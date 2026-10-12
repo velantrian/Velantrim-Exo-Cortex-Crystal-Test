@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import fields
+from itertools import permutations
 from types import SimpleNamespace
 
 import pytest
@@ -144,3 +145,100 @@ def test_discovery_validation_and_stable_tie_breaking():
             index.discover(query, k=bad)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="cross_document_only"):
         index.discover(query, cross_document_only=1)  # type: ignore[arg-type]
+
+
+def test_discovery_results_are_input_order_invariant_for_ties_filters_and_metadata():
+    query = record("query", "amber quartz", document_id="doc-query", session_id="session-query")
+
+    def candidate(
+        candidate_id: str,
+        document_id: str,
+        source_uri: str,
+        source_sha256: str,
+        *,
+        restricted: bool = False,
+        sensitivity: str | None = None,
+    ) -> ReaderLexicalRecord:
+        return ReaderLexicalRecord(
+            session_id=f"session-{candidate_id}",
+            candidate_id=candidate_id,
+            document_id=document_id,
+            source_uri=source_uri,
+            source_sha256=source_sha256,
+            proposition="amber quartz",
+            restricted=restricted,
+            sensitivity=sensitivity,
+        )
+
+    records = (
+        candidate(
+            "uri-z",
+            "doc-a",
+            "file:///z.txt",
+            "f" * 64,
+            restricted=True,
+            sensitivity="restricted-source",
+        ),
+        candidate("hash-b", "doc-a", "file:///shared.txt", "b" * 64),
+        candidate(
+            "uri-a",
+            "doc-a",
+            "file:///a.txt",
+            "d" * 64,
+            sensitivity="confidential",
+        ),
+        candidate(
+            "hash-a",
+            "doc-a",
+            "file:///shared.txt",
+            "a" * 64,
+            restricted=True,
+            sensitivity="restricted-record",
+        ),
+        candidate("other-document", "doc-b", "file:///b.txt", "c" * 64),
+        record("same-document", "amber quartz", document_id="doc-query"),
+    )
+    expected_cross_document_ids = ("uri-a", "hash-a", "hash-b", "uri-z", "other-document")
+    expected_all_ids = expected_cross_document_ids + ("same-document",)
+    expected_source_metadata = {
+        "uri-a": ("file:///a.txt", "d" * 64),
+        "hash-a": ("file:///shared.txt", "a" * 64),
+        "hash-b": ("file:///shared.txt", "b" * 64),
+        "uri-z": ("file:///z.txt", "f" * 64),
+        "other-document": ("file:///b.txt", "c" * 64),
+    }
+    expected_restrictions = {
+        "uri-a": (False, "confidential"),
+        "hash-a": (True, "restricted-record"),
+        "hash-b": (False, None),
+        "uri-z": (True, "restricted-source"),
+        "other-document": (False, None),
+        "same-document": (False, None),
+    }
+    baseline_cross_document = None
+    baseline_with_same_document = None
+
+    for ordered_records in permutations(records):
+        index = ReaderLexicalIndex(ordered_records)
+        cross_document = index.discover(query, k=10)
+        with_same_document = index.discover(query, k=10, cross_document_only=False)
+
+        assert tuple(match.candidate_id for match in cross_document) == expected_cross_document_ids
+        assert tuple(match.candidate_id for match in with_same_document) == expected_all_ids
+        assert len({match.lexical_score for match in cross_document}) == 1
+        assert [match.rank for match in with_same_document] == list(range(1, len(expected_all_ids) + 1))
+        assert {
+            match.candidate_id: (match.candidate_source_uri, match.candidate_source_sha256)
+            for match in cross_document
+        } == expected_source_metadata
+        assert {
+            match.candidate_id: (match.restricted, match.sensitivity)
+            for match in with_same_document
+        } == expected_restrictions
+
+        if baseline_cross_document is None:
+            baseline_cross_document = cross_document
+            baseline_with_same_document = with_same_document
+        else:
+            assert cross_document == baseline_cross_document
+            assert with_same_document == baseline_with_same_document
