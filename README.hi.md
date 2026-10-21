@@ -277,13 +277,15 @@ successful import != backend activation
 ## 💶 Grant truth
 
 ```text
-programme: NLnet NGI0 Commons Fund
+programme: NLnet NGI0 Commons Fund (main Crystal project)
 proposal: submitted
-review: in progress / under review
+decision: NOT_SELECTED / NOT_AWARDED (2026-10-09)
 award: not awarded
 budget change: none
-status: submitted / under review / not awarded
+status: submitted / not selected / not awarded
 ```
+
+यह repository Crystal की एक isolated प्रयोगात्मक प्रति है; यह स्वयं grant का आवेदक या प्राप्तकर्ता नहीं है।
 
 लगभग €50,000 केवल planning/transparency context है; approved budget या payment commitment नहीं। Agreement से पहले merged work existing baseline है।
 

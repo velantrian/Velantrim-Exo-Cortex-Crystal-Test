@@ -257,7 +257,7 @@ Crystal does **not** claim:
 - production-scale retrieval quality from bounded synthetic evaluation surfaces;
 - legal, GDPR, security or supply-chain certification.
 
-**Funding truth:** NLnet remains **submitted / under review / not awarded**. Approximate **€50,000** is planning context only, not an approved budget, grant award or payment commitment.
+**Funding truth:** NLnet NGI0 Commons Fund — the proposal for the main Crystal project was **submitted**; decision of 2026-10-09: **NOT_SELECTED / NOT_AWARDED**. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient. Approximate **€50,000** was planning context only, not an approved budget, grant award or payment commitment.
 
 ## 🛠 Quickstart
 
