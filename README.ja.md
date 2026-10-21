@@ -344,14 +344,14 @@ candidate / suspicion 自体はこの決定を代替しません。
 ## 💶 Grant truth
 
 ```text
-programme: NLnet NGI0 Commons Fund
+programme: NLnet NGI0 Commons Fund (main Crystal project)
 proposal: submitted
-review: in progress
+decision: NOT_SELECTED / NOT_AWARDED (2026-10-09)
 award: not awarded
 budget change: none
 ```
 
-Historical/public compatibility literal: `submitted / under review / not awarded`。
+Crystal 本体の現在の状態：`submitted / not selected / not awarded`（2026-10-09 決定：`NOT_SELECTED / NOT_AWARDED`）。このリポジトリは Crystal の隔離された実験用コピーであり、独立した助成金の申請者・受給者ではありません。
 
 約 **€50,000** は planning / transparency context にすぎません。approved budget、award、payment commitment ではありません。failed evaluation を grant narrative によって runtime capability に変換することもありません。
 
