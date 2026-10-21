@@ -1,5 +1,13 @@
 # 🔱 Velantrim ExoCortex — Crystal
 
+> 🧪 **Isolated Crystal test copy, not the canonical Crystal repository.**
+>
+> **Why:** Test hypotheses and integration changes separately so a lab experiment cannot be mistaken for a verified feature on Crystal `main`.
+>
+> **Example:** Prepare an experiment in this copy and compare against the upstream's exact version and evidence before claiming an outcome.
+>
+> **Status:** Experimental/test surface. [Canonical Crystal](https://github.com/velantrian/velantrim-exocortex-crystal) owns authoritative implementation status.
+
 > 🌐 🇬🇧 **English** · 🇩🇪 [Deutsch](./README.de.md) · 🇫🇷 [Français](./README.fr.md) · 🇪🇸 [Español](./README.es.md) · 🇮🇹 [Italiano](./README.it.md) · 🇷🇺 [Русский](./README.ru.md) · 🇨🇳 [简体中文](./README.zh-CN.md) · 🇸🇦 [العربية](./README.ar.md) · 🇯🇵 [日本語](./README.ja.md) · 🇮🇳 [हिन्दी](./README.hi.md)
 
 ## 💠 Memory and evidence infrastructure that keeps retrieval separate from truth
