@@ -211,6 +211,8 @@ NLnet remains **submitted / under review / not awarded**; approximate €50,000 
 RC-1…RC-9, Comparator v1, NLI v1 and RRTIC-v1 are existing pre-agreement history if completed before
 any funding agreement and cannot later be relabeled as newly funded runtime delivery.
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 ## Detailed English contracts
 
 - [Full architecture](./ARCHITECTURE.md)

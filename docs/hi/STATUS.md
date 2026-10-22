@@ -101,6 +101,8 @@ SQLite ordinary active local-first profile है। PostgreSQL/pgvector optiona
 
 NLnet NGI0 Commons Fund proposal **submitted / under review / not awarded** है। लगभग €50,000 planning/transparency context है; approved budget या payment commitment नहीं।
 
+> **अद्यतन (2026-10-09):** ऊपर दी गई NLnet स्थिति आवेदन जमा करते समय दर्ज की गई स्थिति है। मुख्य Crystal परियोजना के लिए निर्णय: `NOT_SELECTED / NOT_AWARDED`। यह repository Crystal की एक isolated प्रयोगात्मक प्रति है; यह स्वयं grant का आवेदक या प्राप्तकर्ता नहीं है।
+
 ## Historical runtime evidence
 
 Retained checkpoint: `bbd816c09dd39a02e6de6c1014438490572f40f6`.

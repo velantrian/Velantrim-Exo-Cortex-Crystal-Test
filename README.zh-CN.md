@@ -346,7 +346,7 @@ Crystal **不声称**：
 - 从 bounded synthetic evaluation 推导 production-scale retrieval quality；
 - legal、GDPR、security 或 supply-chain certification。
 
-**Funding truth：** NLnet NGI0 Commons Fund：Crystal 主项目的 proposal 已 **submitted**；2026-10-09 决定：**NOT_SELECTED / NOT_AWARDED**。本仓库是 Crystal 的隔离实验副本，不是独立的资助申请方或受资助方。约 **€50,000** 仅是 planning/transparency context，不是 approved budget、grant award 或 payment commitment。
+**Funding truth：** NLnet NGI0 Commons Fund：Crystal 主项目的 proposal 已 **submitted**；2026-10-09 决定：**NOT_SELECTED / NOT_AWARDED**。本仓库是 Crystal 的隔离实验副本，不是独立的资助申请方或受资助方。约 **€50,000** 仅是 planning/transparency context，不是 approved budget、grant award 或 payment commitment。提交时（决定之前）记录的状态：`submitted / under review / not awarded`。
 
 ## 🛠 Quickstart
 

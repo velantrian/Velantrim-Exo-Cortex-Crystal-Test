@@ -108,4 +108,6 @@ SQLite ordinary active local-first. PostgreSQL/pgvector inactive `active=false`;
 
 NLnet **submitted / under review / not awarded**; ~€50,000 planning only; budget change none.
 
+> **Обновление (09.10.2026):** указанный выше статус NLnet — это статус на момент подачи заявки. Решение по основному проекту Crystal: `NOT_SELECTED / NOT_AWARDED`. Этот репозиторий — изолированная экспериментальная копия Crystal, а не отдельный заявитель или получатель гранта.
+
 Русская current parity refresh привязана к `main@9666781d390e3276a111cb5ee1735f6606a76283`, а historical RC-5/6/7 markers остаются immutable provenance. Остальные восемь locale packs этим milestone не меняются.

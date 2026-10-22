@@ -17,6 +17,8 @@
 Crystal has continued to advance while the proposal is under review. Grant accounting must
 therefore be reconciled against live signed `main` at the time of any agreement.
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 ```text
 VERIFIED BASELINE AT AGREEMENT TIME
         +

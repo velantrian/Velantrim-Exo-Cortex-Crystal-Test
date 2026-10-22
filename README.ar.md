@@ -310,7 +310,7 @@ award: not awarded
 budget change: none
 ```
 
-الحالة الدقيقة المختصرة لمشروع Crystal الرئيسي: **submitted / not selected / not awarded** (قرار 2026-10-09: `NOT_SELECTED / NOT_AWARDED`). هذا المستودع نسخة تجريبية معزولة من Crystal، وليس متقدماً أو مستفيداً مستقلاً من المنحة. نحو **€50,000** كان planning/transparency context فقط، وليس awarded budget أو التزام دفع. ما تم دمجه قبل أي اتفاق يبقى existing baseline ولا يجوز احتسابه لاحقاً كـ funded delta جديد.
+الحالة الدقيقة المختصرة لمشروع Crystal الرئيسي: **submitted / not selected / not awarded** (قرار 2026-10-09: `NOT_SELECTED / NOT_AWARDED`). هذا المستودع نسخة تجريبية معزولة من Crystal، وليس متقدماً أو مستفيداً مستقلاً من المنحة. نحو **€50,000** كان planning/transparency context فقط، وليس awarded budget أو التزام دفع. ما تم دمجه قبل أي اتفاق يبقى existing baseline ولا يجوز احتسابه لاحقاً كـ funded delta جديد. الحالة المسجلة وقت التقديم، قبل القرار: `submitted / under review / not awarded`.
 
 ## 🚧 Capability reality-check
 

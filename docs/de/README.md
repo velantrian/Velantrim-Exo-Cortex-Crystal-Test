@@ -105,6 +105,8 @@ repetition across sources != corroboration
 
 SQLite bleibt ordinary active local-first. PostgreSQL/pgvector Reader bleibt inaktiv: `active=false`. NLnet bleibt **submitted / under review / not awarded**; ungefähr €50,000 sind planning only.
 
+> **Aktualisierung (09.10.2026):** Der oben genannte NLnet-Status ist der Stand zum Zeitpunkt der Einreichung. Entscheidung für das Hauptprojekt Crystal: `NOT_SELECTED / NOT_AWARDED`. Dieses Repository ist eine isolierte experimentelle Kopie von Crystal, kein eigener Antragsteller oder Förderempfänger.
+
 ## 📎 Localization provenance
 
 Der historische deutsche Root-Checkpoint `main@6b45bdd196eb42dea7bc30f58d69799b4b1712f2` bleibt Provenienz. Der phased source checkpoint `main@51c205fe048fd69d39fcd47b43e042a50de432bc` bleibt Teil des ausführbaren D1/D3/D4/D5-Vertrags. Beide bedeuten nicht, dass das aktuelle deutsche Paket auf diesem alten Architekturstand stehen bleibt.

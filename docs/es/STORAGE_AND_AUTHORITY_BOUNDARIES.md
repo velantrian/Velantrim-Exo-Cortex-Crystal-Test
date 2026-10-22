@@ -113,4 +113,6 @@ El source restriction/sensitivity context sigue siendo policy metadata; rank, wo
 
 NLnet sigue **submitted / under review / not awarded**; aproximadamente €50,000 es planning only.
 
+> **Actualización (09.10.2026):** el estado de NLnet indicado arriba es el registrado en el momento de la presentación. Decisión para el proyecto principal Crystal: `NOT_SELECTED / NOT_AWARDED`. Este repositorio es una copia experimental aislada de Crystal, no un solicitante ni beneficiario independiente de la subvención.
+
 Historical Spanish source: `main@208f1c772ee3a112cb803d2413c120bef23adb05`. Current Spanish refresh audit source: `main@bbe6b0d3d90d80b3c669ddab5fc56aa1bfe419eb`.

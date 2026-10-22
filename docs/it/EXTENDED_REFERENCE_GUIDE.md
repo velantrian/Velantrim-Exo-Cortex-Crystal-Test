@@ -149,6 +149,8 @@ Guardian resta structural integrity / structural policy boundary, non truth orac
 
 NLnet resta **submitted / under review / not awarded**. Circa **€50,000** è planning only; **budget change: none**.
 
+> **Aggiornamento (09.10.2026):** lo stato NLnet indicato sopra è quello registrato al momento della presentazione. Decisione per il progetto principale Crystal: `NOT_SELECTED / NOT_AWARDED`. Questo repository è una copia sperimentale isolata di Crystal, non un richiedente né un beneficiario autonomo del finanziamento.
+
 Non vengono rivendicati security/legal/GDPR certification, native-speaker editorial certification, AGI/consciousness, universal truth, active PostgreSQL runtime, semantic/hybrid/vector Reader runtime, completed dedicated/full Reader o automatic identity/corroboration/adjudication/evidence admission.
 
 **Milestone storico (checkpoint datato 2026-08-15; non è lo stato attuale delle traduzioni):** Dopo questo Italian milestone, quattro Reader-dependent locale packs restano `REFRESH_NEEDED`; German, Spanish, French, Italian e Russian sono i current localized detail packs. Questo documento non modifica nessun altro linguaggio.

@@ -146,6 +146,8 @@ candidate discovery != candidate adjudication
 
 NLnet reste **submitted / under review / not awarded**. Environ **€50,000** est planning only ; **budget change: none**.
 
+> **Mise à jour (09.10.2026) :** le statut NLnet indiqué ci-dessus est celui enregistré au moment de la soumission. Décision pour le projet principal Crystal : `NOT_SELECTED / NOT_AWARDED`. Ce dépôt est une copie expérimentale isolée de Crystal, et non un candidat ou bénéficiaire distinct de la subvention.
+
 Aucune security/legal/GDPR certification, native-speaker editorial certification, AGI/consciousness, universal truth, active PostgreSQL runtime, semantic/hybrid/vector Reader runtime, completed dedicated/full Reader ou automatic identity/corroboration/adjudication/evidence admission n’est revendiquée.
 
 **Jalon historique (checkpoint daté du 2026-08-15 ; pas l’état actuel des traductions) :** Après ce French milestone, six Reader-dependent locale packs restent `REFRESH_NEEDED`; German, French et Russian sont les current localized detail packs. Ce document ne modifie aucune autre langue.

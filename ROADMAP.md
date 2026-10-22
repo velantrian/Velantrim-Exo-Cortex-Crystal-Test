@@ -14,6 +14,8 @@
 **Legacy exact-normalized dedupe:** issue #165 / PR #431 completed — derived compatibility index only; no re-key or semantic matching  
 **Grant status:** submitted / under review / not awarded
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 ## ✅ Delivered Reader implementation baseline
 
 ```text
@@ -163,6 +165,8 @@ The nine supported localized Reader-dependent public/detail packs are current at
 ## 🎓 Grant boundary
 
 NLnet remains **submitted / under review / not awarded**. Approximate €50,000 is planning context only. Work merged before an agreement is existing pre-agreement baseline/research history and cannot later be counted as newly funded delivery.
+
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
 
 ## Related documents
 

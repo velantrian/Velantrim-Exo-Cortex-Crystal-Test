@@ -87,3 +87,5 @@ Credentials profiles, bundles, receipts, logs, GitHub या Notion में �
 ## Non-claims
 
 Crystal active PostgreSQL runtime, automatic backend switching, dedicated Reader Core, semantic/vector Reader runtime, RRTIC/NLI runtime authorization, production multi-tenancy, universal truth या legal/security/GDPR certification का दावा नहीं करता। NLnet submitted / under review / not awarded है।
+
+> **अद्यतन (2026-10-09):** ऊपर दी गई NLnet स्थिति आवेदन जमा करते समय दर्ज की गई स्थिति है। मुख्य Crystal परियोजना के लिए निर्णय: `NOT_SELECTED / NOT_AWARDED`। यह repository Crystal की एक isolated प्रयोगात्मक प्रति है; यह स्वयं grant का आवेदक या प्राप्तकर्ता नहीं है।

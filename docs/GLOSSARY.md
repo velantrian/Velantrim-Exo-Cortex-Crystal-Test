@@ -84,6 +84,8 @@ repetition              != corroboration
 
 **NLnet state** — submitted / under review / not awarded.
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 **Native-speaker editorial certification** — independent human language-quality review by a qualified native speaker; not claimed merely because a translation exists.
 
 **`CURRENT` translation** — localized surface current against its explicit source checkpoint.

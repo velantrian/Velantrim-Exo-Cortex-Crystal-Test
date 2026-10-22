@@ -86,6 +86,8 @@ active=false
 
 NLnet NGI0 Commons Fund: **submitted / under review / not awarded**. نحو €50,000 planning context فقط، budget change: none. لا يوجد grant-award claim ولا legal/security/GDPR certification claim.
 
+> **تحديث (2026-10-09):** حالة NLnet المذكورة أعلاه هي الحالة المسجلة وقت تقديم الطلب. قرار مشروع Crystal الرئيسي: `NOT_SELECTED / NOT_AWARDED`. هذا المستودع نسخة تجريبية معزولة من Crystal، وليس متقدماً أو مستفيداً مستقلاً من المنحة.
+
 ## 🚫 غير مصرح به حالياً
 
 - dedicated/full Reader Core؛

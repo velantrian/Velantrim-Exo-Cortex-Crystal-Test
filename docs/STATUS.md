@@ -149,6 +149,8 @@ Any such phase requires a separate explicit owner decision and fresh validation 
 
 NLnet remains **submitted / under review / not awarded**. Approximate **€50,000** remains planning context only; no award or budget change is implied by V1 completion.
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 ---
 
 ## Immutable Reader evidence chain — retained historical provenance

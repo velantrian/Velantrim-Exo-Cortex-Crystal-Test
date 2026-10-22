@@ -93,6 +93,8 @@ public deliverable
 Approx. €50,000 is planning context only. The proposal is submitted / under review / not
 awarded; no approved budget or payment commitment is claimed.
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 ### Q6. Does RC-9 mean semantic/vector retrieval is now required?
 
 No. RC-9 deliberately implemented the deterministic lexical baseline first. Its result shows

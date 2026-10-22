@@ -287,7 +287,7 @@ rrtic_runtime_authorization            = false
 
 Crystal не заявляет universal truth/zero hallucinations, automatic semantic equivalence, automatic corroboration/evidence admission, semantic/hybrid/vector Reader runtime, Reader FTS/ANN/vector DB, NLI runtime filter, CrossEncoder reranker, RRTIC runtime provider, implemented EPIS runtime, completed dedicated Reader, active PostgreSQL Reader selection, automatic backend cutover, legal/GDPR/security/supply-chain certification.
 
-**Funding truth:** NLnet NGI0 Commons Fund — заявка основного проекта Crystal была **подана (submitted)**; решение от 09.10.2026: **NOT_SELECTED / NOT_AWARDED**. Этот репозиторий — изолированная экспериментальная копия Crystal, а не отдельный заявитель или получатель гранта. Приблизительно **€50,000** — только planning context, не approved budget/award/payment commitment.
+**Funding truth:** NLnet NGI0 Commons Fund — заявка основного проекта Crystal была **подана (submitted)**; решение от 09.10.2026: **NOT_SELECTED / NOT_AWARDED**. Этот репозиторий — изолированная экспериментальная копия Crystal, а не отдельный заявитель или получатель гранта. Приблизительно **€50,000** — только planning context, не approved budget/award/payment commitment. Статус на момент подачи, до решения: `submitted / under review / not awarded`.
 
 ## 🛠 Quickstart
 
