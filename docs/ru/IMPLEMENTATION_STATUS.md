@@ -149,6 +149,8 @@ PostgreSQL/pgvector остаётся `active=false`. SQLite ordinary local-first
 
 NLnet остаётся **submitted / under review / not awarded**. Приблизительно €50,000 — planning only.
 
+> **Обновление (09.10.2026):** указанный выше статус NLnet — это статус на момент подачи заявки. Решение по основному проекту Crystal: `NOT_SELECTED / NOT_AWARDED`. Этот репозиторий — изолированная экспериментальная копия Crystal, а не отдельный заявитель или получатель гранта.
+
 ## Stop boundary
 
 Localization parity не создаёт новых capabilities и не подразумевает следующий model/discriminator/runtime milestone.

@@ -109,6 +109,8 @@ repetition across sources != corroboration
 
 SQLite ordinary active local-first. PostgreSQL/pgvector Reader inactive `active=false`. NLnet **submitted / under review / not awarded**; ~€50,000 planning only.
 
+> **Обновление (09.10.2026):** указанный выше статус NLnet — это статус на момент подачи заявки. Решение по основному проекту Crystal: `NOT_SELECTED / NOT_AWARDED`. Этот репозиторий — изолированная экспериментальная копия Crystal, а не отдельный заявитель или получатель гранта.
+
 ## 📎 Localization provenance
 
 RC-5 source `51c205fe048fd69d39fcd47b43e042a50de432bc`, RC-6 `ed96a88369f841bdb2ffd79ca020acef174685fc` и RC-7 `ab3ad31c437647535030e371d58f456faf14017b` сохраняются как immutable audit evidence. Они больше не означают, что текущий русский package останавливается на RC-7.

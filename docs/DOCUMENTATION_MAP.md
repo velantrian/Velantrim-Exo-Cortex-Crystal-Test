@@ -148,6 +148,8 @@ Ordinary storage truth remains local-first SQLite. PostgreSQL/pgvector is not an
 
 Grant truth remains **submitted / under review / not awarded**; approximate €50,000 remains planning context only.
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 - [Project, grant and governance overview](./PROJECT_GRANT_AND_GOVERNANCE.md)
 - [Grant scope](./GRANT_NLNET_SCOPE.md)
 - [Baseline-funded delta matrix](./grants/baseline-funded-delta-matrix.md)

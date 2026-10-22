@@ -112,4 +112,6 @@ SQLite 是 ordinary active local-first path。PostgreSQL/pgvector 仍是 inactiv
 
 NLnet 仍为 **submitted / under review / not awarded**；约 €50,000 只是 planning context，budget change none。
 
+> **更新（2026-10-09）：** 上述 NLnet 状态是提交时记录的状态。Crystal 主项目的决定：`NOT_SELECTED / NOT_AWARDED`。本仓库是 Crystal 的隔离实验副本，不是独立的资助申请方或受资助方。
+
 当前简体中文 parity 以 `main@5e6301f0eaee1a6c85d8543be89dc2e606dc05a8` 为 audit base。旧 source marker `a497b7d3cfbe59ca75b11d7449d5a728455b3130` 仅保留为历史 provenance；实时 repository lifecycle state 必须从 GitHub live 解析。

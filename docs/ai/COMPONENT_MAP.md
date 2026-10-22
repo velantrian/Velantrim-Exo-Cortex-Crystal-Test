@@ -181,3 +181,5 @@ No automatic Reader OCR/multimodal engine, semantic/hybrid/vector Reader runtime
 **Start:** `AGENTS.md`, `docs/DOCUMENTATION_SYNC_PROTOCOL.md`, `docs/STATUS.md`, `docs/IMPLEMENTATION_STATUS.md`, `ROADMAP.md`, `docs/ai/WORK_LOG.md`.
 
 NLnet remains `submitted / under review / not awarded`. Issues #155, #165 and #214 are historical closed/completed scopes; their semantic scopes remain distinct and do not select current work. Notion is synchronized only after exact post-merge evidence.
+
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.

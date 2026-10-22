@@ -316,7 +316,7 @@ PostgreSQL/pgvector è una superficie inattiva di import/equivalence. Non esiste
 
 Crystal **non** rivendica universal truth / zero hallucinations, automatic semantic equivalence, automatic corroboration/Evidence Admission, semantic/hybrid/vector Reader runtime, Reader FTS/ANN/vector DB, NLI runtime filter, CrossEncoder reranker, RRTIC runtime provider, EPIS runtime implementato, dedicated Reader completo, active PostgreSQL Reader selection, automatic backend cutover o certificazione legal/GDPR/security/supply-chain.
 
-**Funding truth:** NLnet NGI0 Commons Fund — la proposta del progetto principale Crystal è stata **presentata (submitted)**; decisione del 09.10.2026: **NOT_SELECTED / NOT_AWARDED**. Questo repository è una copia sperimentale isolata di Crystal, non un richiedente né un beneficiario autonomo del finanziamento. Circa **€50,000** era soltanto planning context, non approved budget, award o payment commitment.
+**Funding truth:** NLnet NGI0 Commons Fund — la proposta del progetto principale Crystal è stata **presentata (submitted)**; decisione del 09.10.2026: **NOT_SELECTED / NOT_AWARDED**. Questo repository è una copia sperimentale isolata di Crystal, non un richiedente né un beneficiario autonomo del finanziamento. Circa **€50,000** era soltanto planning context, non approved budget, award o payment commitment. Stato registrato alla presentazione, prima della decisione: `submitted / under review / not awarded`.
 
 ## 🛠 Quickstart
 

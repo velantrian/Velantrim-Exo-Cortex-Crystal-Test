@@ -63,6 +63,8 @@ award: not awarded
 budget change: none
 ```
 
+> **अद्यतन (2026-10-09):** ऊपर दी गई NLnet स्थिति आवेदन जमा करते समय दर्ज की गई स्थिति है। मुख्य Crystal परियोजना के लिए निर्णय: `NOT_SELECTED / NOT_AWARDED`। यह repository Crystal की एक isolated प्रयोगात्मक प्रति है; यह स्वयं grant का आवेदक या प्राप्तकर्ता नहीं है।
+
 लगभग €50,000 केवल planning/transparency context है; approved budget या payment commitment नहीं। Agreement से पहले merged work existing baseline है और funded delta के रूप में दोबारा नहीं गिना जा सकता।
 
 कोई legal, GDPR, security या native-speaker editorial certification claim नहीं है।

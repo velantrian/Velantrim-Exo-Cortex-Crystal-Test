@@ -26,6 +26,8 @@ budget change: none
 
 NLnet bleibt **submitted / under review / not awarded**. Ungefähr **€50,000** sind ausschließlich planning/transparency context, kein approved budget, grant award oder payment commitment.
 
+> **Aktualisierung (09.10.2026):** Der oben genannte NLnet-Status ist der Stand zum Zeitpunkt der Einreichung. Entscheidung für das Hauptprojekt Crystal: `NOT_SELECTED / NOT_AWARDED`. Dieses Repository ist eine isolierte experimentelle Kopie von Crystal, kein eigener Antragsteller oder Förderempfänger.
+
 ## 🧬 Existing baseline
 
 ```text

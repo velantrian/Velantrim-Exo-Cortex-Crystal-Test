@@ -488,6 +488,8 @@ Crystal does not claim:
 
 NLnet remains **submitted / under review / not awarded**. Approximate €50,000 remains planning context only.
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 ---
 
 ## 🧭 How to read the repository

@@ -22,6 +22,8 @@ award: not awarded
 budget change: none
 ```
 
+> **更新（2026-10-09）：** 上述 NLnet 状态是提交时记录的状态。Crystal 主项目的决定：`NOT_SELECTED / NOT_AWARDED`。本仓库是 Crystal 的隔离实验副本，不是独立的资助申请方或受资助方。
+
 约 **€50,000** 只是 planning/transparency context。它不是 approved budget、award、payment commitment 或“semantic Reader funded”声明。
 
 ## 📖 Reader / research truth

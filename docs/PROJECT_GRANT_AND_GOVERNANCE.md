@@ -113,6 +113,8 @@ award: not awarded
 budget change: none
 ```
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 The public funding plan discusses an **approximate €50,000 request**. It remains
 planning/transparency, **not an approved budget or payment commitment**.
 

@@ -9,6 +9,8 @@
 **Post-merge CI:** `31771677028` — **9/9 SUCCESS**  
 **Grant status:** NLnet **submitted / under review / not awarded**
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 ## 1. Executive summary
 
 Crystal is open-source, local-first memory, evidence and Reader infrastructure designed to keep **candidate discovery, provenance, evidence, epistemic admission, strict Canon and presentation separate**.
@@ -149,6 +151,8 @@ Crystal does not claim:
 ## 8. Grant and research boundary
 
 NLnet remains **submitted / under review / not awarded**. Approximate €50,000 is planning context only. Work completed before any funding agreement—including RC-1…RC-9, Comparator v1, NLI v1 and RRTIC-v1—remains existing pre-agreement baseline/research history and cannot later be relabeled as newly funded delivery.
+
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
 
 ## 9. Recommended reviewer path
 

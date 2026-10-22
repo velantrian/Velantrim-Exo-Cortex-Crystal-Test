@@ -285,7 +285,7 @@ budget change: none
 status: submitted / not selected / not awarded
 ```
 
-यह repository Crystal की एक isolated प्रयोगात्मक प्रति है; यह स्वयं grant का आवेदक या प्राप्तकर्ता नहीं है।
+यह repository Crystal की एक isolated प्रयोगात्मक प्रति है; यह स्वयं grant का आवेदक या प्राप्तकर्ता नहीं है। आवेदन जमा करते समय, निर्णय से पहले दर्ज स्थिति: `submitted / under review / not awarded`।
 
 लगभग €50,000 केवल planning/transparency context है; approved budget या payment commitment नहीं। Agreement से पहले merged work existing baseline है।
 

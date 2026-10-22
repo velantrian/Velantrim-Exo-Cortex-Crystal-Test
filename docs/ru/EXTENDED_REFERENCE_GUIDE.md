@@ -147,6 +147,8 @@ candidate discovery != candidate adjudication
 
 NLnet **submitted / under review / not awarded**. Approximately **€50,000** planning only; **budget change: none**.
 
+> **Обновление (09.10.2026):** указанный выше статус NLnet — это статус на момент подачи заявки. Решение по основному проекту Crystal: `NOT_SELECTED / NOT_AWARDED`. Этот репозиторий — изолированная экспериментальная копия Crystal, а не отдельный заявитель или получатель гранта.
+
 No security/legal/GDPR certification, native-speaker editorial certification, AGI/consciousness, universal truth, active PostgreSQL runtime, semantic/hybrid/vector Reader runtime, completed dedicated/full Reader, automatic identity/corroboration/adjudication/evidence admission is claimed.
 
 **Historical milestone status (checkpoint date: 2026-08-15; not the current translation inventory):** Eight non-Russian Reader-dependent locale packs remain `REFRESH_NEEDED`; this Russian refresh does not change them.

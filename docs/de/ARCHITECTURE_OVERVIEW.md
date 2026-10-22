@@ -114,4 +114,6 @@ Es wird kein dedicated/full autonomous Reader, semantic/hybrid Reader runtime, R
 
 NLnet bleibt **submitted / under review / not awarded**; ungefähr €50,000 sind planning only.
 
+> **Aktualisierung (09.10.2026):** Der oben genannte NLnet-Status ist der Stand zum Zeitpunkt der Einreichung. Entscheidung für das Hauptprojekt Crystal: `NOT_SELECTED / NOT_AWARDED`. Dieses Repository ist eine isolierte experimentelle Kopie von Crystal, kein eigener Antragsteller oder Förderempfänger.
+
 Historischer deutscher Source: `main@208f1c772ee3a112cb803d2413c120bef23adb05`. Current German refresh audit source: `main@ad8cec8c868f64b6dfbdc3bf3087230f59c3861c`.

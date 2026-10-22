@@ -287,7 +287,7 @@ Diese Metriken sind bounded retrieval evidence, nicht semantic correctness, epis
 
 Crystal behauptet **keine** universal truth / zero hallucinations, automatic semantic equivalence, automatic corroboration/evidence admission, semantic/hybrid/vector Reader runtime, Reader FTS/ANN/vector DB, NLI runtime filter, CrossEncoder reranker, RRTIC runtime provider, implementierten EPIS runtime, completed dedicated Reader, aktive PostgreSQL Reader selection, automatic backend cutover oder legal/GDPR/security/supply-chain certification.
 
-**Funding truth:** NLnet NGI0 Commons Fund — der Antrag für das Hauptprojekt Crystal wurde **eingereicht (submitted)**; Entscheidung vom 09.10.2026: **NOT_SELECTED / NOT_AWARDED**. Dieses Repository ist eine isolierte experimentelle Kopie von Crystal, kein eigener Antragsteller oder Förderempfänger. Ungefähr **€50,000** waren nur planning context, kein approved budget, award oder payment commitment.
+**Funding truth:** NLnet NGI0 Commons Fund — der Antrag für das Hauptprojekt Crystal wurde **eingereicht (submitted)**; Entscheidung vom 09.10.2026: **NOT_SELECTED / NOT_AWARDED**. Dieses Repository ist eine isolierte experimentelle Kopie von Crystal, kein eigener Antragsteller oder Förderempfänger. Ungefähr **€50,000** waren nur planning context, kein approved budget, award oder payment commitment. Status zum Zeitpunkt der Einreichung, vor der Entscheidung: `submitted / under review / not awarded`.
 
 ## 🛠 Quickstart
 

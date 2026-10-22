@@ -61,4 +61,6 @@ All nine supported locale packs are `CURRENT` for the recorded D1/D3/D4/D5 sourc
 
 SQLite remains ordinary active local-first. PostgreSQL/pgvector remains an inactive target with `active=false`. NLnet remains submitted / under review / not awarded; approximate €50,000 is planning only; budget change is none. RC-5 merged pre-agreement is existing baseline, not future funded delta. If RC-6 merges before an agreement, RC-6 also becomes existing pre-agreement baseline.
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 No legal/GDPR/security/native-speaker editorial certification, full autonomous Reader, automatic summarization, RC-7 cross-document reading, automatic semantic contradiction resolution or active PostgreSQL backend is claimed.

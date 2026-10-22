@@ -240,6 +240,8 @@ NLnet = submitted / under review / not awarded
 ~€50k = planning context only
 ```
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 The future-work ledger is the place to preserve unresolved questions and deferred candidates. It is not a backlog executor. Any issue number or candidate listed there must be re-resolved live before use.
 
 Do not auto-start a residual issue from documentation closure, an old roadmap, or the existence of a future-work entry.

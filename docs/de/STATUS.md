@@ -110,4 +110,6 @@ SQLite bleibt ordinary active local-first. PostgreSQL/pgvector bleibt inaktiv `a
 
 NLnet bleibt **submitted / under review / not awarded**; ungefähr €50,000 sind planning only; budget change none.
 
+> **Aktualisierung (09.10.2026):** Der oben genannte NLnet-Status ist der Stand zum Zeitpunkt der Einreichung. Entscheidung für das Hauptprojekt Crystal: `NOT_SELECTED / NOT_AWARDED`. Dieses Repository ist eine isolierte experimentelle Kopie von Crystal, kein eigener Antragsteller oder Förderempfänger.
+
 Die deutsche current parity ist gegen `main@ad8cec8c868f64b6dfbdc3bf3087230f59c3861c` geprüft. Der ältere Source-Marker `a497b7d3cfbe59ca75b11d7449d5a728455b3130` bleibt historische Provenienz. Current repository lifecycle state muss weiterhin aus live GitHub aufgelöst werden.

@@ -183,6 +183,8 @@ Localization parity and historical provenance are owned by [`docs/TRANSLATION_ST
 
 NLnet remains **submitted / under review / not awarded**. Approximate €50,000 remains planning context only.
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 ## Future work boundary
 
 No P0/P1 implementation work remains in the **V1 completion program**. Post-V1 governance #432 is closed/completed. P2/P3, research, deferred and frozen items are non-blocking backlog only.

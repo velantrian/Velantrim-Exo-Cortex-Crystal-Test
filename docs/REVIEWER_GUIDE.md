@@ -174,6 +174,8 @@ The current matrix is [`FAILURE_MODES.md`](./FAILURE_MODES.md).
 The project is submitted and under review. It is **not awarded**, and no budget change is
 claimed. Merged baseline work cannot be counted again as future funded delivery.
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 Read [`GRANT_NLNET_SCOPE.md`](./GRANT_NLNET_SCOPE.md) and the
 [baseline/funded-delta matrix](./grants/baseline-funded-delta-matrix.md).
 

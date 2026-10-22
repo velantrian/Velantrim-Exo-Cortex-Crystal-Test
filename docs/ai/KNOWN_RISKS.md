@@ -220,6 +220,8 @@ These three historical residual scopes are closed/completed. Their completion do
 - no universal truth, zero hallucinations, AGI, consciousness or production certification is claimed;
 - NLnet remains `submitted / under review / not awarded`; approximate €50,000 planning only.
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 ## Next actions
 
 1. Resolve live GitHub and Notion before selecting a new bounded milestone; this static register does not select one.

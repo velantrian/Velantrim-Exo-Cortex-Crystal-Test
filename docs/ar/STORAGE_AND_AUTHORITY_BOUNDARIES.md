@@ -108,3 +108,5 @@ Retrieval score أو similarity أو Reader relation أو NLI label أو RRTIC s
 - active Reader pgvector/ANN غير مصرح؛
 - automatic contradiction adjudication غير موجود؛
 - NLnet submitted / under review / not awarded.
+
+> **تحديث (2026-10-09):** حالة NLnet المذكورة أعلاه هي الحالة المسجلة وقت تقديم الطلب. قرار مشروع Crystal الرئيسي: `NOT_SELECTED / NOT_AWARDED`. هذا المستودع نسخة تجريبية معزولة من Crystal، وليس متقدماً أو مستفيداً مستقلاً من المنحة.
