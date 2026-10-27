@@ -6,6 +6,8 @@
 **Grant status:** submitted / under review / not awarded  
 **Budget change:** none
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 ## Authority boundary
 
 ```text

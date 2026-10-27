@@ -25,6 +25,8 @@ budget change: none
 
 الحالة المختصرة الدقيقة: **submitted / under review / not awarded**. مبلغ **€50,000** تقريباً هو planning/transparency context فقط؛ ليس approved budget أو award أو payment commitment.
 
+> **تحديث (2026-10-09):** حالة NLnet المذكورة أعلاه هي الحالة المسجلة وقت تقديم الطلب. قرار مشروع Crystal الرئيسي: `NOT_SELECTED / NOT_AWARDED`. هذا المستودع نسخة تجريبية معزولة من Crystal، وليس متقدماً أو مستفيداً مستقلاً من المنحة.
+
 أي عمل merged قبل اتفاق تمويل يبقى existing baseline ولا يجوز إعادة احتسابه funded delta لاحقاً.
 
 ## 📖 Reader baseline

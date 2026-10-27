@@ -112,4 +112,6 @@ SQLite は ordinary active local-first path。PostgreSQL/pgvector は inactive t
 
 NLnet は **submitted / under review / not awarded**。約 €50,000 は planning context only、budget change: none。
 
+> **更新（2026-10-09）：** 上記の NLnet ステータスは申請時点で記録されたものです。Crystal 本体の決定：`NOT_SELECTED / NOT_AWARDED`。このリポジトリは Crystal の隔離された実験用コピーであり、独立した助成金の申請者・受給者ではありません。
+
 Current Japanese parity audit base は `main@5903e90f3e0f2884f4ba257a71808d19fc439ebc`。旧 source marker `a497b7d3cfbe59ca75b11d7449d5a728455b3130` は historical provenance のみです。Live repository lifecycle state は GitHub から解決してください。

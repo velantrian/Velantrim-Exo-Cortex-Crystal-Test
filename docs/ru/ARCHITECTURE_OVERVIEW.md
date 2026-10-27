@@ -116,4 +116,6 @@ No dedicated/full autonomous Reader, semantic/hybrid Reader runtime, Reader FTS/
 
 NLnet **submitted / under review / not awarded**; ~€50,000 planning only.
 
+> **Обновление (09.10.2026):** указанный выше статус NLnet — это статус на момент подачи заявки. Решение по основному проекту Crystal: `NOT_SELECTED / NOT_AWARDED`. Этот репозиторий — изолированная экспериментальная копия Crystal, а не отдельный заявитель или получатель гранта.
+
 Historical RC-7 source: `main@ab3ad31c437647535030e371d58f456faf14017b`. Current Russian refresh source: `main@9666781d390e3276a111cb5ee1735f6606a76283`.

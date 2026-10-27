@@ -143,6 +143,8 @@ La documentazione italiana D1/D3/D4/D5 viene aggiornata in Issue #419 contro `ma
 
 NLnet resta **submitted / under review / not awarded**. Circa €50,000 è planning only.
 
+> **Aggiornamento (09.10.2026):** lo stato NLnet indicato sopra è quello registrato al momento della presentazione. Decisione per il progetto principale Crystal: `NOT_SELECTED / NOT_AWARDED`. Questo repository è una copia sperimentale isolata di Crystal, non un richiedente né un beneficiario autonomo del finanziamento.
+
 ## Stop Boundary
 
 La localization parity non crea alcuna capability nuova e non autorizza alcun nuovo model/discriminator/runtime milestone.

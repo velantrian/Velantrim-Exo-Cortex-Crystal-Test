@@ -87,6 +87,8 @@ evaluation pass != runtime authorization
 
 NLnet funding state：**submitted / under review / not awarded**。约 **€50,000** 是 planning context only；**budget change: none**。`not awarded` 不能被翻译或重写成 approved/funded。
 
+> **更新（2026-10-09）：** 上述 NLnet 状态是提交时记录的状态。Crystal 主项目的决定：`NOT_SELECTED / NOT_AWARDED`。本仓库是 Crystal 的隔离实验副本，不是独立的资助申请方或受资助方。
+
 ## 🧾 Certification boundary
 
 `CURRENT` 表示 technical localization parity/freshness，不表示 native-speaker editorial certification、legal certification、GDPR certification 或 security certification。

@@ -135,4 +135,6 @@ evaluation pass != runtime authorization
 
 NLnet NGI0 Commons Fund：**submitted / under review / not awarded**。约 €50,000 仅是 planning context，不是 approved funding。
 
+> **更新（2026-10-09）：** 上述 NLnet 状态是提交时记录的状态。Crystal 主项目的决定：`NOT_SELECTED / NOT_AWARDED`。本仓库是 Crystal 的隔离实验副本，不是独立的资助申请方或受资助方。
+
 更详细的英文架构合同：[`docs/ARCHITECTURE.md`](../ARCHITECTURE.md)。简体中文 storage/authority 说明：[`STORAGE_AND_AUTHORITY_BOUNDARIES.md`](./STORAGE_AND_AUTHORITY_BOUNDARIES.md)。

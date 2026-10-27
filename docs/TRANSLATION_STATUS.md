@@ -196,6 +196,8 @@ award: not awarded
 budget change: none
 ```
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 Approximately €50,000 remains planning/transparency context only.
 
 ## D5 — extended reference corpus
@@ -271,6 +273,8 @@ successful import != backend activation
 ```
 
 NLnet remains **submitted / under review / not awarded**. Translation cannot turn planning context into an award, a failed evaluation into a runtime capability, or a retrieval candidate into Evidence/Canon authority.
+
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
 
 ## Remaining localization program
 

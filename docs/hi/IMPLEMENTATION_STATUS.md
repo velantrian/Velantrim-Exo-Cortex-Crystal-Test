@@ -72,4 +72,6 @@ SQLite active ordinary profile है। PostgreSQL/pgvector optional inactive t
 
 NLnet proposal submitted है, review में है और **not awarded** है। लगभग €50,000 planning context only है।
 
+> **अद्यतन (2026-10-09):** ऊपर दी गई NLnet स्थिति आवेदन जमा करते समय दर्ज की गई स्थिति है। मुख्य Crystal परियोजना के लिए निर्णय: `NOT_SELECTED / NOT_AWARDED`। यह repository Crystal की एक isolated प्रयोगात्मक प्रति है; यह स्वयं grant का आवेदक या प्राप्तकर्ता नहीं है।
+
 Historical runtime checkpoint `bbd816c09dd39a02e6de6c1014438490572f40f6` और `2078 passed / 13 skipped / 0 failed` केवल retained provenance हैं।

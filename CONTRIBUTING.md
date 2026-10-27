@@ -118,6 +118,8 @@ editorial certification is not implied unless it occurred.
 
 Current status is `submitted / under review / not awarded` with no budget change.
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 Anything merged before a funding agreement is existing baseline and cannot be relabelled as
 future funded delivery. Grant milestones require a new measurable delta and independently
 verifiable acceptance evidence.

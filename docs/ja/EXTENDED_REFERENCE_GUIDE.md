@@ -126,6 +126,8 @@ PostgreSQL/pgvector は inactive import/equivalence target であり、active Re
 
 NLnet NGI0 Commons Fund: **submitted / under review / not awarded**。約 **€50,000** は planning context。**budget change: none**。
 
+> **更新（2026-10-09）：** 上記の NLnet ステータスは申請時点で記録されたものです。Crystal 本体の決定：`NOT_SELECTED / NOT_AWARDED`。このリポジトリは Crystal の隔離された実験用コピーであり、独立した助成金の申請者・受給者ではありません。
+
 ## 🌍 Localization state vocabulary
 
 `CURRENT` = recorded source contract に対する technical parity/freshness。  

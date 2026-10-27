@@ -97,3 +97,5 @@ SQLite ordinary active local-first profile है। PostgreSQL/pgvector optiona
 ## Grant / non-claims
 
 NLnet submitted / under review / not awarded है। Crystal dedicated Reader Core, semantic/vector Reader runtime, RRTIC runtime authorization, NLI runtime filter, universal truth, zero hallucinations या legal/security/GDPR certification का दावा नहीं करता।
+
+> **अद्यतन (2026-10-09):** ऊपर दी गई NLnet स्थिति आवेदन जमा करते समय दर्ज की गई स्थिति है। मुख्य Crystal परियोजना के लिए निर्णय: `NOT_SELECTED / NOT_AWARDED`। यह repository Crystal की एक isolated प्रयोगात्मक प्रति है; यह स्वयं grant का आवेदक या प्राप्तकर्ता नहीं है।

@@ -3,6 +3,8 @@
 **Status date:** 2026-08-12  
 **Grant state:** submitted / under review / not awarded — **no award/budget change**.
 
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
 Anything merged before an agreement is existing pre-agreement baseline and **cannot be counted
 again as future paid work**.
 
@@ -115,6 +117,8 @@ existence does not make Reader vector retrieval an existing capability.
 
 Approximate €50,000 is planning only and does not represent an approved budget/payment
 commitment. NLnet is submitted / under review / not awarded.
+
+> **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
 
 Local-first does not itself prove GDPR compliance or complete security. PostgreSQL/pgvector
 remains inactive `active=false`. #155, #165 and #214 remain separate backlog and are not

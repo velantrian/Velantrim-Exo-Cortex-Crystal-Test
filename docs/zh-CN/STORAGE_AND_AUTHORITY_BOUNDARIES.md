@@ -116,6 +116,8 @@ RRTIC-v1：architecture contract only。
 
 NLnet 仍是 **submitted / under review / not awarded**；约 €50,000 仅用于 planning/transparency context。
 
+> **更新（2026-10-09）：** 上述 NLnet 状态是提交时记录的状态。Crystal 主项目的决定：`NOT_SELECTED / NOT_AWARDED`。本仓库是 Crystal 的隔离实验副本，不是独立的资助申请方或受资助方。
+
 ## 📚 相关合同
 
 - [完整架构](../ARCHITECTURE.md)

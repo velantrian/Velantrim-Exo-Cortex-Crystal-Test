@@ -117,4 +117,6 @@ repetition across sources != corroboration
 **`REFRESH_NEEDED` translation** — traduzione ricca la cui governing English semantics è avanzata.  
 **Native-speaker editorial certification** — revisione linguistica umana indipendente; non è implicata dall’esistenza di una traduzione.
 
+> **Aggiornamento (09.10.2026):** lo stato NLnet indicato sopra è quello registrato al momento della presentazione. Decisione per il progetto principale Crystal: `NOT_SELECTED / NOT_AWARDED`. Questo repository è una copia sperimentale isolata di Crystal, non un richiedente né un beneficiario autonomo del finanziamento.
+
 Historical Italian glossary source: `151b41c680190f7f3de729bf63e8e80a9d2285ce`. Current Italian refresh audit source: `main@e436577dc5ada4692e8fe399da861a44f800e2f1`.

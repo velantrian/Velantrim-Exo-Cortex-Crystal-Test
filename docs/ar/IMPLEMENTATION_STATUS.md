@@ -80,3 +80,5 @@ Therefore semantic/hybrid retrieval, NLI filtering and RRTIC runtime provider ar
 ## 💶 Grant truth
 
 NLnet remains **submitted / under review / not awarded**. Approximately €50,000 is planning context only; budget change: none. Work merged before any funding agreement remains existing baseline.
+
+> **تحديث (2026-10-09):** حالة NLnet المذكورة أعلاه هي الحالة المسجلة وقت تقديم الطلب. قرار مشروع Crystal الرئيسي: `NOT_SELECTED / NOT_AWARDED`. هذا المستودع نسخة تجريبية معزولة من Crystal، وليس متقدماً أو مستفيداً مستقلاً من المنحة.

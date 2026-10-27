@@ -114,4 +114,6 @@ Aucun dedicated/full autonomous Reader, semantic/hybrid Reader runtime, Reader F
 
 NLnet reste **submitted / under review / not awarded** ; environ €50,000 est planning only.
 
+> **Mise à jour (09.10.2026) :** le statut NLnet indiqué ci-dessus est celui enregistré au moment de la soumission. Décision pour le projet principal Crystal : `NOT_SELECTED / NOT_AWARDED`. Ce dépôt est une copie expérimentale isolée de Crystal, et non un candidat ou bénéficiaire distinct de la subvention.
+
 Historical French source : `main@208f1c772ee3a112cb803d2413c120bef23adb05`. Current French refresh audit source : `main@7d03cce2c89f7a4c3fda85742eb358e6b49961f2`.
