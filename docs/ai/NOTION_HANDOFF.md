@@ -119,11 +119,17 @@ access.
 - Public technical source: `docs/lab/REJECT_REENTRY.md`, `docs/status/reentry-guard-lab.json`, this branch's code/tests.
 - Decision: opt-in compound rejection through existing review/Immune owners; ordinary reject remains record-level. CLI additionally requires ADMIN with `fact:*` for the workspace-wide guard.
 - Limits: lexical containment, not semantic identity or erasure; no in-flight ingest fencing, automatic demotion of old Canon, tenant guarantee or production authority.
-- Draft PR/head reference will be added to the dated Notion follow-up after publication. Post-merge SHA/CI evidence remains pending owner review and merge.
+- PR #7 merged into the Crystal-Test lab main as `ff21220a708fd9225d05f870754de2509852dd5d` on 2026-10-30. Dated Notion follow-up records the updated head and test evidence. This is not the canonical Crystal repository.
 
 ## In-flight ingestion fence — 2026-10-29
 
 - Impact `GITHUB_AND_NOTION`; user requested continuation and testing in Crystal-Test.
 - `test_reentry_race_probe.py` reproduced promotion after guard commit on initial PR #7 head. A bounded SQLite promotion fence was implemented and tested, including a separate-process case and independent positive control.
 - Scope is `core.ingest.ingest` transition, not the full graph pipeline, outbox, erasure or existing Canon. See `docs/lab/REJECT_REENTRY.md` and machine evidence in `docs/status/reentry-guard-lab.json`.
-- Notion is available; the dated bounded-results follow-up is synced. Add exact updated PR head after publication. No production or upstream assertion.
+- Notion is available; the dated bounded-results follow-up is synced. Updated PR #7 head `ae73d582fdb828029fb34a6a37762c2bfd4470f7` was synchronized in the dated Notion follow-up. No production or upstream assertion.
+## Crystal-Test lab CI proposal — 2026-10-29
+
+- Impact: `GITHUB_AND_NOTION` (verification workflow). The canonical source remains the lab workflow and `FORGE_LAB_PROVENANCE.md`.
+- Notion access: available; dated lab-results follow-up is synced with PR #8 and the original tested head.
+- No claim of hosted CI success for a rebased head until that exact head runs. The original three workflows stay absent; inherited security tests are explicitly adapted to the separate lab contract, not skipped.
+- README lab notice changed in English; existing translations retain upstream content and require a follow-up lab-notice translation.

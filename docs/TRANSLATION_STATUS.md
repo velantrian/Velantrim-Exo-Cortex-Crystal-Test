@@ -281,3 +281,7 @@ NLnet remains **submitted / under review / not awarded**. Translation cannot tur
 The bounded Human-First documentation parity program is complete for all nine supported locales. The TruthGate-v1 D1 reassessment under Issue #441 is also complete for all 18 affected D1 documents. No Reader-dependent locale remains in the refresh backlog for the recorded semantics.
 
 Any future localization work requires a new live audit if English source semantics change; `CURRENT` is not a permanent freshness guarantee.
+
+## Crystal-Test lab CI notice — 2026-10-29
+
+English README adds a lab-only CI scope note; other localized README lab notices require refresh in a separate documentation follow-up. This does not change or remove the detailed upstream material.
