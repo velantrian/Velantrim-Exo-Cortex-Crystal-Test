@@ -28,6 +28,8 @@ import json
 import hmac
 import hashlib
 import threading
+import sqlite3
+from contextlib import nullcontext
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 
@@ -71,18 +73,25 @@ def _sign(entry_hash: str, key: Optional[bytes] = None) -> Optional[str]:
 
 
 def append_event(
-    event: str, fact_id: Optional[str], detail: Optional[Dict[str, Any]] = None
+    event: str, fact_id: Optional[str], detail: Optional[Dict[str, Any]] = None,
+    *, connection: Optional[sqlite3.Connection] = None,
 ) -> Dict[str, Any]:
     """
     Append a compliance event to the tamper-evident audit chain. Returns a
     receipt with the assigned seq and entry_hash. detail must be content-free
     (reasons/actors/hashes — never personal data).
+
+    With connection, append inside the caller's active transaction without
+    committing or retrying it. The caller must acquire _AUDIT_LOCK before
+    beginning that transaction and hold it until commit/rollback. Without a
+    connection, the original self-owned transaction/retry behavior is retained.
     """
     detail_json = json.dumps(detail or {}, sort_keys=True, ensure_ascii=False)
     ts = _now()
 
     def _write():
-        with memory._db() as conn:
+        context = nullcontext(connection) if connection is not None else memory._db()
+        with context as conn:
             # BEGIN IMMEDIATE acquires the write lock before the tail read, so
             # a concurrent append_event() call (e.g. two /review/approve
             # requests in FastAPI's thread pool) cannot read the same
@@ -90,7 +99,10 @@ def append_event(
             # blocks here until the first transaction commits, then sees the
             # updated tail. call_with_lock_retry covers contention that
             # surfaces later in this block (INSERT / implicit commit).
-            memory.begin_immediate(conn)
+            if connection is None:
+                memory.begin_immediate(conn)
+            elif not conn.in_transaction:
+                raise ValueError("audit append requires an active caller transaction")
             last = conn.execute(
                 "SELECT seq, entry_hash FROM audit_log ORDER BY seq DESC LIMIT 1"
             ).fetchone()
@@ -132,7 +144,10 @@ def append_event(
             return seq, entry_hash, signature
 
     with _APPEND_LOCK:
-        seq, entry_hash, signature = memory.call_with_lock_retry(_write)
+        if connection is None:
+            seq, entry_hash, signature = memory.call_with_lock_retry(_write)
+        else:
+            seq, entry_hash, signature = _write()
     return {"seq": seq, "ts": ts, "event": event, "fact_id": fact_id,
             "entry_hash": entry_hash, "signed": signature is not None}
 

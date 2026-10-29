@@ -102,36 +102,49 @@ def record_threat(
     pid = _pattern_id(normalized)
     sev = max(0.0, min(1.0, float(severity)))
     now = _now()
-    with memory._db() as conn:
-        conn.execute(
-            "INSERT INTO immune_memory "
-            "(pattern_id, pattern, threat_type, severity, recorded_at, actor, hits) "
-            "VALUES (?, ?, ?, ?, ?, ?, 0) "
-            "ON CONFLICT(pattern_id) DO UPDATE SET "
-            "threat_type = excluded.threat_type, severity = excluded.severity",
-            (pid, normalized, threat_type, sev, now, actor),
-        )
-    metrics.incr("immune.threat_recorded")
-    # Lazy import avoids a hard import cycle (audit → memory; immune → audit).
     from core import audit
-    audit.append_event("immune_threat_recorded", None, {
-        "pattern_id": pid, "threat_type": threat_type, "severity": sev, "actor": actor,
-    })
+
+    def _write():
+        with memory._db() as conn:
+            memory.begin_immediate(conn)
+            conn.execute(
+                "INSERT INTO immune_memory "
+                "(pattern_id, pattern, threat_type, severity, recorded_at, actor, hits) "
+                "VALUES (?, ?, ?, ?, ?, ?, 0) "
+                "ON CONFLICT(pattern_id) DO UPDATE SET "
+                "threat_type = excluded.threat_type, severity = excluded.severity",
+                (pid, normalized, threat_type, sev, now, actor),
+            )
+            audit.append_event("immune_threat_recorded", None, {
+                "pattern_id": pid, "threat_type": threat_type, "severity": sev, "actor": actor,
+            }, connection=conn)
+
+    with audit._AUDIT_LOCK:
+        memory.call_with_lock_retry(_write)
+    metrics.incr("immune.threat_recorded")
     return {"pattern_id": pid, "pattern": normalized, "threat_type": threat_type,
             "severity": sev, "recorded_at": now, "actor": actor, "hits": 0}
 
 
 def forget_threat(pattern_id: str, *, actor: str = "system") -> bool:
     """Revoke a recorded threat (curator override). Returns True if one was removed."""
-    with memory._db() as conn:
-        cur = conn.execute(
-            "DELETE FROM immune_memory WHERE pattern_id = ?", (pattern_id,))
-        removed = cur.rowcount > 0
+    from core import audit
+
+    def _write():
+        with memory._db() as conn:
+            memory.begin_immediate(conn)
+            cur = conn.execute(
+                "DELETE FROM immune_memory WHERE pattern_id = ?", (pattern_id,))
+            removed = cur.rowcount > 0
+            if removed:
+                audit.append_event("immune_threat_forgotten", None,
+                                   {"pattern_id": pattern_id, "actor": actor}, connection=conn)
+            return removed
+
+    with audit._AUDIT_LOCK:
+        removed = memory.call_with_lock_retry(_write)
     if removed:
         metrics.incr("immune.threat_forgotten")
-        from core import audit
-        audit.append_event("immune_threat_forgotten", None,
-                           {"pattern_id": pattern_id, "actor": actor})
     return removed
 
 

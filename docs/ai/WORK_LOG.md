@@ -2,6 +2,19 @@
 
 This compact log records material decisions, exact evidence, limitations and hand-offs. It does not replace Git history, issues, pull requests, `CHANGELOG.md` or Notion.
 
+## 2026-10-29 — Crystal-Test immune/audit transaction correction · DRAFT
+
+- Scope: Crystal-Test at `b2c0063fb63992915ef80016ad4cf4b1e3c5f158`; main Crystal unchanged.
+- Two baseline regressions show guard insert/delete surviving a failed audit append.
+- Proposed repair: existing audit writer joins the same active SQLite transaction;
+  shared audit lock precedes BEGIN, retry covers the entire mutation/event operation.
+- Contract, reproduction and explicit remaining boundaries:
+  [`../IMMUNE_AUDIT_ATOMICITY.md`](../IMMUNE_AUDIT_ATOMICITY.md).
+- This does not implement content-level curator rejection or redefine a rejection as
+  a threat. No full-suite/production claim follows from focused tests.
+- Documentation impact: `GITHUB_ONLY`, correctness of the existing guard/audit
+  contract; no new policy or subsystem. Notion synchronization: `NOT_REQUIRED`.
+
 ## 2026-08-16 — Outbox auto-backend restart continuity (#434 / PR #433)
 
 - Live starting point: `main@5e008af09f03750c6811ac4b6fdb147ad463fd78`; the audit first traced `core.queue` selection, enqueue and `drain_l3_outbox()` without changing runtime behavior.
