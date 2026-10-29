@@ -463,8 +463,16 @@ def reject(
     *,
     actor: str = "curator",
     reason: str = "curator_rejected",
+    block_reentry: bool = False,
 ) -> Dict[str, Any]:
-    """Reject an Observed fact with atomic state and audit persistence."""
+    """Reject a record; explicitly opt into the existing lexical Immune guard.
+
+    The optional guard is workspace-wide, revocable and not a semantic value ban.
+    """
+    if type(block_reentry) is not bool:
+        raise ValueError("block_reentry must be bool")
+    if block_reentry and (not isinstance(reason, str) or not reason.strip()):
+        raise ValueError("reentry blocking requires a reason")
     fact = get_fact(fact_id)
     if fact is None:
         return {"found": False, "fact_id": fact_id}
@@ -499,6 +507,7 @@ def reject(
         expected_revision=fact["revision"],
         actor=actor_value,
         reason=reason,
+        material={"block_reentry": True} if block_reentry else None,
     )
     staged = stage_review_decision(
         decision_id=decision_id,
@@ -508,6 +517,7 @@ def reject(
         candidate_path=("Collapsed",),
         event="review_reject",
         audit_detail={"actor": actor_value, "reason": reason},
+        block_reentry=block_reentry,
     )
     if not staged["ok"]:
         return {
@@ -518,6 +528,8 @@ def reject(
         }
     if staged.get("created"):
         metrics.incr("review.rejected")
+        if block_reentry:
+            metrics.incr("immune.threat_recorded")
     return {
         "found": True,
         "fact_id": fact_id,
@@ -527,6 +539,8 @@ def reject(
         "decision_id": decision_id,
         "decision_recorded": True,
         "projection_status": "completed",
+        **({"reentry_pattern_id": staged["payload"]["reentry_pattern_id"]}
+           if block_reentry else {}),
     }
 
 

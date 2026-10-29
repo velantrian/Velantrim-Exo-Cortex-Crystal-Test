@@ -1,0 +1,74 @@
+{
+  "scope": "Crystal-Test branch-only opt-in feature",
+  "base_sha": "e9093ef4325923cb2b2842f7fa508b304de54bcf",
+  "date": "2026-10-29",
+  "upstream_main_changed": false,
+  "ordinary_reject_changed": false,
+  "guard": "existing immune normalized token containment; selected workspace",
+  "runtime_enablement_changed": false,
+  "llm_calls": 0,
+  "tests": {
+    "feature-final": {
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "focused-final": {
+      "tests": 138,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "full-runtime": {
+      "tests": 2434,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 2
+    },
+    "full-final": {
+      "tests": 2431,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 2
+    },
+    "feature-verified": {
+      "tests": 29,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "verified-final": {
+      "tests": 2434,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 2
+    },
+    "baseline-full": {
+      "tests": 2406,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 2
+    },
+    "gates-final": {
+      "tests": 2434,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 2
+    }
+  },
+  "baseline_failures": [
+    "tests/test_security_reproducibility_contract.py::test_all_committed_workflow_actions_are_immutable_reviewed_refs",
+    "tests/test_security_reproducibility_contract.py::test_security_job_installs_exact_dedicated_tool_constraints"
+  ],
+  "baseline_reason": "Three upstream Actions workflows were deliberately excluded from the lab copy; both failures reproduced on unchanged base. No workflow restored or test suppressed.",
+  "coverage_run_limit": "The full single-run gate initially missed CLI exit 1 because it was executed only in a child process. A final in-process test covers it; final feature suite 29 PASS with combined coverage 100%. No full-green suite or hosted CI is claimed; the same two missing-workflow failures remain.",
+  "coverage": {
+    "covered_lines": 12822,
+    "statements": 12822,
+    "missing_lines": 0,
+    "percent": 100.0,
+    "method": "combined full-suite and final feature-suite traces over the same runtime source; --cov=. --cov-append",
+    "full_single_run_before_final_exit_code_test_percent": 99.99220090469505
+  }
+}

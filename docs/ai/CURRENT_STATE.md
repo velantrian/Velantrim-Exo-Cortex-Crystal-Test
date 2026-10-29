@@ -361,3 +361,7 @@ Synchronized Notion may preserve checkpoint provenance, but live GitHub remains 
 This file does not authorize or select the next workstream. The nine-locale documentation parity program being complete does not authorize runtime, model, storage or authority expansion. The bounded audit-remediation fixes and the exact-normalized #165 compatibility closure do not select another architecture or backlog milestone. Before any new bounded work, resolve live GitHub/Notion, perform a fresh architecture reassessment, select exactly one scope, and preserve the authority firewall.
 
 No next model, discriminator, reranker, Reader backend, storage activation, authority expansion or residual issue is automatically authorized by a historical closure or by this static snapshot.
+
+## Crystal-Test branch proposal: explicit reentry guard (2026-10-29)
+
+This laboratory branch adds opt-in `review-reject --block-reentry` on base `e9093ef4325923cb2b2842f7fa508b304de54bcf`. Ordinary rejection semantics are unchanged. ADMIN with `fact:*` is required for the workspace-wide lexical guard. Rejection, existing Immune rule, both audits and journal commit together. See `docs/lab/REJECT_REENTRY.md` and `docs/status/reentry-guard-lab.json`. This entry is branch-local and pending merge; it does not assert upstream Crystal main implementation or reopen completed V1.

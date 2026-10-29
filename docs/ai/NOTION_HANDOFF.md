@@ -110,3 +110,13 @@ No pending hand-offs at the time this protocol was created.
 Move completed items here or mark them `SYNCED`; preserve their GitHub evidence and safe
 Notion reference so later agents can reconstruct the history without private workspace
 access.
+
+## Crystal-Test explicit reentry guard — 2026-10-29
+
+- Documentation impact: `GITHUB_AND_NOTION`.
+- Notion access: `NOTION_AVAILABLE`; synchronization: `SYNCED` for the branch-local implementation and bounded local evidence.
+- Safe target reference: `FORGE-CRYSTAL-01 — Forge vs Manus · PR #1/#2 audit · 2026-10-13`, separate engineering follow-up dated 2026-10-29. Historical pilot text was preserved.
+- Public technical source: `docs/lab/REJECT_REENTRY.md`, `docs/status/reentry-guard-lab.json`, this branch's code/tests.
+- Decision: opt-in compound rejection through existing review/Immune owners; ordinary reject remains record-level. CLI additionally requires ADMIN with `fact:*` for the workspace-wide guard.
+- Limits: lexical containment, not semantic identity or erasure; no in-flight ingest fencing, automatic demotion of old Canon, tenant guarantee or production authority.
+- Draft PR/head reference will be added to the dated Notion follow-up after publication. Post-merge SHA/CI evidence remains pending owner review and merge.

@@ -228,3 +228,7 @@ These three historical residual scopes are closed/completed. Their completion do
 2. Do **not** automatically implement EPIS-001 runtime, Reader semantic/hybrid/vector runtime, semantic dedupe, FTS, ANN/vector DB, model/provider wiring or storage/backend activation.
 3. Treat the Outbox family lock as recovery continuity for the reproduced `auto` backend-switch defect only; do not inflate it into queue migration, locator identity or distributed exactly-once semantics.
 4. Treat future action/tool/dependency updates as reviewable proposals, never automatic trust promotion.
+
+## Crystal-Test explicit reentry guard: bounded guarantee
+
+The branch adds atomic rejection plus the existing lexical Immune rule only through an explicit owner opt-in. Scope is the selected workspace, not a tenant/subject/predicate. It blocks matching subsequent sequential screened writes; it does not recognize paraphrases, fence writes already past pre-screen, retroactively remove other copies or provide physical erasure. The normalized pattern is retained by the existing Immune store. Shared manual patterns have shared revocation semantics. See `docs/lab/REJECT_REENTRY.md` for complete limitations and administrator requirements. Ordinary reject remains record-level.

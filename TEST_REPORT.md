@@ -153,3 +153,7 @@ This verification does not claim:
 NLnet remains **submitted / under review / not awarded**; approximate €50,000 is planning context only.
 
 > **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
+## Crystal-Test laboratory branch: explicit reentry guard (2026-10-29)
+
+Pending review/merge in the experimental copy only. `review-reject --block-reentry` composes the existing review journal and Immune Guard atomically; ordinary rejection remains record-level. No upstream main or production claim is made. Contract/limits: `docs/lab/REJECT_REENTRY.md`; exact evidence: `docs/status/reentry-guard-lab.json`. Final feature suite: 29 PASS. Broad runtime suite: 2430 PASS / 2 SKIP / 2 baseline missing-workflow FAIL; unchanged base: 2402 PASS / 2 SKIP / the same 2 FAIL. One additional exit-status test was added after that broad run and passed in the final feature suite. Combined full + final feature coverage: 100%; the full suite is not globally green. No old verified checkpoint/count is superseded by this branch note.
