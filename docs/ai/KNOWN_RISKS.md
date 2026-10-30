@@ -228,3 +228,9 @@ These three historical residual scopes are closed/completed. Their completion do
 2. Do **not** automatically implement EPIS-001 runtime, Reader semantic/hybrid/vector runtime, semantic dedupe, FTS, ANN/vector DB, model/provider wiring or storage/backend activation.
 3. Treat the Outbox family lock as recovery continuity for the reproduced `auto` backend-switch defect only; do not inflate it into queue migration, locator identity or distributed exactly-once semantics.
 4. Treat future action/tool/dependency updates as reviewable proposals, never automatic trust promotion.
+
+## Crystal-Test explicit reentry guard: bounded guarantee
+
+The branch adds atomic rejection plus the existing lexical Immune rule only through an explicit owner opt-in. Scope is the selected workspace, not a tenant/subject/predicate. It blocks matching subsequent sequential screened writes. `core.ingest.ingest` also rechecks under its SQLite promotion transaction, including when the guard commits after pre-screen and before promotion. It does not fence later L3 projection, promotion that already committed, pipeline/review/low-level paths, recognize paraphrases, retroactively remove other copies or provide physical erasure. The normalized pattern is retained by the existing Immune store. Shared manual patterns have shared revocation semantics. See `docs/lab/REJECT_REENTRY.md` for complete limitations and administrator requirements. Ordinary reject remains record-level.
+
+A synthetic stronger-contract probe also observed physical L3 projection after guard commit when the candidate's SQLite validation had already committed. Whether such an earlier admission must be revoked is a separate policy question; no strict-answer leak was established by this probe.

@@ -134,8 +134,11 @@ def reject_as_principal(
     *,
     requested_actor: Optional[str] = None,
     reason: str = "curator_rejected",
+    block_reentry: bool = False,
 ) -> dict[str, Any]:
     """Authorize then reject with principal-derived audit identity."""
+    if type(block_reentry) is not bool:
+        raise ValueError("block_reentry must be bool")
     normalized_fact_id = _normalize_fact_id(fact_id)
     auth = authorize_review_action(
         principal,
@@ -145,10 +148,15 @@ def reject_as_principal(
     )
     if not auth.allowed:
         return _authorization_denied(auth)
+    if block_reentry and (CuratorRole.ADMIN not in principal.roles
+                          or "fact:*" not in principal.scopes):
+        return {"authorized": False,
+                "reason": "workspace-wide reentry blocking requires admin with fact:* scope"}
     result = review.reject(
         normalized_fact_id,
         actor=principal.actor_id,
         reason=reason,
+        **({"block_reentry": True} if block_reentry else {}),
     )
     return {"authorized": True, **result}
 

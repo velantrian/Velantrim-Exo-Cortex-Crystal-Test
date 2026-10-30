@@ -91,3 +91,11 @@ Signed merge `f8b7d7ea36625b6589a4cf02f12b94c5f98fdb61`; exact-head CI `31593097
 ## Historical retained evidence
 
 Earlier RC-0..RC-8, storage, localization and grant-reconciliation entries remain available in Git history and their signed/CI evidence remains preserved in status and architecture records.
+
+## 2026-10-29 — Crystal-Test explicit rejection/reentry guard proposal
+
+Base `e9093ef4325923cb2b2842f7fa508b304de54bcf`. Owner authorized code work in the experimental repository. Implemented CLI/API opt-in using the existing review decision transaction and Immune writer; no new Canon owner. Added workspace-admin authorization, rollback/restart/replay/revocation tests and neighboring-fact controls. Documentation impact `GITHUB_AND_NOTION`; new English lab guide, no rewrite of existing localized README meaning. Exact local evidence is in `docs/status/reentry-guard-lab.json`; historical global test/checkpoint counts are not advanced. No live LLM calls or production authority.
+
+## Crystal-Test branch: bounded in-flight ingestion fence (2026-10-29)
+
+After an initial Immune pre-screen, `core.ingest.ingest` requests a second pattern check during its existing SQLite Observed → Validated transition. The guard read and transition use one `BEGIN IMMEDIATE` transaction, serializing this specific ordering with a concurrent guard commit across processes. This does not cover already-committed promotions, L3 projection, pipeline/review writes or unscreened low-level paths. See `docs/lab/REJECT_REENTRY.md` and `tests/test_reentry_race_probe.py`. Status: branch-only pending review, no upstream/production claim.

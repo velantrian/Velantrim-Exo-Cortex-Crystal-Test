@@ -175,6 +175,7 @@ def stage_review_decision(
     metadata_patch: Optional[Mapping[str, Any]] = None,
     target_transitions: Iterable[Mapping[str, Any]] = (),
     allow_partial_targets: bool = False,
+    block_reentry: bool = False,
 ) -> dict[str, Any]:
     try:
         fact_id = _guard_mutable_fact_id(fact_id, role="candidate")
@@ -184,7 +185,12 @@ def stage_review_decision(
         raise ValueError("decision_id must be a non-empty string")
     if not isinstance(event, str) or not event:
         raise ValueError("event must be a non-empty string")
+    if type(block_reentry) is not bool:
+        raise ValueError("block_reentry must be bool")
     candidate_path = tuple(candidate_path)
+    if block_reentry and (event != "review_reject" or candidate_path != ("Collapsed",)
+                          or projection_builder is not None):
+        raise ValueError("reentry blocking is only supported for rejection")
     target_specs = [dict(item) for item in target_transitions]
     changed_ids: list[str] = [fact_id]
     for spec in target_specs:
@@ -202,6 +208,8 @@ def stage_review_decision(
             if existing is not None:
                 result = _decode_row(existing)
                 if result["fact_id"] != fact_id or result["event"] != event:
+                    raise DecisionConflict("decision idempotency key collision")
+                if bool(result["payload"].get("reentry_pattern_id")) != block_reentry:
                     raise DecisionConflict("decision idempotency key collision")
                 result.update({"ok": True, "created": False})
                 return result
@@ -241,6 +249,23 @@ def stage_review_decision(
                     raise DecisionConflict(f"conflict target {target_id!r} changed concurrently")
                 _validate_path(target["epistemic_state"], tuple(spec.get("path") or ()))
                 applicable_targets.append((spec, target))
+
+            reentry_pattern_id = None
+            if block_reentry:
+                from core import immune
+
+                claim = crypto.decrypt(candidate["claim"])
+                if not immune._normalize(claim):
+                    raise DecisionConflict("claim has no blockable tokens")
+                if immune._block_severity() > 1.0:
+                    raise DecisionConflict("immune severity floor disables reentry blocking")
+                actor = audit_detail.get("actor")
+                if not isinstance(actor, str) or not actor.strip():
+                    raise DecisionConflict("reentry blocking requires an actor")
+                guard = immune._record_threat_conn(
+                    conn, claim, threat_type="curator_reentry", severity=1.0, actor=actor,
+                )
+                reentry_pattern_id = guard["pattern_id"]
 
             now = _now()
             metadata = _read_metadata(candidate)
@@ -291,6 +316,8 @@ def stage_review_decision(
                     "partial_target_ids": list(partial_tuple),
                 }
             )
+            if reentry_pattern_id is not None:
+                detail["reentry_pattern_id"] = reentry_pattern_id
             audit_receipt = _append_audit_event_conn(
                 conn, event=event, fact_id=fact_id, detail=detail, ts=now
             )
@@ -300,6 +327,8 @@ def stage_review_decision(
                 "projection": projection,
                 "partial_target_ids": list(partial_tuple),
             }
+            if reentry_pattern_id is not None:
+                payload["reentry_pattern_id"] = reentry_pattern_id
             completed_at = now if projection_status == "completed" else None
             conn.execute(
                 "INSERT INTO review_decisions "

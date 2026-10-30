@@ -245,6 +245,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_rj.add_argument("--actor", default=None,
                       help="optional exact-match assertion for the configured principal")
     p_rj.add_argument("--reason", default="curator_rejected", help="reason (for the audit log)")
+    p_rj.add_argument("--block-reentry", action="store_true",
+                      help="also record a revocable workspace-wide lexical guard; requires admin/fact:*")
     # ─── NeuroCore Phase 0 passive tracker (RFC0068) ───────────────────────────
     sub.add_parser(
         "neurocore-report", help="RFC0068 NeuroCore Phase 0 plasticity telemetry")
@@ -488,10 +490,13 @@ def main(argv: Optional[List[str]] = None) -> int:
             args.fact_id,
             requested_actor=args.actor,
             reason=args.reason,
+            **({"block_reentry": True} if args.block_reentry else {}),
         )
         print(json.dumps(result, ensure_ascii=False))
         if result.get("authorized") is False:
             return 3
+        if args.block_reentry and not result.get("rejected"):
+            return 1
     elif args.cmd == "neurocore-report":
         print(json.dumps(neurocore.report(), ensure_ascii=False))
     elif args.cmd == "eval":

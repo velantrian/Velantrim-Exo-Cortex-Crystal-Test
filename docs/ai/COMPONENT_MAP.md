@@ -183,3 +183,11 @@ No automatic Reader OCR/multimodal engine, semantic/hybrid/vector Reader runtime
 NLnet remains `submitted / under review / not awarded`. Issues #155, #165 and #214 are historical closed/completed scopes; their semantic scopes remain distinct and do not select current work. Notion is synchronized only after exact post-merge evidence.
 
 > **Update (2026-10-09):** the NLnet status above is the status recorded at submission. Decision for the main Crystal project: `NOT_SELECTED / NOT_AWARDED`. This repository is an isolated experimental copy of Crystal, not a separate grant applicant or recipient.
+
+## Crystal-Test opt-in rejection/reentry operation
+
+`core/cli.py` → `core/curator_runtime.py` → `core/review.py` → `core/review_decision_store.py` → transaction-participating helper in `core/immune.py`. Existing review/Immune owners remain responsible; the CLI requires workspace-admin scope for this new opt-in. See `docs/lab/REJECT_REENTRY.md` and `tests/test_reject_reentry.py`. No HTTP/MCP field is added.
+
+## Crystal-Test branch: bounded in-flight ingestion fence (2026-10-29)
+
+After an initial Immune pre-screen, `core.ingest.ingest` requests a second pattern check during its existing SQLite Observed → Validated transition. The guard read and transition use one `BEGIN IMMEDIATE` transaction, serializing this specific ordering with a concurrent guard commit across processes. This does not cover already-committed promotions, L3 projection, pipeline/review writes or unscreened low-level paths. See `docs/lab/REJECT_REENTRY.md` and `tests/test_reentry_race_probe.py`. Status: branch-only pending review, no upstream/production claim.

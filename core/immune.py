@@ -82,6 +82,32 @@ def learn_mode() -> bool:
 
 # ─── CRISPR threat memory (persistent, adaptive) ──────────────────────────────
 
+def _record_threat_conn(conn, pattern: str, *, threat_type: str, severity: float,
+                        actor: str) -> Dict[str, Any]:
+    """Join a caller-owned transaction; never commit or publish success here."""
+    normalized = _normalize(pattern)
+    if not normalized:
+        raise ValueError("record_threat: empty pattern")
+    pid = _pattern_id(normalized)
+    sev = max(0.0, min(1.0, float(severity)))
+    now = _now()
+    from core import audit
+
+    conn.execute(
+        "INSERT INTO immune_memory "
+        "(pattern_id, pattern, threat_type, severity, recorded_at, actor, hits) "
+        "VALUES (?, ?, ?, ?, ?, ?, 0) "
+        "ON CONFLICT(pattern_id) DO UPDATE SET "
+        "threat_type = excluded.threat_type, severity = excluded.severity",
+        (pid, normalized, threat_type, sev, now, actor),
+    )
+    audit.append_event("immune_threat_recorded", None, {
+        "pattern_id": pid, "threat_type": threat_type, "severity": sev, "actor": actor,
+    }, connection=conn)
+    return {"pattern_id": pid, "pattern": normalized, "threat_type": threat_type,
+            "severity": sev, "recorded_at": now, "actor": actor, "hits": 0}
+
+
 def record_threat(
     pattern: str,
     *,
@@ -96,34 +122,18 @@ def record_threat(
     type/severity and keeps a single entry (and its accumulated hit count).
     Appends a content-free entry to the audit log for accountability.
     """
-    normalized = _normalize(pattern)
-    if not normalized:
-        raise ValueError("record_threat: empty pattern")
-    pid = _pattern_id(normalized)
-    sev = max(0.0, min(1.0, float(severity)))
-    now = _now()
     from core import audit
 
     def _write():
         with memory._db() as conn:
             memory.begin_immediate(conn)
-            conn.execute(
-                "INSERT INTO immune_memory "
-                "(pattern_id, pattern, threat_type, severity, recorded_at, actor, hits) "
-                "VALUES (?, ?, ?, ?, ?, ?, 0) "
-                "ON CONFLICT(pattern_id) DO UPDATE SET "
-                "threat_type = excluded.threat_type, severity = excluded.severity",
-                (pid, normalized, threat_type, sev, now, actor),
-            )
-            audit.append_event("immune_threat_recorded", None, {
-                "pattern_id": pid, "threat_type": threat_type, "severity": sev, "actor": actor,
-            }, connection=conn)
+            return _record_threat_conn(conn, pattern, threat_type=threat_type,
+                                       severity=severity, actor=actor)
 
     with audit._AUDIT_LOCK:
-        memory.call_with_lock_retry(_write)
+        result = memory.call_with_lock_retry(_write)
     metrics.incr("immune.threat_recorded")
-    return {"pattern_id": pid, "pattern": normalized, "threat_type": threat_type,
-            "severity": sev, "recorded_at": now, "actor": actor, "hits": 0}
+    return result
 
 
 def forget_threat(pattern_id: str, *, actor: str = "system") -> bool:
@@ -155,6 +165,22 @@ def list_threats() -> List[Dict[str, Any]]:
             "SELECT * FROM immune_memory ORDER BY recorded_at DESC, pattern_id"
         ).fetchall()
     return [dict(r) for r in rows]
+
+
+def _reentry_guard_matches_conn(conn, claim: str) -> bool:
+    """Recheck existing Immune patterns in the caller's locked SQLite snapshot.
+
+    This does not perform the full Immune screen, record a hit, or change the
+    authority of ordinary manually recorded threats.
+    """
+    normalized = _normalize(claim)
+    if not normalized:
+        return False
+    haystack = f" {normalized} "
+    floor = _block_severity()
+    rows = conn.execute("SELECT pattern, severity FROM immune_memory")
+    return any(not (row["severity"] < floor) and f" {row['pattern']} " in haystack
+               for row in rows)
 
 
 def _register_hit(pattern_id: str) -> None:
