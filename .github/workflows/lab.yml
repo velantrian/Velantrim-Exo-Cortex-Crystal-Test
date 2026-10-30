@@ -1,0 +1,28 @@
+name: Crystal-Test lab verification
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    name: lab tests (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install lab test dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Compile runtime
+        run: python -m compileall -q core
+      - name: Run complete suite and coverage gate
+        run: python -m pytest tests/ --cov=. --cov-fail-under=100

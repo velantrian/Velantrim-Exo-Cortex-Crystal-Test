@@ -6,7 +6,7 @@
 >
 > **Example:** Prepare an experiment in this copy and compare against the upstream's exact version and evidence before claiming an outcome.
 >
-> **Status:** Experimental/test surface. [Canonical Crystal](https://github.com/velantrian/velantrim-exocortex-crystal) owns authoritative implementation status.
+> **Status:** Experimental/test surface. [Canonical Crystal](https://github.com/velantrian/velantrim-exocortex-crystal) owns authoritative implementation status. Lab CI is `.github/workflows/lab.yml`; upstream CI counts below are not lab proof.
 
 > 🌐 🇬🇧 **English** · 🇩🇪 [Deutsch](./README.de.md) · 🇫🇷 [Français](./README.fr.md) · 🇪🇸 [Español](./README.es.md) · 🇮🇹 [Italiano](./README.it.md) · 🇷🇺 [Русский](./README.ru.md) · 🇨🇳 [简体中文](./README.zh-CN.md) · 🇸🇦 [العربية](./README.ar.md) · 🇯🇵 [日本語](./README.ja.md) · 🇮🇳 [हिन्दी](./README.hi.md)
 
