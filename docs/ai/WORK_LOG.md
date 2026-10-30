@@ -2,6 +2,18 @@
 
 This compact log records material decisions, exact evidence, limitations and hand-offs. It does not replace Git history, issues, pull requests, `CHANGELOG.md` or Notion.
 
+## 2026-10-31 — Crystal-Test erase ↔ Immune opt-in reentry guard · PR branch only
+
+- Scope: close the documented gap where physical erase does not block same-wording
+  re-ingest; TruthGate / Guardian / Canon ownership unchanged.
+- Default `erase_fact` behavior preserved (reentry still possible; test freezes it).
+- Opt-in `block_reentry=True` / CLI `--block-reentry` records Immune pattern
+  `threat_type=erasure_reentry` before deletion; privacy-shaped reasons refused.
+- Docs: [`../lab/ERASE_REENTRY.md`](../lab/ERASE_REENTRY.md).
+- Tests: `tests/test_erase_reentry.py`.
+- Documentation impact: `GITHUB_ONLY`. Notion: `NOT_REQUIRED`.
+- Delivery: PR branch only unless a human explicitly merges.
+
 ## 2026-10-29 — Crystal-Test immune/audit transaction correction · DRAFT
 
 - Scope: Crystal-Test at `b2c0063fb63992915ef80016ad4cf4b1e3c5f158`; main Crystal unchanged.
