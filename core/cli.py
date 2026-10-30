@@ -88,6 +88,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_erase.add_argument(
         "--cascade", action="store_true",
         help="also delete facts derived from this one (DERIVED_FROM)")
+    p_erase.add_argument(
+        "--block-reentry", action="store_true",
+        help=(
+            "LAB opt-in: also record Immune pattern so screened ingest rejects "
+            "the same wording; not a privacy/GDPR mode (requires explicit "
+            "wrongness --reason, not data_subject_request)"
+        ),
+    )
     sub.add_parser("erasures", help="deletion log (tombstones, Art. 30)")
     p_restrict = sub.add_parser(
         "restrict", help="restrict processing of a fact (GDPR Art. 18)")
@@ -339,7 +347,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(format_report(memory_report()))
     elif args.cmd == "erase":
         print(json.dumps(
-            erase_fact(args.fact_id, reason=args.reason, cascade=args.cascade),
+            erase_fact(
+                args.fact_id,
+                reason=args.reason,
+                cascade=args.cascade,
+                **({"block_reentry": True} if args.block_reentry else {}),
+            ),
             ensure_ascii=False))
     elif args.cmd == "erasures":
         print(json.dumps(erasure_log(), ensure_ascii=False))
