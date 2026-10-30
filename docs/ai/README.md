@@ -1,8 +1,10 @@
 # 🤖 Crystal — Special for AI / Agent Entry Point
 
 **Document role:** machine/agent router, not a human landing page.  
-**Project:** `velantrian/velantrim-exocortex-crystal`  
-**Rule:** re-resolve live GitHub before treating any dated SHA or issue state in documentation as current.
+**Project:** `velantrian/Velantrim-Exo-Cortex-Crystal-Test` *(Crystal-Test LAB copy)*  
+**Canonical upstream:** `velantrian/velantrim-exocortex-crystal`  
+**Lab provenance:** [`../../FORGE_LAB_PROVENANCE.md`](../../FORGE_LAB_PROVENANCE.md) — upstream snapshot `692e05e319d1a789752fe797235798d4380e60d4`; workflows excluded by design.  
+**Rule:** re-resolve live GitHub before treating any dated SHA or issue state in documentation as current. Do not treat LAB local smoke as upstream verified CI.
 
 Human-oriented explanation lives in [`../../README.md`](../../README.md) and [`../OVERVIEW.md`](../OVERVIEW.md). Do **not** infer implementation truth from narrative readability, diagrams or competitor comparisons.
 

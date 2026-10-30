@@ -16,7 +16,9 @@ Crystal 是一条面向**可审计 AI 记忆**的 local-first 研究与实现路
 >
 > 📚 **需要深入理解架构？** 继续阅读 **[Deep System Overview →](./docs/OVERVIEW.md)**，再进入下方的详细技术文档。
 
-`v0.3.0` · 🎯 **100% line-coverage gate** · 🧬 **Ring Zero mutation gate** · ✅ **9 permanent CI jobs** · 🐍 **standard-library-first default runtime** · ⚖️ **AGPL-3.0**
+`v0.3.0` · 🧪 **Crystal-Test LAB** · 📌 upstream snapshot `692e05e3…` · 🚫 **GitHub Actions workflows excluded by design** · 🐍 **standard-library-first default runtime** · ⚖️ **AGPL-3.0**
+>
+> LAB copy — not canonical Crystal main. See [FORGE_LAB_PROVENANCE.md](./FORGE_LAB_PROVENANCE.md).
 
 ## 👋 Crystal 是什么，为什么存在
 

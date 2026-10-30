@@ -2,6 +2,19 @@
 
 This compact log records material decisions, exact evidence, limitations and hand-offs. It does not replace Git history, issues, pull requests, `CHANGELOG.md` or Notion.
 
+## 2026-10-31 — Crystal-Test lab identity honesty · PR branch only
+
+- Scope: Crystal-Test identity hygiene only; TruthGate / Guardian / Canon untouched.
+- Removed false local claims of the upstream 9-job / Ring Zero CI gate from root README
+  badge lines; pointed readers at canonical Crystal for verified gates.
+- Strengthened [`../../FORGE_LAB_PROVENANCE.md`](../../FORGE_LAB_PROVENANCE.md) with an
+  explicit machine-readable upstream snapshot pin and `workflows_present: false`.
+- Adapted `tests/test_security_reproducibility_contract.py` for deliberate workflow
+  exclusion; added local `scripts/lab_smoke.sh` (not a GitHub Actions job).
+- Marked status/AI surfaces so inherited CI language is not read as LAB proof.
+- Documentation impact: `GITHUB_ONLY`. Notion synchronization: `NOT_REQUIRED`.
+- Delivery constraint: PR branch only; do not merge to `main` from this work cycle.
+
 ## 2026-10-29 — Crystal-Test immune/audit transaction correction · DRAFT
 
 - Scope: Crystal-Test at `b2c0063fb63992915ef80016ad4cf4b1e3c5f158`; main Crystal unchanged.

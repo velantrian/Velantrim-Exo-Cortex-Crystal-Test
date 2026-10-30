@@ -3,12 +3,17 @@
   "project": "Velantrim Exo-Cortex Crystal",
   "status_date": "2026-09-07",
   "role": "volatile_lifecycle_overlay",
+  "repository_surface": "crystal_test_lab",
+  "ci_workflows_present": false,
+  "upstream_snapshot_commit": "692e05e319d1a789752fe797235798d4380e60d4",
+  "post_merge_ci_evidence_class": "inherited_upstream_evidence",
   "repository_head_rule": "RESOLVE_LIVE_GITHUB",
   "audited_main_checkpoint": "7509be14c274cdc83e8e00287f46a78f8ee33696",
   "post_merge_ci": {
     "run": 33305338492,
     "job_count": 9,
-    "all_successful": true
+    "all_successful": true,
+    "applies_to": "inherited_upstream_crystal_main_not_this_lab_copy"
   },
   "v1_lifecycle": {
     "status": "COMPLETE_FREEZE_STABILITY",
@@ -71,5 +76,5 @@
     "postgresql_pgvector_active": false,
     "runtime_or_production_authorized": false
   },
-  "interpretation": "This overlay records a dated current-lifecycle reconciliation. Historical architecture and verification checkpoints remain in implementation-manifest.json. Live GitHub overrides this overlay when repository or governance state advances."
+  "interpretation": "This overlay records a dated current-lifecycle reconciliation for the Crystal-Test LAB copy. CI workflow files are excluded by design; post_merge_ci figures above are inherited upstream evidence, not local LAB CI proof. Historical architecture and verification checkpoints remain in implementation-manifest.json. Live GitHub overrides this overlay when repository or governance state advances. See FORGE_LAB_PROVENANCE.md."
 }

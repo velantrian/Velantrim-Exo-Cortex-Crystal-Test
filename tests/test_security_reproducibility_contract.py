@@ -1,4 +1,12 @@
-"""Regression contract for issue #214 supply-chain verification hardening."""
+"""Regression contract for issue #214 supply-chain verification hardening.
+
+Crystal-Test deliberately excludes upstream GitHub Actions workflows
+(see FORGE_LAB_PROVENANCE.md). This contract therefore:
+
+- asserts the excluded workflow files remain absent;
+- keeps Dependabot and security-tool pin checks that still apply locally;
+- documents upstream action-SHA expectations without requiring ci.yml.
+"""
 
 from __future__ import annotations
 
@@ -8,11 +16,14 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PROVENANCE = ROOT / "FORGE_LAB_PROVENANCE.md"
 WORKFLOWS = (
     ROOT / ".github/workflows/ci.yml",
     ROOT / ".github/workflows/l3-benchmark-history.yml",
     ROOT / ".github/workflows/postgresql-integration.yml",
 )
+# Documented upstream expectations for the canonical Crystal repository.
+# Crystal-Test does not enforce these against missing workflow files.
 EXPECTED_ACTION_REFS = {
     "actions/checkout": "3d3c42e5aac5ba805825da76410c181273ba90b1",
     "actions/setup-python": "5fda3b95a4ea91299a34e894583c3862153e4b97",
@@ -20,24 +31,30 @@ EXPECTED_ACTION_REFS = {
     "gitleaks/gitleaks-action": "e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e",
 }
 USE_RE = re.compile(r"^\s*-?\s*uses:\s*([^@\s]+)@([0-9a-f]{40})(?:\s+#\s+.+)?$")
+UPSTREAM_SNAPSHOT = "692e05e319d1a789752fe797235798d4380e60d4"
 
 
-def test_all_committed_workflow_actions_are_immutable_reviewed_refs():
-    seen: set[str] = set()
+def test_lab_excludes_upstream_workflows_by_design():
     for workflow in WORKFLOWS:
-        for line in workflow.read_text(encoding="utf-8").splitlines():
-            if "uses:" not in line:
-                continue
-            match = USE_RE.match(line)
-            assert match is not None, f"mutable or malformed action ref: {workflow}: {line}"
-            action, ref = match.groups()
-            assert action in EXPECTED_ACTION_REFS, f"unreviewed action: {action}"
-            assert ref == EXPECTED_ACTION_REFS[action], f"unexpected ref for {action}: {ref}"
-            seen.add(action)
-    assert seen == set(EXPECTED_ACTION_REFS)
+        assert not workflow.exists(), (
+            f"Crystal-Test must not restore excluded upstream workflow: {workflow}"
+        )
 
 
-def test_security_job_installs_exact_dedicated_tool_constraints():
+def test_forge_lab_provenance_pin_is_visible_and_explicit():
+    text = PROVENANCE.read_text(encoding="utf-8")
+    assert f"upstream_snapshot_commit: {UPSTREAM_SNAPSHOT}" in text
+    assert "workflows_present: false" in text
+    assert "authority: LAB_ONLY" in text
+    for relative in (
+        ".github/workflows/ci.yml",
+        ".github/workflows/l3-benchmark-history.yml",
+        ".github/workflows/postgresql-integration.yml",
+    ):
+        assert relative in text
+
+
+def test_security_tool_pins_remain_exact_without_ci_yml():
     requirements = ROOT / ".github/requirements-security.txt"
     pins = {
         line.strip()
@@ -45,10 +62,28 @@ def test_security_job_installs_exact_dedicated_tool_constraints():
         if line.strip() and not line.lstrip().startswith("#")
     }
     assert pins == {"bandit==1.9.4", "pip-audit==2.10.1"}
+    assert not (ROOT / ".github/workflows/ci.yml").exists()
 
-    ci = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
-    assert "pip install -r .github/requirements-security.txt" in ci
-    assert "pip install bandit pip-audit" not in ci
+
+def test_upstream_action_pin_contract_is_documented_not_enforced_here():
+    """Keep the reviewed upstream action map as documentation only.
+
+    If a future lab intentionally restores a workflow file, that change must
+    separately re-enable immutable-ref enforcement. Until then, absence is the
+    contract.
+    """
+    assert set(EXPECTED_ACTION_REFS) == {
+        "actions/checkout",
+        "actions/setup-python",
+        "actions/upload-artifact",
+        "gitleaks/gitleaks-action",
+    }
+    assert all(re.fullmatch(r"[0-9a-f]{40}", ref) for ref in EXPECTED_ACTION_REFS.values())
+    assert USE_RE.pattern
+    for workflow in WORKFLOWS:
+        assert not workflow.exists()
+    provenance = PROVENANCE.read_text(encoding="utf-8")
+    assert "documented expectations for the canonical repository" in provenance
 
 
 def test_dependabot_has_bounded_weekly_action_and_security_tool_update_paths():
