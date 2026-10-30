@@ -130,6 +130,6 @@ access.
 ## Crystal-Test lab CI proposal — 2026-10-29
 
 - Impact: `GITHUB_AND_NOTION` (verification workflow). The canonical source remains the lab workflow and `FORGE_LAB_PROVENANCE.md`.
-- Notion access: available; dated lab-results follow-up is synced with PR #8 and the original tested head.
-- No claim of hosted CI success for a rebased head until that exact head runs. The original three workflows stay absent; inherited security tests are explicitly adapted to the separate lab contract, not skipped.
+- Notion access: `NOTION_AVAILABLE`; synchronization: `SYNCED`. The [FORGE-CRYSTAL-01 checkpoint](https://app.notion.com/p/3f8ac84d054781449f62e208c9fef4f3) already records PR #8's rebased verified head `02cf5581b2ea7d58b26ceed67f4d554cbc91522a` and hosted run #41019730457 success (Python 3.11 and 3.12). Its earlier original-head note remains historical.
+- The rebased tested SHA passed [hosted run #41019730457](https://github.com/velantrian/Velantrim-Exo-Cortex-Crystal-Test/actions/runs/41019730457) (`completed / success`). A later docs-only commit is not covered by that exact-head result until a new run passes. The three upstream workflows stay absent; inherited security tests are explicitly adapted to the separate lab contract, not skipped. No Bandit/pip-audit or production/Canon CI-equivalence claim.
 - README lab notice changed in English; existing translations retain upstream content and require a follow-up lab-notice translation.
