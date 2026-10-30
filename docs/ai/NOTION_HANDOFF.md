@@ -120,3 +120,10 @@ access.
 - Decision: opt-in compound rejection through existing review/Immune owners; ordinary reject remains record-level. CLI additionally requires ADMIN with `fact:*` for the workspace-wide guard.
 - Limits: lexical containment, not semantic identity or erasure; no in-flight ingest fencing, automatic demotion of old Canon, tenant guarantee or production authority.
 - Draft PR/head reference will be added to the dated Notion follow-up after publication. Post-merge SHA/CI evidence remains pending owner review and merge.
+
+## In-flight ingestion fence — 2026-10-29
+
+- Impact `GITHUB_AND_NOTION`; user requested continuation and testing in Crystal-Test.
+- `test_reentry_race_probe.py` reproduced promotion after guard commit on initial PR #7 head. A bounded SQLite promotion fence was implemented and tested, including a separate-process case and independent positive control.
+- Scope is `core.ingest.ingest` transition, not the full graph pipeline, outbox, erasure or existing Canon. See `docs/lab/REJECT_REENTRY.md` and machine evidence in `docs/status/reentry-guard-lab.json`.
+- Notion is available; the dated bounded-results follow-up is synced. Add exact updated PR head after publication. No production or upstream assertion.

@@ -69,6 +69,24 @@
     "missing_lines": 0,
     "percent": 100.0,
     "method": "combined full-suite and final feature-suite traces over the same runtime source; --cov=. --cov-append",
-    "full_single_run_before_final_exit_code_test_percent": 99.99220090469505
+    "full_single_run_before_final_exit_code_test_percent": 99.99220090469505,
+    "scope_head": "dbf28e1d8ed353a0e62a4e113471fb93fe8602af"
+  },
+  "race_fence": {
+    "status": "IMPLEMENTED_ON_PROPOSED_BRANCH",
+    "previous_head": "dbf28e1d8ed353a0e62a4e113471fb93fe8602af",
+    "baseline_race": "FAIL: a pre-screened ingest was accepted after guard commit",
+    "focused_suite": "136 PASS",
+    "covered": "ingest transition checks existing Immune patterns in same SQLite write transaction",
+    "limits": [
+      "not a physical L3 transaction",
+      "does not affect already committed promotion",
+      "does not cover pipeline/review or duplicate paths",
+      "does not provide deletion or semantic matching"
+    ],
+    "full_suite": "2436 PASS / 2 SKIP / 2 pre-existing lab workflow FAIL",
+    "coverage_percent": 100.0,
+    "coverage_scope": "complete test run for this candidate runtime; the two pre-existing workflow tests fail",
+    "late_l3_projection": "PROPOSED_STRONGER_CONTRACT_FAIL: promotion preceded guard; graph projection and accepted result followed guard"
   }
 }

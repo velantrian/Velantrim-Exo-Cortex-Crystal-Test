@@ -984,7 +984,7 @@ def _repair_fact_from_canon(fact_id: str, **fields) -> bool:
         _CANON_REPAIR_CONTEXT.enabled = previous
 
 
-def transition_esm(fact_id: str, new_state: str) -> bool:
+def transition_esm(fact_id: str, new_state: str, *, check_reentry_guard: bool = False) -> bool:
     """
     Transition a fact to a new ESM state.
     A direct SET of epistemic_state bypassing this function is an architectural bug.
@@ -1012,6 +1012,13 @@ def transition_esm(fact_id: str, new_state: str) -> bool:
             if row is None:
                 return False
 
+            if check_reentry_guard and new_state == "Validated":
+                # Same BEGIN IMMEDIATE snapshot as the transition. This serializes
+                # admission against a curator guard commit, across processes too.
+                from core import immune
+                if immune._reentry_guard_matches_conn(conn, crypto.decrypt(row["claim"])):
+                    _l0_pop(fact_id)
+                    return False
             current_state = row["epistemic_state"]
             allowed = ESM_TRANSITIONS.get(current_state)
             if allowed is not None and new_state not in allowed:

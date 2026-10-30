@@ -308,11 +308,11 @@ def ingest(
     # transition_esm returns False and evicts the stale L0 entry. Abort the
     # promotion instead of merging a stale payload / recording success.
     # Defense-in-depth, not a full atomicity guarantee.
-    if not transition_esm(fid, "Validated"):
+    if not transition_esm(fid, "Validated", check_reentry_guard=True):
         adaptation.record_block()
         return {
             "accepted": False,
-            "reason": "ESM CAS conflict: fact state changed concurrently; not promoted",
+            "reason": "ESM CAS conflict or reentry guard: not promoted",
             "conflicts": conflicts, "fact": fact,
         }
     updated = get_fact(fid)

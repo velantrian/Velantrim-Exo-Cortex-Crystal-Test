@@ -167,6 +167,22 @@ def list_threats() -> List[Dict[str, Any]]:
     return [dict(r) for r in rows]
 
 
+def _reentry_guard_matches_conn(conn, claim: str) -> bool:
+    """Recheck existing Immune patterns in the caller's locked SQLite snapshot.
+
+    This does not perform the full Immune screen, record a hit, or change the
+    authority of ordinary manually recorded threats.
+    """
+    normalized = _normalize(claim)
+    if not normalized:
+        return False
+    haystack = f" {normalized} "
+    floor = _block_severity()
+    rows = conn.execute("SELECT pattern, severity FROM immune_memory")
+    return any(not (row["severity"] < floor) and f" {row['pattern']} " in haystack
+               for row in rows)
+
+
 def _register_hit(pattern_id: str) -> None:
     with memory._db() as conn:
         conn.execute(
