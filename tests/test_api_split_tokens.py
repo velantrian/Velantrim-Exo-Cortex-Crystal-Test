@@ -234,3 +234,63 @@ def test_empty_curator_token_blocks_unauth_local(monkeypatch):
     )
     assert response.status_code == 401
     assert not called
+
+@pytest.mark.parametrize("unauth_local", [False, True])
+@pytest.mark.parametrize(
+    ("route", "body"),
+    [
+        ("/review/approve", {"fact_id": "fact-1"}),
+        ("/review/reject", {"fact_id": "fact-1", "reason": "no"}),
+        (
+            "/review/resolve-conflict",
+            {
+                "fact_id": "fact-1",
+                "disposition": "COEXIST",
+                "reason": "independent contexts",
+                "expected_report_id": "r1",
+            },
+        ),
+        ("/ingest", {"text": "must not reach the memory core"}),
+    ],
+)
+def test_empty_curator_token_denies_every_http_write_route(
+    monkeypatch, unauth_local, route, body
+):
+    """Present-but-empty token is a 401 with zero mutation in both auth modes."""
+    monkeypatch.setenv("VELANTRIM_API_CURATOR_TOKEN", "")
+    monkeypatch.setenv("VELANTRIM_CURATOR_ACTOR", "alice")
+    monkeypatch.setenv("VELANTRIM_CURATOR_ROLES", "ADMIN")
+    monkeypatch.setenv("VELANTRIM_CURATOR_SCOPES", "fact:*")
+    if unauth_local:
+        monkeypatch.delenv("VELANTRIM_API_TOKEN", raising=False)
+        monkeypatch.setenv("VELANTRIM_API_ALLOW_UNAUTH_LOCAL", "1")
+        headers = {}
+    else:
+        monkeypatch.setenv("VELANTRIM_API_TOKEN", "writer-secret")
+        monkeypatch.delenv("VELANTRIM_API_ALLOW_UNAUTH_LOCAL", raising=False)
+        headers = {"Authorization": "Bearer writer-secret"}
+
+    mutations = []
+
+    def mutating_review(*args, **kwargs):
+        mutations.append(("review", args, kwargs))
+        return {"found": True, "approved": True}
+
+    async def mutating_ingest(*args, **kwargs):
+        mutations.append(("ingest", args, kwargs))
+        return {"accepted": True}
+
+    for name in ("approve", "reject", "resolve_conflict"):
+        monkeypatch.setattr("core.curator_runtime.review." + name, mutating_review)
+    monkeypatch.setattr("core.aio.aingest", mutating_ingest)
+    monkeypatch.setattr(
+        "core.curator_runtime.review.review_item",
+        lambda fact_id: {"found": True, "diagnosis": {
+            "contradiction_report": {"report_id": "r1"},
+        }},
+    )
+
+    response = TestClient(api.create_app()).post(route, headers=headers, json=body)
+    assert response.status_code == 401, response.text
+    assert "VELANTRIM_API_CURATOR_TOKEN" in response.json()["detail"]
+    assert mutations == []
