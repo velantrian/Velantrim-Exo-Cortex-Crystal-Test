@@ -190,7 +190,7 @@ NLnet remains `submitted / under review / not awarded`. Issues #155, #165 and #2
 
 ## Crystal-Test opt-in erase/reentry operation
 
-`core/cli.py` (`erase --block-reentry`) → `core/erasure.erase_fact(..., block_reentry=True)` → `core/immune.record_threat` (`threat_type=erasure_reentry`) then ordinary physical erase. Default erase unchanged. Privacy-shaped reasons refused. See `docs/lab/ERASE_REENTRY.md` and `tests/test_erase_reentry.py`. No TruthGate/Guardian/Canon ownership change; no HTTP/MCP field.
+`core/cli.py` (`erase --block-reentry`) → `core/curator_runtime.erase_with_reentry_block_as_principal` (ADMIN + `fact:*`) → `core/erasure.erase_fact(..., block_reentry=True)` → `core/immune.record_threat` (`threat_type=erasure_reentry`) then ordinary physical erase. Default erase unchanged. Privacy-shaped reasons refused. See `docs/lab/ERASE_REENTRY.md` and `tests/test_erase_reentry.py`. No TruthGate/Guardian/Canon ownership change; no HTTP/MCP field.
 
 ## Crystal-Test branch: bounded in-flight ingestion fence (2026-10-29)
 

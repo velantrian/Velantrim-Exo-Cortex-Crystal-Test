@@ -139,22 +139,38 @@ def test_revoking_erasure_guard_allows_reingest_without_restoring_row(monkeypatc
     assert memory.get_tombstone(FID) is not None
 
 
-def test_cli_wires_block_reentry_flag(monkeypatch, tmp_path, capsys):
+def test_cli_block_reentry_requires_admin_fact_star(monkeypatch, tmp_path, capsys):
     from core import cli
 
-    monkeypatch.setenv("VELANTRIM_DATA_DIR", str(tmp_path / "data"))
     monkeypatch.setenv("VELANTRIM_DEMO_SEED", "0")
     monkeypatch.setenv("VELANTRIM_IMMUNE_BLOCK_SEVERITY", "0.5")
-    memory.store_fact({
-        "fact_id": FID,
-        "claim": CLAIM,
-        "source": "test://cli",
-        "confidence": 0.9,
-        "epistemic_state": "Validated",
-        "claim_type": "WORLD_FACT",
-        "source_status": "EXTERNAL",
-    })
-    get_l3_graph().merge_fact(memory.get_fact(FID))
+    monkeypatch.setenv("VELANTRIM_CURATOR_ACTOR", "alice")
+    monkeypatch.setenv("VELANTRIM_CURATOR_ROLES", "CURATOR")
+    monkeypatch.setenv("VELANTRIM_CURATOR_SCOPES", "fact:*")
+    _seed(monkeypatch)
+
+    rc = cli.main([
+        "erase", FID,
+        "--reason", "curator_wrong_claim",
+        "--block-reentry",
+    ])
+    assert rc == 3
+    out = capsys.readouterr().out
+    assert "authorized" in out
+    assert "admin" in out.lower()
+    assert memory.get_fact(FID) is not None
+    assert immune.match_threat(CLAIM) is None
+
+
+def test_cli_wires_block_reentry_flag_for_admin(monkeypatch, tmp_path, capsys):
+    from core import cli
+
+    monkeypatch.setenv("VELANTRIM_DEMO_SEED", "0")
+    monkeypatch.setenv("VELANTRIM_IMMUNE_BLOCK_SEVERITY", "0.5")
+    monkeypatch.setenv("VELANTRIM_CURATOR_ACTOR", "lab-admin")
+    monkeypatch.setenv("VELANTRIM_CURATOR_ROLES", "ADMIN")
+    monkeypatch.setenv("VELANTRIM_CURATOR_SCOPES", "fact:*")
+    _seed(monkeypatch)
 
     rc = cli.main([
         "erase", FID,
@@ -174,3 +190,46 @@ def test_cli_wires_block_reentry_flag(monkeypatch, tmp_path, capsys):
         confidence=0.9,
     )
     assert blocked["accepted"] is False
+
+
+def test_shared_immune_pattern_upsert_and_forget_is_global(monkeypatch):
+    """erasure_reentry may refresh an existing pattern; immune-allow removes the shared rule."""
+    _seed(monkeypatch)
+    first = immune.record_threat(
+        CLAIM, threat_type="manual", severity=0.7, actor="manual-owner",
+    )
+    receipt = erase_fact(
+        FID,
+        reason="curator_wrong_claim",
+        actor="lab-operator",
+        block_reentry=True,
+    )
+    assert receipt["reentry_pattern_id"] == first["pattern_id"]
+    entry = immune.match_threat(CLAIM)
+    assert entry is not None
+    assert entry["threat_type"] == "erasure_reentry"
+    assert entry["severity"] == 1.0
+    assert immune.forget_threat(receipt["reentry_pattern_id"], actor="lab-operator")
+    assert immune.match_threat(CLAIM) is None
+
+
+def test_token_containment_can_block_corrective_quotation(monkeypatch):
+    """Documents Immune whole-token containment risk for quoted corrections."""
+    _seed(monkeypatch)
+    erase_fact(
+        FID,
+        reason="curator_wrong_claim",
+        actor="lab-operator",
+        block_reentry=True,
+    )
+    correction = f"Correction: it is false that {CLAIM}"
+    blocked = ingest(
+        correction,
+        fact_id="ing:quoted-correction",
+        source="test://correction",
+        claim_type="WORLD_FACT",
+        source_status="EXTERNAL",
+        confidence=0.9,
+    )
+    assert blocked["accepted"] is False
+    assert "Immune:" in (blocked.get("reason") or "")

@@ -161,6 +161,44 @@ def reject_as_principal(
     return {"authorized": True, **result}
 
 
+def erase_with_reentry_block_as_principal(
+    principal: CuratorPrincipal,
+    fact_id: str,
+    *,
+    reason: str,
+    cascade: bool = False,
+    requested_actor: Optional[str] = None,
+) -> dict[str, Any]:
+    """Authorize workspace-wide Immune install, then erase with block_reentry.
+
+    Ordinary erase without reentry blocking stays on ``erase_fact`` / CLI erase
+    without this helper. Installing a global lexical guard matches the
+    ``review-reject --block-reentry`` contract: ADMIN + ``fact:*``.
+    """
+    from core.erasure import erase_fact
+
+    normalized_fact_id = _normalize_fact_id(fact_id)
+    if requested_actor is not None and requested_actor != principal.actor_id:
+        return {
+            "authorized": False,
+            "reason": "actor assertion does not match authenticated principal",
+        }
+    if (CuratorRole.ADMIN not in principal.roles
+            or "fact:*" not in principal.scopes):
+        return {
+            "authorized": False,
+            "reason": "workspace-wide reentry blocking requires admin with fact:* scope",
+        }
+    result = erase_fact(
+        normalized_fact_id,
+        reason=reason,
+        actor=principal.actor_id,
+        cascade=cascade,
+        block_reentry=True,
+    )
+    return {"authorized": True, **result}
+
+
 def resolve_conflict_as_principal(
     principal: CuratorPrincipal,
     fact_id: str,
@@ -239,6 +277,7 @@ def resolve_conflict_as_principal(
 __all__ = [
     "PrincipalConfigurationError",
     "approve_as_principal",
+    "erase_with_reentry_block_as_principal",
     "principal_from_environment",
     "reject_as_principal",
     "resolve_conflict_as_principal",
