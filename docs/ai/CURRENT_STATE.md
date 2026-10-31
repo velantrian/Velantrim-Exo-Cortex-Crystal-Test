@@ -362,6 +362,13 @@ This file does not authorize or select the next workstream. The nine-locale docu
 
 No next model, discriminator, reranker, Reader backend, storage activation, authority expansion or residual issue is automatically authorized by a historical closure or by this static snapshot.
 
+## Crystal-Test branch proposal: split HTTP ingest/curator tokens (2026-10-31)
+
+LAB opt-in `VELANTRIM_API_CURATOR_TOKEN` distinct from `VELANTRIM_API_TOKEN` so a
+writer bearer cannot call `/review/approve|reject|resolve-conflict`. Single-token
+ADR-018 baseline remains when unset. See `docs/lab/SPLIT_API_TOKENS.md`. No IdP /
+multi-tenant / TruthGate-Guardian-Canon ownership claim.
+
 ## Crystal-Test branch proposal: explicit reentry guard (2026-10-29)
 
 This laboratory branch adds opt-in `review-reject --block-reentry` on base `e9093ef4325923cb2b2842f7fa508b304de54bcf`. Ordinary rejection semantics are unchanged. ADMIN with `fact:*` is required for the workspace-wide lexical guard. Rejection, existing Immune rule, both audits and journal commit together. See `docs/lab/REJECT_REENTRY.md` and `docs/status/reentry-guard-lab.json`. This entry is branch-local and pending merge; it does not assert upstream Crystal main implementation or reopen completed V1.

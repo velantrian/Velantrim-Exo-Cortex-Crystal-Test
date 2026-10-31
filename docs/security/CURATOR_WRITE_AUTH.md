@@ -23,6 +23,12 @@ The optional FastAPI service supports one bearer token mapped to one curator pri
 Load `VELANTRIM_API_TOKEN` from the host's runtime secret manager; never place a token
 value in source files, examples, shell history or committed environment files.
 
+Crystal-Test LAB optionally accepts a distinct `VELANTRIM_API_CURATOR_TOKEN`. When set
+to a different secret, `/ingest` keeps the writer bearer while `/review/approve`,
+`/review/reject` and `/review/resolve-conflict` require the curator bearer. Unset keeps
+the single-token ADR-018 baseline. See [`../lab/SPLIT_API_TOKENS.md`](../lab/SPLIT_API_TOKENS.md).
+This is not multi-user IdP, token lifecycle management or production multi-tenancy.
+
 ```text
 VELANTRIM_CURATOR_ACTOR=alice
 VELANTRIM_CURATOR_ROLES=CURATOR
