@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Crystal-Test local lab smoke — not the upstream 9-job CI gate.
 # Independent .github/workflows/lab.yml is allowed; upstream workflows are not.
+# Fail closed: one selected interpreter, one pytest invocation, no retry fallback.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -35,8 +36,7 @@ fi
 PY=""
 if command -v python3 >/dev/null 2>&1; then
   PY="$(command -v python3)"
-fi
-if [[ -z "$PY" ]] && command -v python >/dev/null 2>&1; then
+elif command -v python >/dev/null 2>&1; then
   PY="$(command -v python)"
 fi
 if [[ -z "$PY" ]]; then
@@ -44,17 +44,6 @@ if [[ -z "$PY" ]]; then
   exit 1
 fi
 
-set +e
 "$PY" -m pytest -o addopts='' tests/test_security_reproducibility_contract.py -q
-status=$?
-set -e
-if [[ $status -ne 0 ]]; then
-  if command -v pytest >/dev/null 2>&1; then
-    pytest -o addopts='' tests/test_security_reproducibility_contract.py -q
-  else
-    echo "FAIL: pytest unavailable for LAB smoke (exit $status)" >&2
-    exit "$status"
-  fi
-fi
 
 echo "LAB smoke OK — upstream workflows absent; lab.yml may exist but is not canonical Crystal proof."

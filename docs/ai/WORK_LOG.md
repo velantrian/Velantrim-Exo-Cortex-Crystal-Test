@@ -13,9 +13,12 @@ This compact log records material decisions, exact evidence, limitations and han
   optional independent `lab.yml` (`upstream_workflows_present: false`,
   `lab_ci_is_not_canonical_crystal_proof: true`). Smoke no longer forbids the whole
   `.github/workflows` directory.
+- Independent review P1: removed smoke pytest retry fallback that could print
+  `LAB smoke OK` after a failed first interpreter run; one `"$PY" -m pytest` only.
 - Adapted `tests/test_security_reproducibility_contract.py`; added local
   `scripts/lab_smoke.sh` (not a substitute for upstream CI).
-- Marked status/AI surfaces so inherited CI language is not read as LAB proof.
+- Marked status/AI surfaces so inherited CI language is not read as LAB proof;
+  wording now says **upstream** workflows excluded.
 - Documentation impact: `GITHUB_ONLY`. Notion synchronization: `NOT_REQUIRED`.
 - Delivery constraint: PR branch only; do not merge to `main` from this work cycle.
 

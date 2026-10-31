@@ -11,6 +11,7 @@
 | #8 vs #9 | Allow independent `lab.yml`; forbid only excluded **upstream** workflows. Lab CI ≠ canonical Crystal proof. |
 | #11 empty curator token | Present-but-empty env → `401`, no writer-token fallback; presence disables unauth-local. |
 | #10 erase reentry auth | CLI `--block-reentry` requires ADMIN + `fact:*` via curator_runtime helper. |
+| #9 smoke false-positive | One selected interpreter; one pytest invocation; no second-interpreter retry that can print `LAB smoke OK` after a failed first run. |
 
 ## PR heads to verify (update after each push)
 
@@ -29,10 +30,13 @@ Resolve live SHAs with GitHub before merge. Rebase dependents after each merge.
 - [ ] Upstream workflows still absent
 - [ ] Optional `lab.yml` does not break smoke/contract
 - [ ] Provenance declares `upstream_workflows_present: false` and `lab_ci_is_not_canonical_crystal_proof: true`
-- [ ] README does not claim upstream 9-job gate locally
+- [ ] README / STATUS / CURRENT_STATE say **upstream** workflows excluded (not “all Actions”)
+- [ ] `lab_smoke.sh` has no pytest retry fallback; failed pytest cannot print `LAB smoke OK`
+- [ ] Regression test asserts smoke script fail-closed control flow
 
 ```bash
 bash scripts/lab_smoke.sh
+python3 -m pytest -o addopts='' tests/test_security_reproducibility_contract.py -q
 ```
 
 ### #10
@@ -53,6 +57,19 @@ python3 -m pytest -o addopts='' tests/test_erase_reentry.py tests/test_erasure.p
 ```bash
 python3 -m pytest -o addopts='' tests/test_api_split_tokens.py tests/test_api_curator_principal.py -q
 ```
+
+## Local verification evidence (agent environment)
+
+Recorded after independent review REQUEST CHANGES on #9 smoke retry.
+
+| PR | Exact HEAD (at record time) | Command | Result |
+|---|---|---|---|
+| #9 | tip after smoke-fix commit on `cursor/lab-identity-honesty-2fc7` | `bash scripts/lab_smoke.sh` | pass; fail-closed probe with fake `python3` exit 7 → smoke exit 7, no `LAB smoke OK` |
+| #9 | same | `python3 -m pytest -o addopts='' tests/test_security_reproducibility_contract.py -q` | 8 passed |
+| #10 | `29e1da74c5a0b247c2a543afd9f838a2d66d9de8` | `python3 -m pytest -o addopts='' tests/test_erase_reentry.py tests/test_erasure.py -q` | 31 passed (worktree) |
+| #11 | `bc8efb93a6ee87defbfd5ee96099c37ab1b0d706` | `python3 -m pytest -o addopts='' tests/test_api_split_tokens.py tests/test_api_curator_principal.py -q` | 29 passed (worktree) |
+
+Hosted GitHub Actions for #9–#11: still not claimed here. PR #8 LAB run does not prove #9–#11. Merge to `main` remains reviewer-gated only.
 
 ## Remaining P2 (not blocking this protocol)
 

@@ -98,6 +98,28 @@ def test_upstream_action_pin_contract_is_documented_not_enforced_here():
     assert "lab_ci_is_not_canonical_crystal_proof: true" in provenance
 
 
+def test_lab_smoke_script_fail_closed_without_pytest_retry():
+    """A failed first pytest must not be recoverable by a second interpreter.
+
+    Independent review reproduced a false-positive path where smoke printed
+    LAB smoke OK after the selected interpreter's pytest failed and a bare
+    ``pytest`` retry later passed. The script must invoke pytest exactly once.
+    """
+    smoke = (ROOT / "scripts/lab_smoke.sh").read_text(encoding="utf-8")
+    assert "set -euo pipefail" in smoke
+    assert '"$PY" -m pytest -o addopts=\'\' tests/test_security_reproducibility_contract.py -q' in smoke
+    assert "set +e" not in smoke
+    assert "status=$?" not in smoke
+    # Exactly one executable pytest invocation (not a retry / bare pytest fallback).
+    invocations = re.findall(
+        r'(?:^|\n)\s*(?:\$\{?PY\}?|"\$PY"|pytest)\s*(?:-m\s+pytest)?\s+-o\s+addopts',
+        smoke,
+    )
+    assert len(invocations) == 1, invocations
+    assert not re.search(r'(?:^|\n)\s*pytest\s+-o\s+addopts', smoke)
+    assert "LAB smoke OK" in smoke
+
+
 def test_dependabot_has_bounded_weekly_action_and_security_tool_update_paths():
     config = (ROOT / ".github/dependabot.yml").read_text(encoding="utf-8")
     assert 'package-ecosystem: "github-actions"' in config

@@ -3,7 +3,9 @@
 ```text
 repository_surface: CRYSTAL_TEST_LAB
 upstream_snapshot: 692e05e319d1a789752fe797235798d4380e60d4
-ci_workflows: EXCLUDED_BY_DESIGN
+upstream_workflows: EXCLUDED_BY_DESIGN
+lab_workflow_allowed: .github/workflows/lab.yml
+lab_ci_is_not_canonical_crystal_proof: true
 this_file_ci_claims: HISTORICAL_UPSTREAM_EVIDENCE_ONLY
 local_verification: scripts/lab_smoke.sh
 ```
