@@ -295,3 +295,139 @@ def test_empty_curator_token_denies_every_http_write_route(
     assert response.status_code == 401, response.text
     assert "VELANTRIM_API_CURATOR_TOKEN" in response.json()["detail"]
     assert mutations == []
+
+
+def test_curator_token_can_reject_and_resolve_conflict(monkeypatch):
+    """Independent-review matrix: curator bearer owns reject + conflict writes."""
+    client, writer, curator = _dual_client(monkeypatch, role="ADMIN")
+    seen = []
+
+    def reject(fact_id, **kwargs):
+        seen.append(("reject", fact_id, kwargs))
+        return {"found": True, "rejected": True}
+
+    def resolve_conflict(fact_id, **kwargs):
+        seen.append(("resolve", fact_id, kwargs))
+        return {"found": True, "resolved": True}
+
+    monkeypatch.setattr("core.curator_runtime.review.reject", reject)
+    monkeypatch.setattr(
+        "core.curator_runtime.review.resolve_conflict", resolve_conflict,
+    )
+    monkeypatch.setattr(
+        "core.curator_runtime.review.review_item",
+        lambda _fid: {
+            "found": True,
+            "diagnosis": {"contradiction_report": {"report_id": "r1"}},
+        },
+    )
+
+    rejected = client.post(
+        "/review/reject",
+        headers=curator,
+        json={"fact_id": "fact-1", "reason": "noise"},
+    )
+    resolved = client.post(
+        "/review/resolve-conflict",
+        headers=curator,
+        json={
+            "fact_id": "fact-1",
+            "disposition": "COEXIST",
+            "reason": "contexts",
+            "expected_report_id": "r1",
+        },
+    )
+    assert rejected.status_code == 200, rejected.text
+    assert resolved.status_code == 200, resolved.text
+    assert [item[0] for item in seen] == ["reject", "resolve"]
+    assert all(item[2].get("actor") == "alice" for item in seen)
+
+    # Writer still cannot perform the same curator writes.
+    assert client.post(
+        "/review/reject",
+        headers=writer,
+        json={"fact_id": "fact-1", "reason": "noise"},
+    ).status_code == 401
+
+
+def test_dual_mode_ask_and_receipt_use_writer_token_only(monkeypatch):
+    """Read paths stay on writer bearer; curator token is not a substitute."""
+    client, writer, curator = _dual_client(monkeypatch)
+    seen_queries = []
+
+    async def fake_arun(query, **kwargs):
+        seen_queries.append(query)
+        return {"answer": "ok", "query": query, **kwargs}
+
+    def fake_receipt(result):
+        return {"receipt_for": result.get("query"), "ok": True}
+
+    monkeypatch.setattr("core.aio.arun", fake_arun)
+    monkeypatch.setattr("core.provenance.build_receipt", fake_receipt)
+
+    asked = client.post(
+        "/ask",
+        headers=writer,
+        json={"query": "what is known?"},
+    )
+    assert asked.status_code == 200, asked.text
+    assert asked.json()["answer"] == "ok"
+
+    receipt = client.get(
+        "/receipt",
+        headers=writer,
+        params={"q": "receipt query"},
+    )
+    assert receipt.status_code == 200, receipt.text
+    assert receipt.json()["receipt_for"] == "receipt query"
+    assert seen_queries == ["what is known?", "receipt query"]
+
+    # Curator bearer alone is not the read/query credential.
+    denied_ask = client.post(
+        "/ask",
+        headers=curator,
+        json={"query": "should fail"},
+    )
+    denied_receipt = client.get(
+        "/receipt",
+        headers=curator,
+        params={"q": "should fail"},
+    )
+    assert denied_ask.status_code == 401
+    assert denied_receipt.status_code == 401
+    assert seen_queries == ["what is known?", "receipt query"]
+
+
+def test_whitespace_only_curator_token_fails_closed_on_writes(monkeypatch):
+    """Present whitespace-only CURATOR_TOKEN must never reopen writer-as-curator."""
+    monkeypatch.setenv("VELANTRIM_API_TOKEN", "writer-secret")
+    monkeypatch.setenv("VELANTRIM_API_CURATOR_TOKEN", "   ")
+    monkeypatch.setenv("VELANTRIM_CURATOR_ACTOR", "alice")
+    monkeypatch.setenv("VELANTRIM_CURATOR_ROLES", "ADMIN")
+    monkeypatch.setenv("VELANTRIM_CURATOR_SCOPES", "fact:*")
+    monkeypatch.delenv("VELANTRIM_API_ALLOW_UNAUTH_LOCAL", raising=False)
+    mutations = []
+    monkeypatch.setattr(
+        "core.curator_runtime.review.approve",
+        lambda *args, **kwargs: mutations.append("approve") or {"found": True},
+    )
+    async def mutating_ingest(*args, **kwargs):
+        mutations.append("ingest")
+        return {"accepted": True}
+
+    monkeypatch.setattr("core.aio.aingest", mutating_ingest)
+    client = TestClient(api.create_app())
+    writer = {"Authorization": "Bearer writer-secret"}
+
+    approve = client.post(
+        "/review/approve", headers=writer, json={"fact_id": "fact-1"},
+    )
+    ingest = client.post(
+        "/ingest", headers=writer, json={"text": "must not mutate"},
+    )
+    assert approve.status_code == 401
+    assert ingest.status_code == 401
+    assert "whitespace" in approve.json()["detail"].lower() or \
+        "empty" in approve.json()["detail"].lower() or \
+        "invalid" in approve.json()["detail"].lower()
+    assert mutations == []
