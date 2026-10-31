@@ -1,22 +1,34 @@
 #!/usr/bin/env bash
 # Crystal-Test local lab smoke — not the upstream 9-job CI gate.
+# Independent .github/workflows/lab.yml is allowed; upstream workflows are not.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-if [[ -d .github/workflows ]]; then
-  echo "FAIL: .github/workflows must remain absent in Crystal-Test LAB" >&2
-  exit 1
-fi
+for upstream in \
+  .github/workflows/ci.yml \
+  .github/workflows/l3-benchmark-history.yml \
+  .github/workflows/postgresql-integration.yml
+do
+  if [[ -e "$upstream" ]]; then
+    echo "FAIL: excluded upstream workflow must remain absent: $upstream" >&2
+    exit 1
+  fi
+done
 
 if ! grep -q 'upstream_snapshot_commit: 692e05e319d1a789752fe797235798d4380e60d4' FORGE_LAB_PROVENANCE.md; then
   echo "FAIL: FORGE_LAB_PROVENANCE.md missing explicit upstream snapshot pin" >&2
   exit 1
 fi
 
-if ! grep -q 'workflows_present: false' FORGE_LAB_PROVENANCE.md; then
-  echo "FAIL: FORGE_LAB_PROVENANCE.md must declare workflows_present: false" >&2
+if ! grep -q 'upstream_workflows_present: false' FORGE_LAB_PROVENANCE.md; then
+  echo "FAIL: FORGE_LAB_PROVENANCE.md must declare upstream_workflows_present: false" >&2
+  exit 1
+fi
+
+if ! grep -q 'lab_ci_is_not_canonical_crystal_proof: true' FORGE_LAB_PROVENANCE.md; then
+  echo "FAIL: FORGE_LAB_PROVENANCE.md must declare lab CI is not canonical proof" >&2
   exit 1
 fi
 
@@ -45,4 +57,4 @@ if [[ $status -ne 0 ]]; then
   fi
 fi
 
-echo "LAB smoke OK — local identity/security contract only; not upstream CI proof."
+echo "LAB smoke OK — upstream workflows absent; lab.yml may exist but is not canonical Crystal proof."

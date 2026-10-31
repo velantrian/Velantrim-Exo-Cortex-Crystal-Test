@@ -4,7 +4,9 @@
   "status_date": "2026-09-07",
   "role": "volatile_lifecycle_overlay",
   "repository_surface": "crystal_test_lab",
-  "ci_workflows_present": false,
+  "upstream_ci_workflows_present": false,
+  "lab_workflow_allowed": ".github/workflows/lab.yml",
+  "lab_ci_is_not_canonical_crystal_proof": true,
   "upstream_snapshot_commit": "692e05e319d1a789752fe797235798d4380e60d4",
   "post_merge_ci_evidence_class": "inherited_upstream_evidence",
   "repository_head_rule": "RESOLVE_LIVE_GITHUB",
@@ -76,5 +78,5 @@
     "postgresql_pgvector_active": false,
     "runtime_or_production_authorized": false
   },
-  "interpretation": "This overlay records a dated current-lifecycle reconciliation for the Crystal-Test LAB copy. CI workflow files are excluded by design; post_merge_ci figures above are inherited upstream evidence, not local LAB CI proof. Historical architecture and verification checkpoints remain in implementation-manifest.json. Live GitHub overrides this overlay when repository or governance state advances. See FORGE_LAB_PROVENANCE.md."
+  "interpretation": "This overlay records a dated current-lifecycle reconciliation for the Crystal-Test LAB copy. Upstream CI workflows remain excluded; optional lab.yml is not canonical Crystal proof. post_merge_ci figures above are inherited upstream evidence. Historical architecture and verification checkpoints remain in implementation-manifest.json. Live GitHub overrides this overlay when repository or governance state advances. See FORGE_LAB_PROVENANCE.md."
 }

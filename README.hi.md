@@ -16,7 +16,7 @@ Crystal एक **local-first, auditable AI memory/evidence infrastructure** ह�
 >
 > 📚 **गहरी architecture view:** **[Deep System Overview →](./docs/OVERVIEW.md)**।
 
-`v0.3.0` · 🧪 **Crystal-Test LAB** · 📌 upstream snapshot `692e05e3…` · 🚫 **GitHub Actions workflows excluded by design** · 🐍 standard-library-first default runtime · ⚖️ **AGPL-3.0**
+`v0.3.0` · 🧪 **Crystal-Test LAB** · 📌 upstream snapshot `692e05e3…` · 🚫 **upstream CI workflows excluded** · 🐍 standard-library-first default runtime · ⚖️ **AGPL-3.0**
 >
 > LAB copy — not canonical Crystal main. See [FORGE_LAB_PROVENANCE.md](./FORGE_LAB_PROVENANCE.md).
 

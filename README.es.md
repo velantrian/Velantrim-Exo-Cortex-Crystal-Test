@@ -16,7 +16,7 @@ Crystal es una **línea de investigación e ingeniería local-first para memoria
 >
 > 📚 **¿Buscas la arquitectura en profundidad?** Continúa con **[Deep System Overview →](./docs/OVERVIEW.md)** y después con las superficies españolas detalladas más abajo.
 
-`v0.3.0` · 🧪 **Crystal-Test LAB** · 📌 upstream snapshot `692e05e3…` · 🚫 **GitHub Actions workflows excluded by design** · 🐍 **standard-library-first default runtime** · ⚖️ **AGPL-3.0**
+`v0.3.0` · 🧪 **Crystal-Test LAB** · 📌 upstream snapshot `692e05e3…` · 🚫 **upstream CI workflows excluded** · 🐍 **standard-library-first default runtime** · ⚖️ **AGPL-3.0**
 >
 > LAB copy — not canonical Crystal main. See [FORGE_LAB_PROVENANCE.md](./FORGE_LAB_PROVENANCE.md).
 

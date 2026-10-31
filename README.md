@@ -8,7 +8,7 @@
 >
 > **Status:** Experimental/test surface. [Canonical Crystal](https://github.com/velantrian/velantrim-exocortex-crystal) owns authoritative implementation status.
 >
-> **Lab provenance:** [FORGE_LAB_PROVENANCE.md](./FORGE_LAB_PROVENANCE.md) — upstream snapshot `692e05e319d1a789752fe797235798d4380e60d4`; GitHub Actions workflows are **excluded by design**. Local verification is `scripts/lab_smoke.sh`, not the upstream 9-job CI gate.
+> **Lab provenance:** [FORGE_LAB_PROVENANCE.md](./FORGE_LAB_PROVENANCE.md) — upstream snapshot `692e05e319d1a789752fe797235798d4380e60d4`; **upstream** CI workflows are excluded by design. Optional independent `lab.yml` is lab-only verification, not canonical Crystal proof. Local smoke: `scripts/lab_smoke.sh`.
 
 > 🌐 🇬🇧 **English** · 🇩🇪 [Deutsch](./README.de.md) · 🇫🇷 [Français](./README.fr.md) · 🇪🇸 [Español](./README.es.md) · 🇮🇹 [Italiano](./README.it.md) · 🇷🇺 [Русский](./README.ru.md) · 🇨🇳 [简体中文](./README.zh-CN.md) · 🇸🇦 [العربية](./README.ar.md) · 🇯🇵 [日本語](./README.ja.md) · 🇮🇳 [हिन्दी](./README.hi.md)
 
@@ -22,9 +22,9 @@ Crystal is a **local-first research and implementation line for auditable AI mem
 >
 > 📚 **Want the deeper architecture?** Continue to **[Deep System Overview →](./docs/OVERVIEW.md)**.
 
-`v0.3.0` · 🧪 **Crystal-Test LAB** · 📌 upstream snapshot `692e05e3…` · 🚫 **GitHub Actions workflows excluded by design** · 🐍 **standard-library-first default runtime** · ⚖️ **AGPL-3.0**
+`v0.3.0` · 🧪 **Crystal-Test LAB** · 📌 upstream snapshot `692e05e3…` · 🚫 **upstream CI workflows excluded** · 🐍 **standard-library-first default runtime** · ⚖️ **AGPL-3.0**
 >
-> Upstream verified gates (`100%` coverage / Ring Zero / 9 permanent CI jobs) live only on [velantrim-exocortex-crystal](https://github.com/velantrian/velantrim-exocortex-crystal). This LAB copy does **not** claim those gates as current local CI proof.
+> Upstream verified gates (`100%` coverage / Ring Zero / 9 permanent CI jobs) live only on [velantrim-exocortex-crystal](https://github.com/velantrian/velantrim-exocortex-crystal). Optional Crystal-Test `lab.yml` is **not** that gate.
 
 ## 👋 What Crystal is — and why it exists
 

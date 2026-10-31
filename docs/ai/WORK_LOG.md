@@ -8,9 +8,13 @@ This compact log records material decisions, exact evidence, limitations and han
 - Removed false local claims of the upstream 9-job / Ring Zero CI gate from root README
   badge lines; pointed readers at canonical Crystal for verified gates.
 - Strengthened [`../../FORGE_LAB_PROVENANCE.md`](../../FORGE_LAB_PROVENANCE.md) with an
-  explicit machine-readable upstream snapshot pin and `workflows_present: false`.
-- Adapted `tests/test_security_reproducibility_contract.py` for deliberate workflow
-  exclusion; added local `scripts/lab_smoke.sh` (not a GitHub Actions job).
+  explicit machine-readable upstream snapshot pin.
+- Audit follow-up vs PR #8: contract distinguishes **excluded upstream workflows** from
+  optional independent `lab.yml` (`upstream_workflows_present: false`,
+  `lab_ci_is_not_canonical_crystal_proof: true`). Smoke no longer forbids the whole
+  `.github/workflows` directory.
+- Adapted `tests/test_security_reproducibility_contract.py`; added local
+  `scripts/lab_smoke.sh` (not a substitute for upstream CI).
 - Marked status/AI surfaces so inherited CI language is not read as LAB proof.
 - Documentation impact: `GITHUB_ONLY`. Notion synchronization: `NOT_REQUIRED`.
 - Delivery constraint: PR branch only; do not merge to `main` from this work cycle.
