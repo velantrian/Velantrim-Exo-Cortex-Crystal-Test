@@ -193,3 +193,44 @@ def test_curator_token_without_api_token_fails_closed(monkeypatch):
     )
     assert response.status_code == 401
     assert "requires VELANTRIM_API_TOKEN" in response.json()["detail"]
+
+
+def test_empty_curator_token_env_does_not_fallback_to_writer(monkeypatch):
+    """Present-but-empty CURATOR_TOKEN must not silently reopen single-token mode."""
+    monkeypatch.setenv("VELANTRIM_API_TOKEN", "writer-secret")
+    monkeypatch.setenv("VELANTRIM_API_CURATOR_TOKEN", "")
+    monkeypatch.setenv("VELANTRIM_CURATOR_ACTOR", "alice")
+    monkeypatch.setenv("VELANTRIM_CURATOR_ROLES", "CURATOR")
+    monkeypatch.setenv("VELANTRIM_CURATOR_SCOPES", "fact:*")
+    called = []
+    monkeypatch.setattr(
+        "core.curator_runtime.review.approve",
+        lambda *args, **kwargs: called.append(1) or {"found": True, "approved": True},
+    )
+    client = TestClient(api.create_app())
+    response = client.post(
+        "/review/approve",
+        headers={"Authorization": "Bearer writer-secret"},
+        json={"fact_id": "fact-1"},
+    )
+    assert response.status_code == 401
+    assert "empty" in response.json()["detail"] or "invalid" in response.json()["detail"].lower()
+    assert not called
+
+
+def test_empty_curator_token_blocks_unauth_local(monkeypatch):
+    monkeypatch.delenv("VELANTRIM_API_TOKEN", raising=False)
+    monkeypatch.setenv("VELANTRIM_API_CURATOR_TOKEN", "")
+    monkeypatch.setenv("VELANTRIM_API_ALLOW_UNAUTH_LOCAL", "1")
+    called = []
+    monkeypatch.setattr(
+        "core.curator_runtime.review.approve",
+        lambda *args, **kwargs: called.append(1) or {"found": True},
+    )
+    client = TestClient(api.create_app())
+    response = client.post(
+        "/review/approve",
+        json={"fact_id": "fact-1"},
+    )
+    assert response.status_code == 401
+    assert not called

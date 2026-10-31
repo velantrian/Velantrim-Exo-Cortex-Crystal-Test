@@ -29,9 +29,11 @@ single-token baseline.
 
 ## Fail-closed rules
 
-- whitespace-padded curator token → `401`
+- variable **unset** → single-token ADR-018 baseline
+- variable **present but empty/blank/whitespace-padded** → `401` (no writer-token fallback)
 - curator token equal to API token → `401`
-- curator token set without API token → `401` (disables unauth-local bypass)
+- curator token set without API token → `401`
+- any presence of curator-token env disables unauth-local bypass
 - writer bearer on curator write routes → `401` with zero mutation
 
 ## Limits

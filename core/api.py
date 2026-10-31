@@ -74,17 +74,19 @@ def create_app():
     def _configured_curator_token() -> Optional[str]:
         """Optional distinct curator bearer for dual-token LAB mode.
 
-        ``None`` means single-token compatibility mode (ADR-018 baseline).
+        ``None`` means the variable is unset → single-token ADR-018 baseline.
+        A present-but-empty/whitespace value is invalid dual-token configuration
+        and must fail closed (never silently fall back to writer-token curator).
         """
-        raw = os.environ.get("VELANTRIM_API_CURATOR_TOKEN")
-        if raw is None or raw == "":
+        if "VELANTRIM_API_CURATOR_TOKEN" not in os.environ:
             return None
-        if raw != raw.strip():
+        raw = os.environ.get("VELANTRIM_API_CURATOR_TOKEN")
+        if raw is None or raw == "" or raw != raw.strip():
             raise HTTPException(
                 status_code=401,
                 detail="API authentication configuration is invalid: "
-                       "VELANTRIM_API_CURATOR_TOKEN must not be blank or "
-                       "padded with whitespace.",
+                       "VELANTRIM_API_CURATOR_TOKEN is set but empty, blank, "
+                       "or padded with whitespace.",
             )
         return raw
 
@@ -110,9 +112,9 @@ def create_app():
 
     def _explicit_unauth_local() -> bool:
         raw_token = os.environ.get("VELANTRIM_API_TOKEN")
-        curator_raw = os.environ.get("VELANTRIM_API_CURATOR_TOKEN")
-        # Dual-token secrets disable unauth-local even if API_TOKEN is empty.
-        if curator_raw is not None and curator_raw != "":
+        # Any presence of the curator-token variable disables unauth-local,
+        # including an empty/invalid value that must fail closed elsewhere.
+        if "VELANTRIM_API_CURATOR_TOKEN" in os.environ:
             return False
         return (
             (raw_token is None or raw_token == "")
