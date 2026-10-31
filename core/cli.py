@@ -28,6 +28,7 @@ from core.audit import audit_log, verify_audit_log
 from core.curator_runtime import (
     PrincipalConfigurationError,
     approve_as_principal,
+    erase_with_reentry_block_as_principal,
     principal_from_environment,
     reject_as_principal,
 )
@@ -346,14 +347,32 @@ def main(argv: Optional[List[str]] = None) -> int:
     elif args.cmd == "report":
         print(format_report(memory_report()))
     elif args.cmd == "erase":
-        print(json.dumps(
-            erase_fact(
+        if args.block_reentry:
+            try:
+                principal = principal_from_environment()
+            except PrincipalConfigurationError as exc:
+                print(json.dumps({"authorized": False, "reason": str(exc)},
+                                 ensure_ascii=False))
+                return 2
+            result = erase_with_reentry_block_as_principal(
+                principal,
                 args.fact_id,
                 reason=args.reason,
                 cascade=args.cascade,
-                **({"block_reentry": True} if args.block_reentry else {}),
-            ),
-            ensure_ascii=False))
+            )
+            print(json.dumps(result, ensure_ascii=False))
+            if result.get("authorized") is False:
+                return 3
+            if not result.get("erased_now") and not result.get("reentry_pattern_id"):
+                return 1
+        else:
+            print(json.dumps(
+                erase_fact(
+                    args.fact_id,
+                    reason=args.reason,
+                    cascade=args.cascade,
+                ),
+                ensure_ascii=False))
     elif args.cmd == "erasures":
         print(json.dumps(erasure_log(), ensure_ascii=False))
     elif args.cmd == "restrict":
