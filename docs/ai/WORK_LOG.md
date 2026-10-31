@@ -22,6 +22,17 @@ This compact log records material decisions, exact evidence, limitations and han
 - Documentation impact: `GITHUB_ONLY`. Notion synchronization: `NOT_REQUIRED`.
 - Delivery constraint: PR branch only; do not merge to `main` from this work cycle.
 
+## 2026-10-31 — Crystal-Test optional split HTTP ingest/curator tokens · PR branch only
+
+- Scope: close the Atlas gap where one bearer can both `/ingest` and `/review/approve`.
+- Opt-in `VELANTRIM_API_CURATOR_TOKEN` distinct from `VELANTRIM_API_TOKEN`.
+- Unset keeps ADR-018 single-token baseline; equal/whitespace/misconfig fail closed.
+- Docs: [`../lab/SPLIT_API_TOKENS.md`](../lab/SPLIT_API_TOKENS.md).
+- Tests: `tests/test_api_split_tokens.py`.
+- No IdP, multi-tenant, MCP write surface, TruthGate/Guardian/Canon change.
+- Documentation impact: `GITHUB_ONLY`. Notion: `NOT_REQUIRED`.
+- Delivery: PR branch only unless a human explicitly merges.
+
 ## 2026-10-29 — Crystal-Test immune/audit transaction correction · DRAFT
 
 - Scope: Crystal-Test at `b2c0063fb63992915ef80016ad4cf4b1e3c5f158`; main Crystal unchanged.
