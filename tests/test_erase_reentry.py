@@ -233,3 +233,104 @@ def test_token_containment_can_block_corrective_quotation(monkeypatch):
     )
     assert blocked["accepted"] is False
     assert "Immune:" in (blocked.get("reason") or "")
+
+
+def test_erase_with_reentry_block_as_principal_denies_non_admin(monkeypatch):
+    """Independent-review acceptance: principal path requires ADMIN + fact:*."""
+    from core.curator_auth import CuratorPrincipal, CuratorRole
+    from core.curator_runtime import erase_with_reentry_block_as_principal
+
+    _seed(monkeypatch)
+    curator = CuratorPrincipal(
+        "alice", frozenset({CuratorRole.CURATOR}), frozenset({"fact:*"}),
+    )
+    denied = erase_with_reentry_block_as_principal(
+        curator, FID, reason="curator_wrong_claim",
+    )
+    assert denied == {
+        "authorized": False,
+        "reason": "workspace-wide reentry blocking requires admin with fact:* scope",
+    }
+    assert memory.get_fact(FID) is not None
+    assert immune.match_threat(CLAIM) is None
+
+
+def test_erase_with_reentry_block_as_principal_denies_admin_without_fact_star(
+    monkeypatch,
+):
+    from core.curator_auth import CuratorPrincipal, CuratorRole
+    from core.curator_runtime import erase_with_reentry_block_as_principal
+
+    _seed(monkeypatch)
+    admin_narrow = CuratorPrincipal(
+        "alice", frozenset({CuratorRole.ADMIN}), frozenset({"fact:other"}),
+    )
+    denied = erase_with_reentry_block_as_principal(
+        admin_narrow, FID, reason="curator_wrong_claim",
+    )
+    assert denied["authorized"] is False
+    assert memory.get_fact(FID) is not None
+    assert immune.match_threat(CLAIM) is None
+
+
+def test_erase_with_reentry_block_as_principal_admin_fact_star_succeeds(
+    monkeypatch,
+):
+    from core.curator_auth import CuratorPrincipal, CuratorRole
+    from core.curator_runtime import erase_with_reentry_block_as_principal
+
+    _seed(monkeypatch)
+    admin = CuratorPrincipal(
+        "lab-admin", frozenset({CuratorRole.ADMIN}), frozenset({"fact:*"}),
+    )
+    result = erase_with_reentry_block_as_principal(
+        admin, FID, reason="curator_wrong_claim",
+    )
+    assert result["authorized"] is True
+    assert result["erased_now"] is True
+    assert result["reentry_pattern_id"]
+    assert memory.get_fact(FID) is None
+    assert immune.match_threat(CLAIM) is not None
+
+
+def test_erase_with_reentry_block_as_principal_actor_mismatch_is_zero_mutation(
+    monkeypatch,
+):
+    from core.curator_auth import CuratorPrincipal, CuratorRole
+    from core.curator_runtime import erase_with_reentry_block_as_principal
+
+    _seed(monkeypatch)
+    admin = CuratorPrincipal(
+        "lab-admin", frozenset({CuratorRole.ADMIN}), frozenset({"fact:*"}),
+    )
+    denied = erase_with_reentry_block_as_principal(
+        admin,
+        FID,
+        reason="curator_wrong_claim",
+        requested_actor="mallory",
+    )
+    assert denied == {
+        "authorized": False,
+        "reason": "actor assertion does not match authenticated principal",
+    }
+    assert memory.get_fact(FID) is not None
+    assert immune.match_threat(CLAIM) is None
+
+
+def test_direct_erase_fact_block_reentry_is_library_trust_boundary(monkeypatch):
+    """Trusted in-process callers may call erase_fact without curator IAM.
+
+    Independent review called this out as an explicit boundary: CLI/HTTP must
+    use erase_with_reentry_block_as_principal; raw Python API does not invent a
+    second admission owner and does not claim production IAM.
+    """
+    _seed(monkeypatch)
+    receipt = erase_fact(
+        FID,
+        reason="curator_wrong_claim",
+        actor="trusted-library-caller",
+        block_reentry=True,
+    )
+    assert receipt["erased_now"] is True
+    assert receipt["reentry_pattern_id"]
+    assert immune.match_threat(CLAIM) is not None
