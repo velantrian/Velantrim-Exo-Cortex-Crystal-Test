@@ -362,6 +362,15 @@ This file does not authorize or select the next workstream. The nine-locale docu
 
 No next model, discriminator, reranker, Reader backend, storage activation, authority expansion or residual issue is automatically authorized by a historical closure or by this static snapshot.
 
+## Crystal-Test branch proposal: erase ↔ Immune reentry guard (2026-10-31)
+
+LAB opt-in `erase_fact(..., block_reentry=True)` / CLI `erase --block-reentry`
+records an Immune pattern before physical deletion so screened ingest can reject
+the same wording under a new id. Default erase is unchanged. Privacy-shaped
+erase reasons are refused because Immune retains normalized pattern text. See
+`docs/lab/ERASE_REENTRY.md`. Branch-local pending review; no upstream/production
+claim; TruthGate/Guardian/Canon ownership unchanged.
+
 ## Crystal-Test branch proposal: explicit reentry guard (2026-10-29)
 
 This laboratory branch adds opt-in `review-reject --block-reentry` on base `e9093ef4325923cb2b2842f7fa508b304de54bcf`. Ordinary rejection semantics are unchanged. ADMIN with `fact:*` is required for the workspace-wide lexical guard. Rejection, existing Immune rule, both audits and journal commit together. See `docs/lab/REJECT_REENTRY.md` and `docs/status/reentry-guard-lab.json`. This entry is branch-local and pending merge; it does not assert upstream Crystal main implementation or reopen completed V1.
