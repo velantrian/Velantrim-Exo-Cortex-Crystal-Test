@@ -235,6 +235,7 @@ def test_empty_curator_token_blocks_unauth_local(monkeypatch):
     assert response.status_code == 401
     assert not called
 
+
 @pytest.mark.parametrize("unauth_local", [False, True])
 @pytest.mark.parametrize(
     ("route", "body"),
