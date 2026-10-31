@@ -18,7 +18,9 @@ Crystal — **local-first исследовательская и инженерн
 >
 > 📚 **Нужна глубокая архитектура?** Откройте **[Deep System Overview →](./docs/OVERVIEW.md)**, затем русские detail-surfaces ниже.
 
-`v0.3.0` · 🎯 **100% line-coverage gate** · 🧬 **Ring Zero mutation gate** · ✅ **9 permanent CI jobs** · 🐍 **standard-library-first default runtime** · ⚖️ **AGPL-3.0**
+`v0.3.0` · 🧪 **Crystal-Test LAB** · 📌 upstream snapshot `692e05e3…` · 🚫 **upstream CI workflows excluded** · 🐍 **standard-library-first default runtime** · ⚖️ **AGPL-3.0**
+>
+> LAB copy — not canonical Crystal main. See [FORGE_LAB_PROVENANCE.md](./FORGE_LAB_PROVENANCE.md).
 
 ## 👋 Что такое Crystal
 

@@ -3,6 +3,7 @@
 **Status date:** 2026-08-21  
 **Primary/source language:** English  
 **Active policy:** [LOCALIZATION_POLICY.md](./LOCALIZATION_POLICY.md)  
+**Crystal-Test LAB note (2026-10-31):** root `README.*.md` badge lines were patched for lab-identity honesty (no local claim of the upstream 9-job CI gate). Full visual/semantic README parity refresh for those locales is **`REFRESH_NEEDED`** relative to the English LAB banner; this is documentation freshness only and does not authorize runtime work.  
 **Current English human-first README source:** `main@3bc9f4c3b7ad30a3d0cc7a59904f26509a5a1883`  
 **Current Russian parity audit source:** `main@9666781d390e3276a111cb5ee1735f6606a76283`  
 **Current German parity audit source:** `main@ad8cec8c868f64b6dfbdc3bf3087230f59c3861c`  

@@ -1,7 +1,9 @@
 # Velantrim Crystal — Current Status
 
+> 🧪 **Crystal-Test LAB surface.** This status text is largely **inherited upstream evidence** from canonical Crystal. **Upstream** CI workflows are excluded by design; optional independent `lab.yml` is lab-only verification, not verified Crystal `main` proof. Do not read the nine-job / Ring Zero language below as current local CI proof. Lab identity and upstream snapshot pin: [`../FORGE_LAB_PROVENANCE.md`](../FORGE_LAB_PROVENANCE.md). Local smoke: `scripts/lab_smoke.sh`.
+
 **Status date:** 2026-09-07  
-**Lifecycle:** **V1 COMPLETE / 100% / FREEZE-STABILITY**  
+**Lifecycle:** **V1 COMPLETE / 100% / FREEZE-STABILITY** *(inherited upstream claim; not re-verified by Crystal-Test CI)*  
 **V1 P0:** `0`  
 **V1 P1:** `0`  
 **Post-V1 governance:** Issue `#432` is **CLOSED / COMPLETED**; its bounded server-side governance acceptance criteria are satisfied and it does **not** reopen Crystal V1.  

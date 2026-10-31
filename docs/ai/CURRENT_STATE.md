@@ -1,5 +1,15 @@
 # 🤖 Crystal AI Current State
 
+```text
+repository_surface: CRYSTAL_TEST_LAB
+upstream_snapshot: 692e05e319d1a789752fe797235798d4380e60d4
+upstream_workflows: EXCLUDED_BY_DESIGN
+lab_workflow_allowed: .github/workflows/lab.yml
+lab_ci_is_not_canonical_crystal_proof: true
+this_file_ci_claims: HISTORICAL_UPSTREAM_EVIDENCE_ONLY
+local_verification: scripts/lab_smoke.sh
+```
+
 **Status date:** 2026-08-21  
 **Document role:** compact technical state snapshot; live GitHub + tests + exact CI override this file if repository state has advanced.  
 **Repository HEAD:** `RESOLVE_LIVE_GITHUB`.  
@@ -8,7 +18,7 @@
 **Active milestone:** `RESOLVE_LIVE_GITHUB`.  
 **Next milestone selected:** `RESOLVE_LIVE_GITHUB`.
 
-Do not treat a historical SHA as current HEAD. Do not treat this document as a substitute for `docs/status/implementation-manifest.json`. Do not hard-code a latest repository/docs closure here as an indefinitely-current invariant; resolve volatile lifecycle state from live GitHub before acting.
+This repository is **Crystal-Test LAB**, not canonical Crystal. CI run IDs and gate language below are **inherited upstream evidence** unless a LAB note says otherwise. Do not treat a historical SHA as current HEAD. Do not treat this document as a substitute for `docs/status/implementation-manifest.json`. Do not hard-code a latest repository/docs closure here as an indefinitely-current invariant; resolve volatile lifecycle state from live GitHub before acting. See [`../../FORGE_LAB_PROVENANCE.md`](../../FORGE_LAB_PROVENANCE.md).
 
 ## Current Reader position
 
