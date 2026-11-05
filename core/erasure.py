@@ -44,6 +44,17 @@ from core.provenance_chain import ProvenanceChain
 # everything derived from it (GDPR Art. 17 — derived personal data).
 REL_DERIVED_FROM = "DERIVED_FROM"
 
+# Opt-in lexical reentry blocking stores a normalized Immune pattern. That is
+# incompatible with privacy/GDPR erasure (which must not retain claim wording).
+_PRIVACY_ERASURE_REASONS = frozenset({
+    "data_subject_request",
+    "gdpr_request",
+    "privacy",
+    "right_to_be_forgotten",
+    "art17",
+    "art_17",
+})
+
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -52,6 +63,36 @@ def _now() -> str:
 def _hash_claim(claim: str) -> str:
     """Hash of the erased claim — proof without storing the content."""
     return "sha256:" + hashlib.sha256(claim.encode("utf-8")).hexdigest()
+
+
+def _resolve_claim_text(fact: Optional[Dict[str, Any]],
+                        l3_node: Optional[Dict[str, Any]]) -> Optional[str]:
+    for row in (fact, l3_node):
+        if not row:
+            continue
+        claim = row.get("claim")
+        if isinstance(claim, str) and claim.strip():
+            return claim
+    return None
+
+
+def _install_erasure_reentry_guard(claim: str, *, actor: str) -> str:
+    """Record an Immune pattern for opt-in post-erasure reentry blocking."""
+    from core import immune
+
+    if not immune._normalize(claim):
+        raise ValueError("block_reentry: claim has no blockable tokens")
+    if immune._block_severity() > 1.0:
+        raise ValueError(
+            "block_reentry: immune severity floor disables reentry blocking"
+        )
+    guard = immune.record_threat(
+        claim,
+        threat_type="erasure_reentry",
+        severity=1.0,
+        actor=actor,
+    )
+    return guard["pattern_id"]
 
 
 def record_derivation(derived_id: str, source_id: str) -> None:
@@ -69,6 +110,7 @@ def erase_fact(
     reason: str = "data_subject_request",
     actor: str = "operator",
     cascade: bool = False,
+    block_reentry: bool = False,
     _visited: Optional[set] = None,
 ) -> Dict[str, Any]:
     """
@@ -82,6 +124,13 @@ def erase_fact(
     facts with a DERIVED_FROM edge to it (recursively, with cycle protection). This way
     derived personal data does not survive the deletion of the source.
 
+    block_reentry=True (Crystal-Test LAB opt-in): before deletion, record the claim's
+    wording in the existing Immune guard so screened ingest/import paths reject the
+    same normalized wording under a new fact id. Default erase remains unchanged and
+    does **not** install a guard — erased wrong claims may otherwise return. This
+    flag stores normalized pattern text and is **not** a privacy/GDPR erasure mode;
+    privacy-shaped reasons are refused. Cascaded deletes never inherit the flag.
+
     Ring Zero / VALUES_CORE are non-deletable (I6) → ImmutableStateError.
 
     Idempotent: a repeated deletion of an already erased fact returns
@@ -89,6 +138,19 @@ def erase_fact(
 
     Returns a receipt with the details of the operation.
     """
+    if type(block_reentry) is not bool:
+        raise ValueError("block_reentry must be bool")
+    if block_reentry:
+        if not isinstance(reason, str) or not reason.strip():
+            raise ValueError("block_reentry requires a non-empty reason")
+        if reason.strip().lower() in _PRIVACY_ERASURE_REASONS:
+            raise ValueError(
+                "block_reentry stores a normalized immune pattern and is not a "
+                "privacy/GDPR erasure; use an explicit wrongness reason"
+            )
+        if not isinstance(actor, str) or not actor.strip():
+            raise ValueError("block_reentry requires an actor")
+
     if fact_id in IMMUTABLE_FACT_IDS:
         raise ImmutableStateError(
             f"erase_fact: '{fact_id}' is protected by Ring Zero (I6) and cannot be deleted"
@@ -100,6 +162,17 @@ def erase_fact(
     graph = get_l3_graph()
     fact = get_fact(fact_id)
     l3_node = graph.get_fact(fact_id)
+
+    reentry_pattern_id: Optional[str] = None
+    if block_reentry:
+        claim = _resolve_claim_text(fact, l3_node)
+        if claim is None:
+            raise ValueError(
+                "block_reentry requires a stored claim before erasure; "
+                "already-erased or claimless ids cannot install a guard"
+            )
+        reentry_pattern_id = _install_erasure_reentry_guard(claim, actor=actor.strip())
+
     # Delete evidence and import-session entries BEFORE the no-op check below,
     # and fold their results into that check. Either can be the only remaining
     # trace of a fact_id whose L1/L3 rows are already gone (e.g. left behind by
@@ -188,6 +261,8 @@ def erase_fact(
         "content_hash": (tombstone or {}).get("content_hash"),
         "erased_at": (tombstone or {}).get("erased_at", _now()),
     }
+    if reentry_pattern_id is not None:
+        receipt["reentry_pattern_id"] = reentry_pattern_id
 
     if cascade:
         cascaded = []
@@ -196,7 +271,7 @@ def erase_fact(
                 continue
             cascaded.append(erase_fact(
                 d, reason=f"cascade_from:{fact_id}", actor=actor,
-                cascade=True, _visited=visited))
+                cascade=True, block_reentry=False, _visited=visited))
         receipt["cascaded"] = cascaded
     return receipt
 
