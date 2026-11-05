@@ -43,11 +43,7 @@ def test_guard_survives_pre_l1_delete_failure_and_retry_recovers(monkeypatch):
     assert guard["threat_type"] == "erasure_reentry"
     assert audit.verify_audit_log()["ok"]
     # Guard installation is audited; completed erase is not.
-    from core import audit as audit_module
-    with memory._db() as conn:
-        events = [row[0] for row in conn.execute(
-            "SELECT event_type FROM audit_log"
-        ).fetchall()]
+    events = [entry["event"] for entry in audit.audit_log()]
     assert "immune_threat_recorded" in events
     assert "erase" not in events
 
