@@ -188,6 +188,13 @@ NLnet remains `submitted / under review / not awarded`. Issues #155, #165 and #2
 
 `core/cli.py` → `core/curator_runtime.py` → `core/review.py` → `core/review_decision_store.py` → transaction-participating helper in `core/immune.py`. Existing review/Immune owners remain responsible; the CLI requires workspace-admin scope for this new opt-in. See `docs/lab/REJECT_REENTRY.md` and `tests/test_reject_reentry.py`. No HTTP/MCP field is added.
 
+## Crystal-Test optional split HTTP tokens
+
+`core/api.py` bearer guards: `VELANTRIM_API_TOKEN` for ingest/read; optional distinct
+`VELANTRIM_API_CURATOR_TOKEN` for approve/reject/resolve-conflict. See
+`docs/lab/SPLIT_API_TOKENS.md` and `tests/test_api_split_tokens.py`. ADR-018 single-token
+baseline remains when the curator token is unset.
+
 ## Crystal-Test branch: bounded in-flight ingestion fence (2026-10-29)
 
 After an initial Immune pre-screen, `core.ingest.ingest` requests a second pattern check during its existing SQLite Observed → Validated transition. The guard read and transition use one `BEGIN IMMEDIATE` transaction, serializing this specific ordering with a concurrent guard commit across processes. This does not cover already-committed promotions, L3 projection, pipeline/review writes or unscreened low-level paths. See `docs/lab/REJECT_REENTRY.md` and `tests/test_reentry_race_probe.py`. Status: branch-only pending review, no upstream/production claim.

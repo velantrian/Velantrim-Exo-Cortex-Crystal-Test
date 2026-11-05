@@ -5,9 +5,11 @@
 # library; FastAPI/uvicorn are only needed to expose the memory core over HTTP.
 # Install with:  pip install ".[api]"
 #
-# Read endpoints are bearer-token guarded. Curator writes add a second
-# fail-closed layer: the authenticated token maps to one configured
-# CuratorPrincipal, and request text never establishes audit identity.
+# Read/ingest endpoints are bearer-token guarded via VELANTRIM_API_TOKEN.
+# Curator writes add a second fail-closed layer: the authenticated token maps
+# to one configured CuratorPrincipal, and request text never establishes audit
+# identity. Crystal-Test LAB optionally sets VELANTRIM_API_CURATOR_TOKEN to a
+# distinct secret so the ingest/writer bearer cannot approve/reject.
 
 from typing import Any, Dict, List, Optional
 
@@ -69,8 +71,51 @@ def create_app():
             )
         return raw
 
+    def _configured_curator_token() -> Optional[str]:
+        """Optional distinct curator bearer for dual-token LAB mode.
+
+        ``None`` means the variable is unset → single-token ADR-018 baseline.
+        A present-but-empty/whitespace value is invalid dual-token configuration
+        and must fail closed (never silently fall back to writer-token curator).
+        """
+        if "VELANTRIM_API_CURATOR_TOKEN" not in os.environ:
+            return None
+        raw = os.environ.get("VELANTRIM_API_CURATOR_TOKEN")
+        if raw is None or raw == "" or raw != raw.strip():
+            raise HTTPException(
+                status_code=401,
+                detail="API authentication configuration is invalid: "
+                       "VELANTRIM_API_CURATOR_TOKEN is set but empty, blank, "
+                       "or padded with whitespace.",
+            )
+        return raw
+
+    def _bearer_supplied(authorization: Optional[str]) -> str:
+        if authorization and authorization.lower().startswith("bearer "):
+            return authorization[7:]
+        return ""
+
+    def _validate_dual_token_config(api_token: str, curator_token: str) -> None:
+        if not api_token:
+            raise HTTPException(
+                status_code=401,
+                detail="Dual-token mode requires VELANTRIM_API_TOKEN when "
+                       "VELANTRIM_API_CURATOR_TOKEN is set.",
+            )
+        if hmac.compare_digest(api_token, curator_token):
+            raise HTTPException(
+                status_code=401,
+                detail="API authentication configuration is invalid: "
+                       "VELANTRIM_API_CURATOR_TOKEN must differ from "
+                       "VELANTRIM_API_TOKEN.",
+            )
+
     def _explicit_unauth_local() -> bool:
         raw_token = os.environ.get("VELANTRIM_API_TOKEN")
+        # Any presence of the curator-token variable disables unauth-local,
+        # including an empty/invalid value that must fail closed elsewhere.
+        if "VELANTRIM_API_CURATOR_TOKEN" in os.environ:
+            return False
         return (
             (raw_token is None or raw_token == "")
             and os.environ.get("VELANTRIM_API_ALLOW_UNAUTH_LOCAL") == "1"
@@ -79,6 +124,9 @@ def create_app():
     def _require_api_token(
             authorization: Optional[str] = Header(None)) -> None:
         expected = _configured_api_token()
+        curator_token = _configured_curator_token()
+        if curator_token is not None:
+            _validate_dual_token_config(expected, curator_token)
         if not expected:
             if _explicit_unauth_local():
                 return
@@ -88,16 +136,26 @@ def create_app():
                        "VELANTRIM_API_TOKEN to require a bearer token, or set "
                        "VELANTRIM_API_ALLOW_UNAUTH_LOCAL=1 to explicitly allow "
                        "an unauthenticated local-development instance.")
-        supplied = ""
-        if authorization and authorization.lower().startswith("bearer "):
-            supplied = authorization[7:]
+        supplied = _bearer_supplied(authorization)
         if not hmac.compare_digest(supplied, expected):
             raise HTTPException(status_code=401,
                                 detail="missing or invalid bearer token")
 
     def _require_curator_principal(
             authorization: Optional[str] = Header(None)) -> CuratorPrincipal:
-        _require_api_token(authorization)
+        curator_token = _configured_curator_token()
+        if curator_token is None:
+            # Single-token ADR-018 baseline: writer bearer == curator bearer.
+            _require_api_token(authorization)
+        else:
+            api_token = _configured_api_token()
+            _validate_dual_token_config(api_token, curator_token)
+            supplied = _bearer_supplied(authorization)
+            if not hmac.compare_digest(supplied, curator_token):
+                raise HTTPException(
+                    status_code=401,
+                    detail="missing or invalid curator bearer token",
+                )
         if _explicit_unauth_local():
             return synthetic_local_admin_principal()
         try:
