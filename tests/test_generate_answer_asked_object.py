@@ -98,7 +98,7 @@ def test_absent_primary_object_mismatching_object_is_excluded():
     assert "grounding" in out["error"]
 
 
-def test_explicit_link_between_two_objects_is_kept():
+def test_linked_objects_does_not_keep_foreign_status():
     link = _verified(
         "link-r41-r14",
         "Register R-41 attaches primary document R-14",
@@ -119,14 +119,49 @@ def test_explicit_link_between_two_objects_is_kept():
         primary_object="R-41",
     )
     out = generate_answer(_pack(link, trap, on_object, asked_object="R-41"), trace=[])
+    assert out["answer"] == "status pending review"
+    ids = [f["fact_id"] for f in out["facts"]]
+    assert ids == ["on-r41"]
+    assert "Register R-41 attaches primary document R-14" not in out["answer"]
+    assert "status closed via R-14" not in out["answer"]
+
+
+def test_linked_objects_does_not_admit_l2_status_for_l():
+    l2 = _verified(
+        "e2",
+        "ready",
+        object="L",
+        primary_object="L2",
+        linked_objects=["L"],
+    )
+    kept = _facts_applicable_to_asked_object([l2], "L")
+    assert kept == []
+    out = generate_answer(_pack(l2, asked_object="L"), trace=[])
+    assert out["answer"] is None
+    assert "grounding" in out["error"]
+
+
+def test_status_applies_to_keeps_explicit_status_transfer():
+    transfer = _verified(
+        "xfer",
+        "L inherited ready status from L2",
+        object="L2",
+        primary_object="L2",
+        status_applies_to=["L"],
+    )
+    on_object = _verified(
+        "on-l",
+        "L in progress",
+        object="L",
+        primary_object="L",
+    )
+    out = generate_answer(_pack(transfer, on_object, asked_object="L"), trace=[])
     assert out["answer"] is not None
     ids = [f["fact_id"] for f in out["facts"]]
-    assert "link-r41-r14" in ids
-    assert "on-r41" in ids
-    assert "trap-status" not in ids
-    assert "Register R-41 attaches primary document R-14" in out["answer"]
-    assert "status pending review" in out["answer"]
-    assert "status closed via R-14" not in out["answer"]
+    assert "xfer" in ids
+    assert "on-l" in ids
+    assert "L inherited ready status from L2" in out["answer"]
+    assert "L in progress" in out["answer"]
 
 
 def _retrieved_r41_pair():
@@ -184,7 +219,7 @@ def test_run_forwards_explicit_asked_object_to_generate_answer(monkeypatch):
     assert "closed" not in out["answer"]
 
 
-def test_run_forwards_explicit_link_through_query_path(monkeypatch):
+def test_run_does_not_treat_linked_objects_as_status_transfer(monkeypatch):
     from core import pipeline
 
     items = _retrieved_r41_pair()
@@ -206,11 +241,40 @@ def test_run_forwards_explicit_link_through_query_path(monkeypatch):
     )
     monkeypatch.setattr(pipeline, "retrieve", lambda q, k=3: items)
     out = pipeline.run("Какой статус сообщить для R-41?", asked_object="R-41")
+    assert out["answer"] == "status pending review"
+    ids = [f["fact_id"] for f in out["facts"]]
+    assert ids == ["e3"]
+    assert "Register R-41 attaches primary document R-14" not in out["answer"]
+    assert "status closed via R-14" not in out["answer"]
+
+
+def test_run_forwards_status_applies_to_through_query_path(monkeypatch):
+    from core import pipeline
+
+    items = _retrieved_r41_pair()
+    items.append(
+        {
+            "id": "xfer-1",
+            "text": "R-41 inherited pending status from R-14",
+            "source": "register-index",
+            "confidence": 0.9,
+            "_score": 0.6,
+            "claim_type": "WORLD_FACT",
+            "source_status": "EXTERNAL",
+            "epistemic_state": "Observed",
+            "origin": "retrieval",
+            "object": "R-14",
+            "primary_object": "R-14",
+            "status_applies_to": ["R-41"],
+        }
+    )
+    monkeypatch.setattr(pipeline, "retrieve", lambda q, k=3: items)
+    out = pipeline.run("Какой статус сообщить для R-41?", asked_object="R-41")
     assert out["answer"] is not None
     ids = [f["fact_id"] for f in out["facts"]]
     assert "e3" in ids
-    assert "link-1" in ids
+    assert "xfer-1" in ids
     assert "e2" not in ids
-    assert "Register R-41 attaches primary document R-14" in out["answer"]
+    assert "R-41 inherited pending status from R-14" in out["answer"]
     assert "status pending review" in out["answer"]
     assert "status closed via R-14" not in out["answer"]

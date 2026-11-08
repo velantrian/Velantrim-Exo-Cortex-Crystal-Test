@@ -37,14 +37,68 @@ from core import metrics, adaptation
 logger = logging.getLogger(__name__)
 
 # Object-applicability metadata carried from retrieval into generate_answer.
-# linked_objects names an explicit relation among objects; a mismatch of
-# primary_object alone must not drop such a link.
-_APPLICABILITY_FIELDS = ("object", "primary_object", "linked_objects")
+# status_applies_to is an explicit status-transfer relation. linked_objects
+# may record related context, but a link such as "L uses L2" must not by
+# itself let L2's status ground an answer about L.
+_APPLICABILITY_FIELDS = ("object", "primary_object", "linked_objects", "status_applies_to")
 
 # Evidence time carried from retrieval into generate_answer.
 # created_at / updated_at are storage write times and must not be treated
 # as observation time, so they are not copied here.
 _TEMPORAL_FIELDS = ("observed_at", "recorded_at", "date", "valid_from", "valid_until")
+_PERSISTED_APPLICABILITY_FIELDS = _APPLICABILITY_FIELDS + _TEMPORAL_FIELDS
+_APPLICABILITY_METADATA_KEY = "applicability"
+
+
+def _applicability_from_record(record: Dict[str, Any]) -> Dict[str, Any]:
+    """Collect object/time fields from a record or from metadata.applicability."""
+    stored: Dict[str, Any] = {}
+    metadata = record.get("metadata") if isinstance(record, dict) else None
+    if isinstance(metadata, dict):
+        nested = metadata.get(_APPLICABILITY_METADATA_KEY)
+        if isinstance(nested, dict):
+            for key, value in nested.items():
+                if key in _PERSISTED_APPLICABILITY_FIELDS:
+                    stored[key] = value
+    if isinstance(record, dict):
+        for key in _PERSISTED_APPLICABILITY_FIELDS:
+            if key in record:
+                stored[key] = record[key]
+    return stored
+
+
+def _embed_applicability_in_metadata(fact: Dict[str, Any]) -> None:
+    """Write object/time fields into metadata.applicability before store_fact()."""
+    stored = _applicability_from_record(fact)
+    if not stored:
+        return
+    metadata = dict(fact["metadata"]) if isinstance(fact.get("metadata"), dict) else {}
+    nested = (
+        dict(metadata[_APPLICABILITY_METADATA_KEY])
+        if isinstance(metadata.get(_APPLICABILITY_METADATA_KEY), dict)
+        else {}
+    )
+    nested.update(stored)
+    metadata[_APPLICABILITY_METADATA_KEY] = nested
+    fact["metadata"] = metadata
+
+
+def _lift_applicability(target: Dict[str, Any], source: Dict[str, Any]) -> None:
+    """Copy persisted object/time fields onto an in-memory fact after reload."""
+    stored = _applicability_from_record(source)
+    if not stored:
+        return
+    for key, value in stored.items():
+        target[key] = value
+    metadata = dict(target["metadata"]) if isinstance(target.get("metadata"), dict) else {}
+    nested = (
+        dict(metadata[_APPLICABILITY_METADATA_KEY])
+        if isinstance(metadata.get(_APPLICABILITY_METADATA_KEY), dict)
+        else {}
+    )
+    nested.update(stored)
+    metadata[_APPLICABILITY_METADATA_KEY] = nested
+    target["metadata"] = metadata
 
 
 def _safe_confidence(value: Any, default: float = 0.0) -> float:
@@ -517,12 +571,7 @@ def retrieve(query: str, k: Optional[int] = None) -> List[Dict[str, Any]]:
             "truth_status":    node.get("truth_status"),
             "origin":          origin,
         }
-        for key in _APPLICABILITY_FIELDS:
-            if key in node:
-                recalled[key] = node[key]
-        for key in _TEMPORAL_FIELDS:
-            if key in node:
-                recalled[key] = node[key]
+        _lift_applicability(recalled, node)
         return recalled
 
     # Source 2: L3 canonical memory (recall of what was learned).
@@ -763,7 +812,19 @@ def build_facts_pack(
         safe_source = _safe_source(item.get("source"))
         if safe_source is not None:
             fact["source"] = safe_source
-        # L0/L1 store (store_fact does not persist the transient _score).
+        prior = get_fact(fact_id)
+        if prior and isinstance(prior.get("metadata"), dict):
+            merged_metadata = dict(prior["metadata"])
+            if isinstance(item.get("metadata"), dict):
+                merged_metadata.update(item["metadata"])
+            fact["metadata"] = merged_metadata
+        elif isinstance(item.get("metadata"), dict):
+            fact["metadata"] = dict(item["metadata"])
+        for key in _PERSISTED_APPLICABILITY_FIELDS:
+            if key in item:
+                fact[key] = item[key]
+        _embed_applicability_in_metadata(fact)
+        # L0/L1 store (store_fact persists metadata, not extra top-level keys).
         store_fact(fact)
         # Sync epistemic_state and restricted from the persisted store:
         # store_fact preserves the existing state on conflict, so the fact
@@ -779,15 +840,10 @@ def build_facts_pack(
         if persisted:
             fact["epistemic_state"] = persisted["epistemic_state"]
             fact["restricted"] = bool(persisted.get("restricted"))
+            _lift_applicability(fact, persisted)
         # _score — the relevance rank, only for ordering the pack; not written
         # to the canon (_l3_payload takes the clean persistent record without _score).
         fact["_score"] = round(float(item.get("_score", fact["confidence"])), 4)
-        for key in _APPLICABILITY_FIELDS:
-            if key in item:
-                fact[key] = item[key]
-        for key in _TEMPORAL_FIELDS:
-            if key in item:
-                fact[key] = item[key]
         facts.append(fact)
 
     # retrieve() already returns facts by descending _score; we rank by relevance
@@ -963,14 +1019,13 @@ def _declared_primary_object(fact: Dict[str, Any]) -> Optional[str]:
     return None
 
 
-def _explicitly_links_asked_object(fact: Dict[str, Any], asked: str) -> bool:
-    """True when the fact explicitly names the asked object among linked objects."""
-    links = fact.get("linked_objects")
-    if not isinstance(links, (list, tuple)):
-        return False
-    for item in links:
-        if isinstance(item, str) and item.strip() == asked:
-            return True
+def _explicitly_transfers_status_to(fact: Dict[str, Any], asked: str) -> bool:
+    """True when status_applies_to names the asked object as a status-transfer target."""
+    raw = fact.get("status_applies_to")
+    if isinstance(raw, str):
+        return raw.strip() == asked
+    if isinstance(raw, (list, tuple)):
+        return any(isinstance(item, str) and item.strip() == asked for item in raw)
     return False
 
 
@@ -984,16 +1039,16 @@ def _facts_applicable_to_asked_object(
     callers keep current behaviour. A fact with no declared object is kept:
     legacy records must not be silently dropped. A present but empty or
     malformed `primary_object` fails closed when an asked object was given.
-    A fact whose `linked_objects` explicitly includes the asked object is
-    kept even if its primary object differs: mismatch alone must not forbid
-    an explicit relation between two objects.
+    A fact whose `status_applies_to` names the asked object may still ground
+    that object's status even if `primary_object` differs. `linked_objects`
+    alone does not transfer status.
     """
     if not isinstance(asked_object, str) or not asked_object.strip():
         return list(facts)
     asked = asked_object.strip()
     kept: List[Dict[str, Any]] = []
     for fact in facts:
-        if _explicitly_links_asked_object(fact, asked):
+        if _explicitly_transfers_status_to(fact, asked):
             kept.append(fact)
             continue
         if "primary_object" in fact:
@@ -1026,81 +1081,163 @@ def _normalize_as_of(as_of: Any) -> Optional[str]:
     return None
 
 
-def _parse_temporal_date(value: Any) -> Optional[date]:
-    """Calendar date of an explicit timestamp; None if missing or unparseable.
+def _parse_temporal_instant(value: Any) -> Optional[tuple]:
+    """Parse an explicit date or datetime without clipping leftover characters.
 
-    Uses the timezone written on the value when present. Storage fields
-    created_at / updated_at are never passed here.
+    Returns ``("date", date)`` or ``("datetime", datetime)``. Strings such as
+    ``2026-11-08oops`` are rejected instead of being read as ``2026-11-08``.
     """
     if isinstance(value, datetime):
-        return value.date()
+        return ("datetime", value)
     if isinstance(value, date):
-        return value
+        return ("date", value)
     if not isinstance(value, str) or not value.strip():
         return None
     text = value.strip()
-    try:
-        if "T" in text or " " in text[10:] if len(text) > 10 else False:
-            iso = text.replace("Z", "+00:00")
-            return datetime.fromisoformat(iso).date()
-        if len(text) >= 10 and text[4] == "-" and text[7] == "-":
-            return date.fromisoformat(text[:10])
-        iso = text.replace("Z", "+00:00")
-        return datetime.fromisoformat(iso).date()
-    except ValueError:
+    if len(text) == 10:
         try:
-            iso = text.replace("Z", "+00:00")
-            return datetime.fromisoformat(iso).date()
+            return ("date", date.fromisoformat(text))
         except ValueError:
             return None
+    iso = text[:-1] + "+00:00" if text.endswith("Z") else text
+    try:
+        return ("datetime", datetime.fromisoformat(iso))
+    except ValueError:
+        return None
 
 
-def _fact_observation_date(fact: Dict[str, Any]) -> Optional[date]:
-    """First explicit observation timestamp: observed_at, recorded_at, then date."""
-    for key in ("observed_at", "recorded_at", "date"):
+def _datetime_tzinfo(parsed: tuple):
+    if parsed[0] == "datetime":
+        return parsed[1].tzinfo
+    return None
+
+
+def _as_comparable_datetime(parsed: tuple, *, other_tz=None, end_of_day: bool = False) -> datetime:
+    if parsed[0] == "datetime":
+        return parsed[1]
+    day = parsed[1]
+    if end_of_day:
+        dt = datetime(day.year, day.month, day.day, 23, 59, 59, 999999)
+    else:
+        dt = datetime(day.year, day.month, day.day, 0, 0, 0)
+    if other_tz is not None:
+        return dt.replace(tzinfo=other_tz)
+    return dt
+
+
+def _compare_temporals(left: tuple, right: tuple) -> Optional[int]:
+    """Return -1, 0 or 1; None when the pair cannot be compared safely."""
+    if left[0] == "date" and right[0] == "date":
+        if left[1] < right[1]:
+            return -1
+        if left[1] > right[1]:
+            return 1
+        return 0
+    tz = _datetime_tzinfo(left) or _datetime_tzinfo(right)
+    left_dt = _as_comparable_datetime(left, other_tz=tz)
+    right_dt = _as_comparable_datetime(right, other_tz=tz)
+    if (left_dt.tzinfo is None) != (right_dt.tzinfo is None):
+        return None
+    if left_dt.tzinfo is not None and right_dt.tzinfo is not None:
+        left_dt = left_dt.astimezone(timezone.utc)
+        right_dt = right_dt.astimezone(timezone.utc)
+    if left_dt < right_dt:
+        return -1
+    if left_dt > right_dt:
+        return 1
+    return 0
+
+
+def _optional_temporal_bound(fact: Dict[str, Any], key: str):
+    """Return the parsed bound, None if missing, or False if present but invalid."""
+    if key not in fact:
+        return None
+    value = fact.get(key)
+    if value is None:
+        return None
+    if isinstance(value, str) and not value.strip():
+        return None
+    parsed = _parse_temporal_instant(value)
+    if parsed is None:
+        return False
+    return parsed
+
+
+def _interval_covers_as_of(as_of_parsed: tuple, start, end) -> bool:
+    if as_of_parsed[0] == "date" and (
+        (start is not None and start[0] == "datetime")
+        or (end is not None and end[0] == "datetime")
+    ):
+        tz = _datetime_tzinfo(start or ("date", None)) or _datetime_tzinfo(end or ("date", None))
+        day_start = (
+            "datetime",
+            _as_comparable_datetime(as_of_parsed, other_tz=tz, end_of_day=False),
+        )
+        day_end = (
+            "datetime",
+            _as_comparable_datetime(as_of_parsed, other_tz=tz, end_of_day=True),
+        )
+        if start is not None:
+            compared = _compare_temporals(day_start, start)
+            if compared is None or compared < 0:
+                return False
+        if end is not None:
+            compared = _compare_temporals(day_end, end)
+            if compared is None or compared > 0:
+                return False
+        return True
+    if start is not None:
+        compared = _compare_temporals(as_of_parsed, start)
+        if compared is None or compared < 0:
+            return False
+    if end is not None:
+        compared = _compare_temporals(as_of_parsed, end)
+        if compared is None or compared > 0:
+            return False
+    return True
+
+
+def _observation_covers_as_of(observed: tuple, as_of_parsed: tuple) -> bool:
+    if observed[0] == "date" and as_of_parsed[0] == "date":
+        return observed[1] == as_of_parsed[1]
+    if observed[0] == "datetime" and as_of_parsed[0] == "datetime":
+        return _compare_temporals(observed, as_of_parsed) == 0
+    return False
+
+
+def _fact_observation(fact: Dict[str, Any]) -> Optional[tuple]:
+    """Evidence time: observed_at, then probe date. Never recorded_at/created_at/updated_at."""
+    for key in ("observed_at", "date"):
         if key not in fact:
             continue
         raw = fact.get(key)
         if raw is None or (isinstance(raw, str) and not raw.strip()):
             continue
-        return _parse_temporal_date(raw)
+        return _parse_temporal_instant(raw)
     return None
 
 
-def _fact_covers_as_of(fact: Dict[str, Any], as_of_date: date) -> bool:
+def _fact_covers_as_of(fact: Dict[str, Any], as_of: Any) -> bool:
     """True when the fact's own evidence time covers as_of.
 
-    An explicit validity interval, if present, decides coverage. Otherwise
-    an observation on the same calendar date as as_of may ground a
-    current-state answer. A missing or earlier observation does not cover
-    as_of; the fact remains historical evidence and is not treated as false.
-    created_at / updated_at are ignored.
+    An explicit validity interval, if present, decides coverage at full
+    precision. Otherwise a date-only observation covers a date-only as_of
+    on the same calendar day, and a timestamped observation covers only
+    the same instant. recorded_at, created_at and updated_at are ignored.
     """
-    interval_present = False
-    start = None
-    end = None
-    raw_from = fact.get("valid_from") if "valid_from" in fact else None
-    raw_until = fact.get("valid_until") if "valid_until" in fact else None
-    if raw_from not in (None, ""):
-        interval_present = True
-        start = _parse_temporal_date(raw_from)
-        if start is None:
-            return False
-    if raw_until not in (None, ""):
-        interval_present = True
-        end = _parse_temporal_date(raw_until)
-        if end is None:
-            return False
-    if interval_present:
-        if start is not None and as_of_date < start:
-            return False
-        if end is not None and as_of_date > end:
-            return False
-        return True
-    observed = _fact_observation_date(fact)
+    as_of_parsed = _parse_temporal_instant(as_of)
+    if as_of_parsed is None:
+        return False
+    start = _optional_temporal_bound(fact, "valid_from")
+    end = _optional_temporal_bound(fact, "valid_until")
+    if start is False or end is False:
+        return False
+    if start is not None or end is not None:
+        return _interval_covers_as_of(as_of_parsed, start, end)
+    observed = _fact_observation(fact)
     if observed is None:
         return False
-    return observed == as_of_date
+    return _observation_covers_as_of(observed, as_of_parsed)
 
 
 def _facts_covering_as_of(
@@ -1118,10 +1255,9 @@ def _facts_covering_as_of(
     as_of_text = _normalize_as_of(as_of)
     if as_of_text is None:
         return list(facts)
-    as_of_date = _parse_temporal_date(as_of_text)
-    if as_of_date is None:
+    if _parse_temporal_instant(as_of_text) is None:
         return []
-    return [fact for fact in facts if _fact_covers_as_of(fact, as_of_date)]
+    return [fact for fact in facts if _fact_covers_as_of(fact, as_of_text)]
 
 
 def generate_answer(
@@ -1141,15 +1277,22 @@ def generate_answer(
     rationale; this is the smallest production-safe runtime slice of that RFC.
 
     If facts_pack contains a non-empty string `asked_object`, facts whose
-    declared primary object differs are excluded after CanonicalView. This
-    filter does not invent an object from the query text and does not write
-    memory.
+    declared primary object differs are excluded after CanonicalView unless
+    they list that object in `status_applies_to`. `linked_objects` may record
+    related context but does not transfer status. This filter does not invent
+    an object from the query text and does not write memory.
 
     If facts_pack also contains temporal_scope="current" and an explicit
     `as_of`, facts that do not cover that moment are left as historical
-    evidence and are not used as current grounding. Time is never inferred
-    from the query text or the server clock, and created_at / updated_at
-    are not evidence time. There is no universal expiry period.
+    evidence and are not used as current grounding. Unparseable `as_of`
+    values such as `2026-11-08oops` are rejected rather than clipped to a
+    date. Observation time comes from `observed_at`, then the probe field
+    `date`; `recorded_at`, `created_at` and `updated_at` are not evidence
+    time. Date-only values keep day granularity, and timestamps keep hours
+    and timezone. Object and time fields are stored in
+    metadata["applicability"] so they survive reload after the L0 cache is
+    cleared. Time is never inferred from the query text or the server clock.
+    There is no universal expiry period.
     """
     canonical_facts = project_canonical(facts_pack["facts"])
     asked_object = facts_pack.get("asked_object")
