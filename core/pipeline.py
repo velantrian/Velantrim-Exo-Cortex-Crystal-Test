@@ -17,7 +17,7 @@
 
 import logging
 import math
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import List, Dict, Any, Optional
 from core.trace import build_trace, promote_trace, format_trace
 from core.memory import (
@@ -35,6 +35,16 @@ from core.rrf import rrf_fuse
 from core import metrics, adaptation
 
 logger = logging.getLogger(__name__)
+
+# Object-applicability metadata carried from retrieval into generate_answer.
+# linked_objects names an explicit relation among objects; a mismatch of
+# primary_object alone must not drop such a link.
+_APPLICABILITY_FIELDS = ("object", "primary_object", "linked_objects")
+
+# Evidence time carried from retrieval into generate_answer.
+# created_at / updated_at are storage write times and must not be treated
+# as observation time, so they are not copied here.
+_TEMPORAL_FIELDS = ("observed_at", "recorded_at", "date", "valid_from", "valid_until")
 
 
 def _safe_confidence(value: Any, default: float = 0.0) -> float:
@@ -494,7 +504,7 @@ def retrieve(query: str, k: Optional[int] = None) -> List[Dict[str, Any]]:
         # looking like an authoritative, fully-confident fact (#257 review
         # round 3). build_facts_pack() is responsible for not crashing L1
         # storage on a None/malformed source — see its own docstring.
-        return {
+        recalled = {
             "id":              node["fact_id"],
             "text":            node.get("claim", ""),
             "source":          node.get("source"),
@@ -507,6 +517,13 @@ def retrieve(query: str, k: Optional[int] = None) -> List[Dict[str, Any]]:
             "truth_status":    node.get("truth_status"),
             "origin":          origin,
         }
+        for key in _APPLICABILITY_FIELDS:
+            if key in node:
+                recalled[key] = node[key]
+        for key in _TEMPORAL_FIELDS:
+            if key in node:
+                recalled[key] = node[key]
+        return recalled
 
     # Source 2: L3 canonical memory (recall of what was learned).
     # Fetch with a margin (see _VECTOR_SEARCH_FETCH_MARGIN) so a denied row
@@ -697,6 +714,9 @@ def retrieve(query: str, k: Optional[int] = None) -> List[Dict[str, Any]]:
 def build_facts_pack(
     retrieved: List[Dict[str, Any]],
     query: str,
+    asked_object: Any = None,
+    as_of: Any = None,
+    temporal_scope: Any = None,
 ) -> Dict[str, Any]:
     """
     Assemble a FactsPack from the retrieved facts.
@@ -762,17 +782,34 @@ def build_facts_pack(
         # _score — the relevance rank, only for ordering the pack; not written
         # to the canon (_l3_payload takes the clean persistent record without _score).
         fact["_score"] = round(float(item.get("_score", fact["confidence"])), 4)
+        for key in _APPLICABILITY_FIELDS:
+            if key in item:
+                fact[key] = item[key]
+        for key in _TEMPORAL_FIELDS:
+            if key in item:
+                fact[key] = item[key]
         facts.append(fact)
 
     # retrieve() already returns facts by descending _score; we rank by relevance
     # (_score), not by confidence — these are different axes.
     facts.sort(key=lambda x: x["_score"], reverse=True)
 
-    return {
+    pack: Dict[str, Any] = {
         "facts": facts,
         "query": query,
         "total": len(facts),
     }
+    if isinstance(asked_object, str) and asked_object.strip():
+        pack["asked_object"] = asked_object.strip()
+    as_of_text = _normalize_as_of(as_of)
+    if (
+        isinstance(temporal_scope, str)
+        and temporal_scope.strip() == "current"
+        and as_of_text is not None
+    ):
+        pack["temporal_scope"] = "current"
+        pack["as_of"] = as_of_text
+    return pack
 
 
 # ─── GUARDIAN ─────────────────────────────────────────────────────────────────
@@ -907,6 +944,186 @@ def _public_facts(facts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return [{k: v for k, v in f.items() if not k.startswith("_")} for f in facts]
 
 
+def _declared_primary_object(fact: Dict[str, Any]) -> Optional[str]:
+    """Object the primary evidence is about.
+
+    `primary_object` wins over wrapper `object` attribution: a register row
+    attributed to R-41 whose attached document names R-14 must not ground an
+    answer about R-41. An absent declaration means this filter cannot judge
+    the fact and must leave it unchanged.
+    """
+    if "primary_object" in fact:
+        value = fact.get("primary_object")
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+        return None
+    value = fact.get("object")
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    return None
+
+
+def _explicitly_links_asked_object(fact: Dict[str, Any], asked: str) -> bool:
+    """True when the fact explicitly names the asked object among linked objects."""
+    links = fact.get("linked_objects")
+    if not isinstance(links, (list, tuple)):
+        return False
+    for item in links:
+        if isinstance(item, str) and item.strip() == asked:
+            return True
+    return False
+
+
+def _facts_applicable_to_asked_object(
+    facts: List[Dict[str, Any]],
+    asked_object: Any,
+) -> List[Dict[str, Any]]:
+    """Drop grounding facts whose declared primary object is not the asked one.
+
+    No asked object, or a non-string/blank asked object, is a no-op so existing
+    callers keep current behaviour. A fact with no declared object is kept:
+    legacy records must not be silently dropped. A present but empty or
+    malformed `primary_object` fails closed when an asked object was given.
+    A fact whose `linked_objects` explicitly includes the asked object is
+    kept even if its primary object differs: mismatch alone must not forbid
+    an explicit relation between two objects.
+    """
+    if not isinstance(asked_object, str) or not asked_object.strip():
+        return list(facts)
+    asked = asked_object.strip()
+    kept: List[Dict[str, Any]] = []
+    for fact in facts:
+        if _explicitly_links_asked_object(fact, asked):
+            kept.append(fact)
+            continue
+        if "primary_object" in fact:
+            declared = fact.get("primary_object")
+            if not isinstance(declared, str) or not declared.strip():
+                continue
+            if declared.strip() != asked:
+                continue
+        else:
+            declared = _declared_primary_object(fact)
+            if declared is not None and declared != asked:
+                continue
+        kept.append(fact)
+    return kept
+
+
+
+def _normalize_as_of(as_of: Any) -> Optional[str]:
+    """Return a caller-supplied as_of as text, or None if none was given.
+
+    Accepts a non-empty string, a datetime, or a date. Never reads the
+    server clock and never invents a time from query text.
+    """
+    if isinstance(as_of, datetime):
+        return as_of.isoformat()
+    if isinstance(as_of, date):
+        return as_of.isoformat()
+    if isinstance(as_of, str) and as_of.strip():
+        return as_of.strip()
+    return None
+
+
+def _parse_temporal_date(value: Any) -> Optional[date]:
+    """Calendar date of an explicit timestamp; None if missing or unparseable.
+
+    Uses the timezone written on the value when present. Storage fields
+    created_at / updated_at are never passed here.
+    """
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    if not isinstance(value, str) or not value.strip():
+        return None
+    text = value.strip()
+    try:
+        if "T" in text or " " in text[10:] if len(text) > 10 else False:
+            iso = text.replace("Z", "+00:00")
+            return datetime.fromisoformat(iso).date()
+        if len(text) >= 10 and text[4] == "-" and text[7] == "-":
+            return date.fromisoformat(text[:10])
+        iso = text.replace("Z", "+00:00")
+        return datetime.fromisoformat(iso).date()
+    except ValueError:
+        try:
+            iso = text.replace("Z", "+00:00")
+            return datetime.fromisoformat(iso).date()
+        except ValueError:
+            return None
+
+
+def _fact_observation_date(fact: Dict[str, Any]) -> Optional[date]:
+    """First explicit observation timestamp: observed_at, recorded_at, then date."""
+    for key in ("observed_at", "recorded_at", "date"):
+        if key not in fact:
+            continue
+        raw = fact.get(key)
+        if raw is None or (isinstance(raw, str) and not raw.strip()):
+            continue
+        return _parse_temporal_date(raw)
+    return None
+
+
+def _fact_covers_as_of(fact: Dict[str, Any], as_of_date: date) -> bool:
+    """True when the fact's own evidence time covers as_of.
+
+    An explicit validity interval, if present, decides coverage. Otherwise
+    an observation on the same calendar date as as_of may ground a
+    current-state answer. A missing or earlier observation does not cover
+    as_of; the fact remains historical evidence and is not treated as false.
+    created_at / updated_at are ignored.
+    """
+    interval_present = False
+    start = None
+    end = None
+    raw_from = fact.get("valid_from") if "valid_from" in fact else None
+    raw_until = fact.get("valid_until") if "valid_until" in fact else None
+    if raw_from not in (None, ""):
+        interval_present = True
+        start = _parse_temporal_date(raw_from)
+        if start is None:
+            return False
+    if raw_until not in (None, ""):
+        interval_present = True
+        end = _parse_temporal_date(raw_until)
+        if end is None:
+            return False
+    if interval_present:
+        if start is not None and as_of_date < start:
+            return False
+        if end is not None and as_of_date > end:
+            return False
+        return True
+    observed = _fact_observation_date(fact)
+    if observed is None:
+        return False
+    return observed == as_of_date
+
+
+def _facts_covering_as_of(
+    facts: List[Dict[str, Any]],
+    as_of: Any,
+    temporal_scope: Any,
+) -> List[Dict[str, Any]]:
+    """Keep facts that may ground a current-state answer at as_of.
+
+    No-op unless temporal_scope is "current" and as_of is supplied.
+    Unparseable as_of fails closed: current status cannot be established.
+    """
+    if not isinstance(temporal_scope, str) or temporal_scope.strip() != "current":
+        return list(facts)
+    as_of_text = _normalize_as_of(as_of)
+    if as_of_text is None:
+        return list(facts)
+    as_of_date = _parse_temporal_date(as_of_text)
+    if as_of_date is None:
+        return []
+    return [fact for fact in facts if _fact_covers_as_of(fact, as_of_date)]
+
+
 def generate_answer(
     facts_pack: Dict[str, Any],
     trace: List[Dict[str, Any]],
@@ -922,14 +1139,66 @@ def generate_answer(
     epistemic_state "Validated" without ever being externally verified. See
     docs/CANONICAL_VIEW_RFC.md and core/canonical_view.py for the full
     rationale; this is the smallest production-safe runtime slice of that RFC.
+
+    If facts_pack contains a non-empty string `asked_object`, facts whose
+    declared primary object differs are excluded after CanonicalView. This
+    filter does not invent an object from the query text and does not write
+    memory.
+
+    If facts_pack also contains temporal_scope="current" and an explicit
+    `as_of`, facts that do not cover that moment are left as historical
+    evidence and are not used as current grounding. Time is never inferred
+    from the query text or the server clock, and created_at / updated_at
+    are not evidence time. There is no universal expiry period.
     """
     canonical_facts = project_canonical(facts_pack["facts"])
+    asked_object = facts_pack.get("asked_object")
+    if canonical_facts:
+        applicable = _facts_applicable_to_asked_object(canonical_facts, asked_object)
+        if not applicable and isinstance(asked_object, str) and asked_object.strip():
+            logger.warning(
+                "generate_answer: no facts applicable to asked object %r "
+                "(%d strict-canonical fact(s) excluded)",
+                asked_object.strip(),
+                len(canonical_facts),
+            )
+        canonical_facts = applicable
+    as_of = facts_pack.get("as_of")
+    temporal_scope = facts_pack.get("temporal_scope")
+    temporal_active = (
+        isinstance(temporal_scope, str)
+        and temporal_scope.strip() == "current"
+        and _normalize_as_of(as_of) is not None
+    )
+    facts_after_object = list(canonical_facts)
+    if canonical_facts:
+        covering = _facts_covering_as_of(canonical_facts, as_of, temporal_scope)
+        if not covering and temporal_active:
+            logger.warning(
+                "generate_answer: no facts cover as_of %r "
+                "(%d fact(s) remain historical evidence, not current grounding)",
+                _normalize_as_of(as_of),
+                len(facts_after_object),
+            )
+        canonical_facts = covering
     if not canonical_facts:
         # Issue #64 + CanonicalView: a verifiable memory system must not answer
         # from material that is not strict-canonical (VERIFIED, non-contradicted/
         # -deprecated, unrestricted, identity-complete). No such facts →
         # insufficient grounding → block, even if unvalidated/non-canonical
         # material (e.g. USER_CLAIMED) is present.
+        # A current-state question with only historical evidence reports
+        # uncertainty: current status is not established. That is not a
+        # denial that an event occurred, and not an assertion of the last
+        # historical status as "today".
+        if temporal_active and facts_after_object:
+            refusal_error = (
+                "insufficient grounding: current status is not established"
+            )
+        else:
+            refusal_error = (
+                "insufficient grounding: no strict-canonical (VERIFIED) facts available"
+            )
         logger.warning(
             "generate_answer: no strict-canonical facts — blocking answer "
             "(%d non-canonical fact(s) present but not usable as grounding)",
@@ -967,7 +1236,7 @@ def generate_answer(
             refusal_trace.append(entry)
         return {
             "answer":      None,
-            "error":       "insufficient grounding: no strict-canonical (VERIFIED) facts available",
+            "error":       refusal_error,
             "query":       facts_pack.get("query", ""),
             "facts":       [],
             "trace":       refusal_trace,
@@ -1178,7 +1447,14 @@ def drain_l3_outbox(graph=None) -> int:
     return healed
 
 
-def run(query: str, episode: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def run(
+    query: str,
+    episode: Optional[Dict[str, Any]] = None,
+    *,
+    asked_object: Optional[str] = None,
+    as_of: Optional[str] = None,
+    temporal_scope: Optional[str] = None,
+) -> Dict[str, Any]:
     """
     The full Velantrim pipeline:
     Query → Retrieve → FactsPack → Trace → Guardian → TruthGate → Answer
@@ -1188,6 +1464,13 @@ def run(query: str, episode: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
 
     episode — optional episode context (who / where / when / event):
     facts recalled together are linked in L3 by an episodic edge.
+
+    asked_object — explicit object the answer must be about. Passed through
+    to generate_answer; never inferred from the query text.
+
+    as_of and temporal_scope — explicit question time and scope. Passed
+    through to generate_answer; never inferred from the query text or the
+    server clock. temporal_scope="current" marks a current-state question.
     """
     metrics.incr("query.total")
     # 0. Self-heal: re-merge facts whose write to L3 previously failed (outbox).
@@ -1216,7 +1499,13 @@ def run(query: str, episode: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         return _blocked("Retrieval returned 0 results.", query)
 
     # 2. FactsPack
-    facts_pack = build_facts_pack(retrieved, query)
+    facts_pack = build_facts_pack(
+        retrieved,
+        query,
+        asked_object=asked_object,
+        as_of=as_of,
+        temporal_scope=temporal_scope,
+    )
 
     # 3. Trace
     trace = build_trace(retrieved)
