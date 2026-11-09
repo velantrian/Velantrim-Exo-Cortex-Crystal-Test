@@ -25,7 +25,12 @@ v4 = current core.query_parse on all splits; counterexamples_v3 is scored agains
      eval_results_v4.json, demo_v4.*, before_after_v4.json, permutation_invariance_v4.json.
      Since v5 the v4 parser is the frozen snapshot tests/query_parse_v4.py (= tag
      query-parse-v4-frozen); the v4 report regenerates byte-identically.
-v5 = current core.query_parse (rules R1-R6, 2026-11-09) on dev_gold_v2 (dev.json
+v6 = current core.query_parse (final contract C1-C6, 2026-11-09) on the latest gold
+     versions (dev_gold_v3, heldout_gold_v2, probes, cv2, cv3_gold_v2, cv4,
+     counterexamples_v5_gold_v2, counterexamples_v6); v5 frozen snapshot for before
+     -> after; --write: eval_results_v6.json, demo_v6.*, before_after_v6.json,
+     permutation_invariance_v6.json.
+v5 = core.query_parse at tag query-parse-v5-frozen, now tests/query_parse_v5.py (rules R1-R6, 2026-11-09) on dev_gold_v2 (dev.json
      unchanged), heldout, probes, cv2, cv3_gold_v2, cv4 and counterexamples_v5; v4
      snapshot for before -> after; --write produces eval_results_v5.json (with the
      v4 snapshot on the v5 sets), demo_v5.* (exactly three outcomes),
@@ -63,14 +68,16 @@ V1_SPLITS = ("dev", "heldout", "probes")
 V2_SPLITS = V1_SPLITS + ("counterexamples_v2",)
 V3_SPLITS = V2_SPLITS + ("counterexamples_v3",)
 V4_SPLITS = V2_SPLITS + ("counterexamples_v3_gold_v2", "counterexamples_v4")
+V6_SPLITS = ("dev_gold_v3", "heldout_gold_v2", "probes", "counterexamples_v2", "counterexamples_v3_gold_v2",
+             "counterexamples_v4", "counterexamples_v5_gold_v2", "counterexamples_v6")
 V5_SPLITS = ("dev_gold_v2", "heldout", "probes", "counterexamples_v2", "counterexamples_v3_gold_v2", "counterexamples_v4",
              "counterexamples_v5")
 PARSERS = {"v1": parser_v1, "v2": parser_v2_frozen, "v3": parser_v3_frozen, "v4": parser_v4_frozen,
            "v5": parser_v5_frozen, "v6": parser_current}
-SPLITS = {"v1": V1_SPLITS, "v2": V2_SPLITS, "v3": V3_SPLITS, "v4": V4_SPLITS, "v5": V5_SPLITS}
-PREVIOUS = {"v2": "v1", "v3": "v2", "v4": "v3", "v5": "v4"}
+SPLITS = {"v1": V1_SPLITS, "v2": V2_SPLITS, "v3": V3_SPLITS, "v4": V4_SPLITS, "v5": V5_SPLITS, "v6": V6_SPLITS}
+PREVIOUS = {"v2": "v1", "v3": "v2", "v4": "v3", "v5": "v4", "v6": "v5"}
 PREV_LABEL = {"v2": "v1 snapshot, d550f3f", "v3": "v2 snapshot, eee4062", "v4": "v3 snapshot, a6d11f3",
-              "v5": "v4 snapshot, tag query-parse-v4-frozen"}
+              "v5": "v4 snapshot, tag query-parse-v4-frozen", "v6": "v5 snapshot, tag query-parse-v5-frozen"}
 
 
 def load_split(split):
@@ -192,8 +199,11 @@ DEMO_IDS_V4 = DEMO_IDS_V3 + ("E01", "E03", "E05", "E06", "F01", "F02", "F04", "F
 # v5: exactly three outcomes through the full path
 DEMO_V5 = (("V34", "Outcome 1 — correct answer"), ("V01", "Outcome 2 — useful clarification (no query)"),
            ("V28", "Outcome 3 — understandable limitation (unsupported, no query)"))
+DEMO_V6 = (("G04", "Outcome 1 — correct answer"), ("G01", "Outcome 2 — useful clarification (no query)"),
+           ("G08", "Outcome 3 — understandable limitation (unsupported, no query)"))
+DEMO_SPEC = {"v5": DEMO_V5, "v6": DEMO_V6}
 DEMO_IDS_BY = {"v1": DEMO_IDS, "v2": DEMO_IDS_V2, "v3": DEMO_IDS_V3, "v4": DEMO_IDS_V4,
-               "v5": tuple(i for i, _ in DEMO_V5)}
+               "v5": tuple(i for i, _ in DEMO_V5), "v6": tuple(i for i, _ in DEMO_V6)}
 
 
 def demo(results, ids=DEMO_IDS, version="v1"):
@@ -271,7 +281,7 @@ def before_after(v2_results, version="v2"):
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
-    version = argv[argv.index("--version") + 1] if "--version" in argv else "v5"
+    version = argv[argv.index("--version") + 1] if "--version" in argv else "v6"
     parser = PARSERS[version]
     splits = SPLITS[version]
     results = [evaluate(s, parser) for s in splits]
@@ -303,6 +313,14 @@ def write(results, version):
             "results": [{"split": r["split"], "n": r["n"], "counts": r["counts"], "answers_differ": r["answers_differ"],
                          "not_correct": [x["id"] for x in r["rows"] if not x["category"].startswith("correct")]}
                         for r in prev]}
+    if version == "v6":
+        prev = [evaluate(s, PARSERS["v5"]) for s in SPLITS["v6"]]
+        payload["v5_snapshot_on_v6_sets"] = {
+            "_note": "frozen v5 parser (tests/query_parse_v5.py, = tag query-parse-v5-frozen) scored on the v6 sets "
+                     "(latest gold versions; gold changes = user's final contract decision 2026-11-09, C1-C6).",
+            "results": [{"split": r["split"], "n": r["n"], "counts": r["counts"], "answers_differ": r["answers_differ"],
+                         "not_correct": [x["id"] for x in r["rows"] if not x["category"].startswith("correct")]}
+                        for r in prev]}
     if version == "v5":
         prev = [evaluate(s, PARSERS["v4"]) for s in SPLITS["v5"]]
         payload["v4_snapshot_on_v5_sets"] = {
@@ -315,14 +333,14 @@ def write(results, version):
     (OUT / f"eval_results_{version}.json").write_text(json.dumps(payload, ensure_ascii=False, indent=1) + "\n",
                                                      encoding="utf-8")
     rows, md = demo(results, DEMO_IDS_BY[version], version)
-    if version == "v5":
-        rows, md = demo_v5(rows, md)
+    if version in DEMO_SPEC:
+        rows, md = demo_v5(rows, md, DEMO_SPEC[version], PARSERS[version])
     (OUT / f"demo_{version}.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     (OUT / f"demo_{version}.md").write_text(md + "\n", encoding="utf-8")
     if version != "v1":
         (OUT / f"before_after_{version}.json").write_text(
             json.dumps(before_after(results, version), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    if version in ("v3", "v4", "v5"):
+    if version in ("v3", "v4", "v5", "v6"):
         prev = PREVIOUS[version]
         perm = {"_note": "decision (kind, params, candidates, clarification/limitation text, mentioned_objects) for every "
                          "permutation of the split's catalogue x {names as given, names reversed}; 'changed' lists items "
@@ -337,19 +355,20 @@ def write(results, version):
         (OUT / "morning_evening_v5.md").write_text(morning_evening_md(me) + "\n", encoding="utf-8")
 
 
-def demo_v5(rows, md):
-    """Exactly three outcomes in a fixed order; the answer carries its receipt (citations)."""
+def demo_v5(rows, md, spec=DEMO_V5, parser=None):
+    """Exactly three outcomes in a fixed order; the answer carries its receipt (citations). Used for v5 and v6."""
     from core import provenance
-    order = [i for i, _ in DEMO_V5]
+    parser = parser or PARSERS["v5"]
+    order = [i for i, _ in spec]
     rows = sorted(rows, key=lambda r: order.index(r["id"]))
     head, *sections = md.split("\n## ")
     by_id = {sec.split(" — ", 1)[0]: sec for sec in sections}
     out = [head.replace("Path: **", "Exactly three outcomes. Path: **")]
-    for i, label in DEMO_V5:
+    for i, label in spec:
         sec = "%s: %s" % (label, by_id[i])
         row = next(r for r in rows if r["id"] == i)
         if row["parser"]["kind"] == "parsed":
-            g = PARSERS["v5"].ask(row["question"], SETUP["known_objects"], None, now=NOW, timezone=SETUP["timezone"],
+            g = parser.ask(row["question"], SETUP["known_objects"], None, now=NOW, timezone=SETUP["timezone"],
                                   query_fn=run_filter)
             rec = provenance.build_receipt(g["result"])
             row["receipt"] = {"answer": rec["answer"], "citations": [c["fact_id"] for c in rec["citations"]]}

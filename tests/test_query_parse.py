@@ -70,9 +70,11 @@ def test_follow_up_time_inherits_absolute_and_date_and_reanchors_now():
     later = NOW + timedelta(hours=2)
     ctx = [context_turn("q", p("Какой статус L был 8 ноября в 10:00?"))]
     assert p("А его статус?", ctx)["params"]["as_of"] == "2026-11-08T10:00:00+01:00"
-    # v5 R3: an explicit date without a time asks for the time; «сегодня» alone keeps date-only
+    # v6 C1/C6: «сегодня» without a time is a clarification; nothing date-only is inherited
     ctx_date = [context_turn("q", p("Какой статус L сегодня?"))]
-    assert p("А его статус?", ctx_date)["params"]["as_of"] == "2026-11-09"
+    assert p("А его статус?", ctx_date)["kind"] == "needs_clarification"
+    stale = [{"question": "q", "kind": "parsed", "asked_object": "L", "time_ref": "date", "as_of": "2026-11-08"}]
+    assert p("А его статус?", stale)["kind"] == "needs_clarification"  # v6: a date-only turn is not reused
     ctx_now = [context_turn("q", p("Какой статус L сейчас?"))]
     assert p("А его статус?", ctx_now, now=later)["params"]["as_of"] == later.astimezone(
         ev_tz()).isoformat()
@@ -101,15 +103,16 @@ def test_context_is_bounded_and_structured():
 
 def test_now_today_and_yesterday_are_not_interchangeable():
     now = p("Какой статус L сейчас?")["params"]["as_of"]
-    today = p("Какой статус L сегодня?")["params"]["as_of"]
-    assert now == NOW_S and today == "2026-11-09" and now != today
+    assert now == NOW_S
+    # v6 C1: «сегодня» / «вчера» without a time ask for the time
+    assert p("Какой статус L сегодня?")["kind"] == "needs_clarification"
     assert p("Какой статус L за вчера?")["kind"] == "unsupported"
-    assert p("Какой статус L вчера?")["params"]["as_of"] == "2026-11-08"
+    assert p("Какой статус L вчера?")["kind"] == "needs_clarification"
     assert p("Какой статус L был вчера в 10:00?")["params"]["as_of"] == "2026-11-08T10:00:00+01:00"
     # «сегодня» uses the explicit zone's calendar day, not the now offset.
     late_utc = datetime(2026, 11, 8, 23, 30, tzinfo=dt_timezone.utc)
-    assert p("Какой статус L сегодня?", now=late_utc)["params"]["as_of"] == "2026-11-09"
-    assert p("Какой статус L сегодня?", tz="UTC", now=late_utc)["params"]["as_of"] == "2026-11-08"
+    assert p("Какой статус L сегодня в 00:10?", now=late_utc)["params"]["as_of"] == "2026-11-09T00:10:00+01:00"
+    assert p("Какой статус L сегодня в 00:10?", tz="UTC", now=late_utc)["params"]["as_of"] == "2026-11-08T00:10:00+00:00"
 
 
 @pytest.mark.parametrize("q", ["Что менялось у L за неделю?", "Сравни статус L и L2",
@@ -178,7 +181,7 @@ def test_explicit_failure_modes(q, kind, needle):
     ("Какой статус L был 8 ноября в 12 ночи?", "2026-11-08T00:00:00+01:00"),
     ("Статус M на 2026-11-08 10:00?", "2026-11-08T10:00:00+01:00"),
     ("Какой статус L был 8 ноября 2026 года в 10:00?", "2026-11-08T10:00:00+01:00"),
-    ("Какой статус L был вчера?", "2026-11-08"),  # «вчера» alone: date-only, unchanged in v5
+    ("Какой статус L был вчера в 9:30?", "2026-11-08T09:30:00+01:00"),  # v6: «вчера» alone now asks
 ])
 def test_supported_date_and_clock_forms(q, as_of):
     assert p(q)["params"]["as_of"] == as_of
@@ -271,11 +274,12 @@ def test_live_store_parsed_question_memory_unchanged_and_receipts(durable):
     assert past["answer"] == "L: статус — на ремонте"
     # v5 R3: an explicit date without a time is a clarification (no query) ...
     assert ask("Какой статус L был 8 ноября?", OBJ, now=NOW, timezone=TZ, query_fn=_never)["query_called"] is False
-    # ... «вчера» alone still asks for whole-day coverage of 8 Nov, which no fact gives
-    day = ask("Какой статус L был вчера?", OBJ, now=NOW, timezone=TZ, query_fn=query)
-    assert day["answer"] is None
-    with pytest.raises(ValueError):
-        provenance.build_receipt(day["result"])
+    # ... and so is «вчера» alone (v6 C1); a whole day is unsupported (v6 C3)
+    assert ask("Какой статус L был вчера?", OBJ, now=NOW, timezone=TZ, query_fn=_never)["query_called"] is False
+    assert ask("Какой статус L весь день вчера?", OBJ, now=NOW, timezone=TZ, query_fn=_never)["query_called"] is False
+    # a past moment still answers through the filter
+    day = ask("Какой статус L был 1 ноября в 10:00?", OBJ, now=NOW, timezone=TZ, query_fn=query)
+    assert day["answer"] == "L: статус — на ремонте"
     clar = ask("А его статус?", OBJ, now=NOW, timezone=TZ, query_fn=_never)
     assert clar["query_called"] is False
     reopen()
@@ -287,7 +291,7 @@ def test_live_store_parsed_question_memory_unchanged_and_receipts(durable):
 # ── evaluation numbers are pinned so drift is visible ──────────────────────
 
 def test_eval_counts_are_reproducible():
-    res = {r["split"]: r for r in ev.main([])}
+    res = {r["split"]: r for r in ev.main(["--version", "v5"])}  # v5 pins (frozen snapshot); v6 pins: test_query_parse_v6_rules.py
     # v5: dev is scored against gold v2 (D15 -> clarification R3, D23 -> unsupported R5)
     assert res["dev_gold_v2"]["counts"] == {
         "correct_parse": 13, "confident_misparse": 0, "correct_clarification": 8,

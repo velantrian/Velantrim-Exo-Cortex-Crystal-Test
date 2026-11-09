@@ -75,6 +75,17 @@ v5 (user/Astra decision 2026-11-09, rules R1–R6; frozen v4 at
   unsupported, «будет» with a past/current time -> clarification;
 * R6: comparison markers (сравн…, лучше, хуже, чем, отлича…, разниц…,
   одинаков…) -> unsupported.
+
+v6 final contract (user decision 2026-11-09, C1–C6; frozen v5 at
+``tests/query_parse_v5.py``):
+* C1: «сегодня», «вчера» or a calendar date without a time -> ask for the time
+  (no whole-day reading any more); C6: no time at all -> ask;
+* C2: a day with a clock -> a moment in the established zone (unchanged);
+* C3: an explicitly requested whole day («весь день», «в течение … дня») ->
+  unsupported (whole-day check not supported by the parser yet);
+* C4/C5: future -> unsupported, «будет» + past moment -> ask (as v5);
+* a follow-up / confirmed choice reuses only a moment (documented v1/v4 rules);
+  no ``parsed`` result carries a date-only as_of.
 """
 import re
 from datetime import date, datetime, time, timedelta, timezone as _utc_mod, tzinfo
@@ -153,6 +164,10 @@ _PO_NOT_PLACE = ("статус", "состояни", "данн", "информа
                  "мнени", "оценк", "смысл", "поводу", "порядк")
 _TIME_ALTERNATIVE = r"\b\d{1,2}(?::\d{2})?\s+(?:или|либо|и)\s+(?:в\s+|на\s+)?\d{1,2}\b"
 _STATUS = r"\bстатус\w*|\bсостояни\w*"
+
+
+# v6 C3: explicitly requested whole day (detection only)
+_WHOLE_DAY = r"\bвесь\s+день\b|\bв\s+течени[еи]\s+(?:[а-яё]+\s+)?дня\b"
 
 
 def _result_unsupported(limitation: str, **extra) -> Dict[str, Any]:
@@ -471,7 +486,7 @@ def _parse_day(low: str, now_local: Optional[datetime]):
         if re.search(r"\b%s\b" % word, low):
             if now_local is None:
                 return {"error": "no_clock"}
-            return {"day": now_local.date() + timedelta(days=delta), "token": word, "relative": True,
+            return {"day": now_local.date() + timedelta(days=delta), "token": word,
                     "year_source": "относительно явно заданного текущего момента"}
     return None
 
@@ -564,14 +579,10 @@ def _time_reference_core(low: str, now: Optional[datetime], tz: Optional[tzinfo]
         if day["day"] > now_local.date():
             return _future("Вопрос о будущем дне: «%s» ещё не наступил (явно заданный текущий момент %s); "
                            "состояние на будущий день не поддерживается (прогноз)." % (day["token"], now.isoformat()))
-        if not day.get("relative"):  # v5 R3
-            return _result_clarify("На какое время %s нужен статус? Укажите время, например «%s в 10:00»."
-                                   % (day["token"], day["token"]),
-                                   "дата без времени: статус мог меняться в течение дня; весь день не подставляется")
-        as_of = day["day"].isoformat()
-        return {"ref": "date", "as_of": as_of,
-                "why": "день «%s» без времени → date-only as_of %s (весь день в поясе %s; %s)"
-                       % (day["token"], as_of, tz, day["year_source"])}
+        # v5 R3 / v6 C1: a day without a time (also «сегодня», «вчера») -> ask for the time
+        return _result_clarify("На какое время %s нужен статус? Укажите время, например «%s в 10:00»."
+                               % (day["token"], day["token"]),
+                               "день без времени: статус мог меняться в течение дня; весь день не подставляется")
     moment = _local(day["day"], clock[0], tz)
     if moment is None:
         return _result_clarify("Местное время %s %s неоднозначно или не существует (переход на летнее/зимнее время). Уточните смещение UTC."
@@ -649,6 +660,9 @@ def parse_question(question: str, known_objects: Sequence[Dict[str, Any]],
 
 
 def _parse(text, low, tokens, index, mentions, context, now, tz, timezone_param):
+    if re.search(_WHOLE_DAY, low):
+        return _result_unsupported("Проверка состояния за весь день разборщиком пока не поддерживается; "
+                                   "укажите момент (например «8 ноября в 10:00») или «сейчас».")
     for pattern, label in _PERIOD_PATTERNS:
         if re.search(pattern, low):
             return _result_unsupported(
@@ -710,7 +724,7 @@ def _parse(text, low, tokens, index, mentions, context, now, tz, timezone_param)
             ptz = _resolve_tz(pend.get("tz")) or tz
             as_of = (now.astimezone(ptz) if ptz is not None else now).isoformat()
             why = "уточнённая реплика спрашивала «сейчас» → заново привязано к явно заданному текущему моменту %s" % as_of
-        elif pend and pend.get("time_ref") in ("absolute", "date") and isinstance(pend.get("as_of"), str):
+        elif pend and pend.get("time_ref") == "absolute" and isinstance(pend.get("as_of"), str):  # v6: moment only
             as_of, why = pend["as_of"], "момент из уточнённой реплики: as_of %s" % pend["as_of"]
         else:
             r = _result_clarify("Выбран объект %s. На какой момент: сейчас или на конкретную дату и время?" % x,
@@ -855,7 +869,7 @@ def _parse_time_part(low, now, tz, zone, context, follow_up, from_context):
     prior = from_context if from_context is not None else (
         _bounded(context)[-1] if follow_up and _bounded(context) else None)
     if ref is None and zone_note:
-        if prior and prior.get("time_ref") in ("absolute", "date"):
+        if prior and prior.get("time_ref") == "absolute":
             return ("result", _result_clarify(
                 "Пересчитать прежний момент в поясе «%s» или вы имеете в виду другой момент?" % zone["phrase"],
                 "пояс назван без момента; прежний момент был в другом поясе"))
@@ -867,7 +881,7 @@ def _parse_time_part(low, now, tz, zone, context, follow_up, from_context):
             as_of = (now.astimezone(tz) if tz is not None else now).isoformat()
             ref = {"ref": "now", "as_of": as_of,
                    "why": "время не названо; предыдущая реплика спрашивала «сейчас» → заново привязано к явно заданному текущему моменту %s" % as_of}
-        elif prior_ref in ("absolute", "date") and isinstance(prior.get("as_of"), str):
+        elif prior_ref == "absolute" and isinstance(prior.get("as_of"), str):  # v6: a moment only, never a date
             ref = {"ref": prior_ref, "as_of": prior["as_of"],
                    "why": "время не названо; унаследовано из предыдущей реплики: as_of %s" % prior["as_of"]}
         else:

@@ -66,10 +66,11 @@ def test_zone_in_text_used_even_without_default_zone_and_for_today_and_now():
     # «сегодня» is the calendar day in the NAMED zone: 23:30 UTC on 8 Nov is already 9 Nov in Moscow.
     from datetime import datetime, timezone as dt_tz
     late = datetime(2026, 11, 8, 23, 30, tzinfo=dt_tz.utc)
-    r = parse_question("Какой статус L сегодня по UTC?", OBJ, now=late, timezone="Europe/Moscow")
-    assert r["params"]["as_of"] == "2026-11-08"
-    r = parse_question("Какой статус L сегодня по Москве?", OBJ, now=late, timezone="UTC")
-    assert r["params"]["as_of"] == "2026-11-09"
+    # v6 C1: «сегодня» needs a clock now; the day is still taken in the NAMED zone
+    r = parse_question("Какой статус L сегодня в 00:10 по UTC?", OBJ, now=late, timezone="Europe/Moscow")
+    assert r["params"]["as_of"] == "2026-11-08T00:10:00+00:00"
+    r = parse_question("Какой статус L сегодня в 00:10 по Москве?", OBJ, now=late, timezone="UTC")
+    assert r["params"]["as_of"] == "2026-11-09T00:10:00+03:00"
 
 
 @pytest.mark.parametrize("q", [

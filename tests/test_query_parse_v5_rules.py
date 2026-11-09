@@ -84,7 +84,7 @@ def test_r2_today_with_clock_is_a_moment_in_the_explicit_zone():
 
 # ── R3: explicit date without time ──────────────────────────────────────────
 @pytest.mark.parametrize("q", ["Какой статус L был 7 ноября?", "Статус L на 2026-11-07?", "Статус L на 07.11?",
-                               "Какой статус L был 8 ноября 2026 года?", "Какой статус L был весь день 7 ноября?"])
+                               "Какой статус L был 8 ноября 2026 года?"])
 def test_r3_date_without_time_asks_for_the_time(q):
     p = gated(q)
     assert p["kind"] == "needs_clarification" and p["question"].startswith("На какое время")
@@ -92,9 +92,12 @@ def test_r3_date_without_time_asks_for_the_time(q):
 
 
 def test_r3_r4_today_and_yesterday_alone_keep_documented_whole_day():
-    assert gated("Какой статус L сегодня?")["params"]["as_of"] == "2026-11-09"
-    assert gated("Какой статус L был вчера?")["params"]["as_of"] == "2026-11-08"
-    assert gated("Какой статус L весь день сегодня?")["params"]["as_of"] == "2026-11-09"
+    # v5 behaviour, kept on the frozen v5 snapshot; v6 (C1, C3) changes it, see test_query_parse_v6_rules.py
+    from tests import query_parse_v5 as v5
+    assert gated("Какой статус L сегодня?", parser=v5)["params"]["as_of"] == "2026-11-09"
+    assert gated("Какой статус L был вчера?", parser=v5)["params"]["as_of"] == "2026-11-08"
+    assert gated("Какой статус L весь день сегодня?", parser=v5)["params"]["as_of"] == "2026-11-09"
+    assert gated("Какой статус L был весь день 7 ноября?", parser=v5)["kind"] == "needs_clarification"
     assert gated("Какой статус L был весь день 7 ноября?", parser=v4)["params"]["as_of"] == "2026-11-07"  # v4: implicit
 
 
@@ -113,7 +116,8 @@ def test_r5_future_is_unsupported(q, ctx):
 
 
 def test_r5_future_word_with_past_or_current_time_clarifies():
-    for q in ("Какой статус L будет 8 ноября в 10:00?", "Какой статус L будет сейчас?", "Какой статус L будет сегодня?"):
+    for q in ("Какой статус L будет 8 ноября в 10:00?", "Какой статус L будет сейчас?",
+              "Какой статус L будет сегодня в 07:00?"):  # v6 C1: «сегодня» alone asks for the time first
         p = gated(q)
         assert p["kind"] == "needs_clarification" and "противоречат" in p["reason"], q
     assert gated("Какой статус L будет 8 ноября?")["question"].startswith("На какое время")  # R3 first

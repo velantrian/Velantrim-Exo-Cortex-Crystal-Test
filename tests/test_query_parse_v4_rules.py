@@ -92,8 +92,9 @@ def test_confirmed_choice_with_named_zone_and_absolute_time():
     assert gated("M", ctx)["params"]["as_of"] == "2026-11-09T09:58:00+03:00"
     ctx = ctx_of("Какой статус Мостами был 8 ноября в 10:00?")
     assert gated("Y", ctx)["params"]["as_of"] == "2026-11-08T10:00:00+01:00"
-    ctx = ctx_of("Какой статус Моста сегодня?")
-    assert gated("Y", ctx)["params"]["as_of"] == "2026-11-09"
+    ctx = ctx_of("Какой статус Моста сегодня?")  # v6 C1: no usable moment -> the choice asks for the time
+    p = gated("Y", ctx)
+    assert p["kind"] == "needs_clarification" and p["confirmed_object"] == "Y"
 
 
 def test_confirmed_choice_without_time_asks_time_but_keeps_choice():
