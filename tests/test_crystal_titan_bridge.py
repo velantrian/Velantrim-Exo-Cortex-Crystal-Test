@@ -166,6 +166,9 @@ def test_matching_ground_is_present_in_final_messages():
     assert result["handoff"]["provider_called"] is True
     assert result["handoff"]["prepared_messages"] == result["final_messages"]
     assert result["handoff"]["provider_received"] == result["final_messages"]
+    assert result["handoff"]["prepared_matches_provider_received"] is True
+    assert result["titan"]["capture_points"]["prepared"] != result["titan"]["capture_points"]["received"]
+    assert result["titan"]["prepared_messages"] == result["titan"]["provider_received_messages"]
     assert result["handoff"]["provider_response"] == result["reply"]
     assert result["handoff"]["admitted_records_passed_to_titan"][0]["fact_id"] == "g-m-current"
 
@@ -180,6 +183,7 @@ def test_foreign_or_stale_ground_is_absent_from_final_messages():
     assert result["handoff"]["provider_called"] is False
     assert result["handoff"]["prepared_messages"] is None
     assert result["handoff"]["provider_received"] is None
+    assert result["handoff"]["prepared_matches_provider_received"] is None
     assert result["handoff"]["provider_response"] is None
     assert "Подходящих сведений нет" in result["reply"]
     excluded_ids = {item["fact_id"] for item in result["excluded"]}
@@ -519,3 +523,77 @@ def test_status_question_with_grounds_still_invokes_titan():
     assert result["titan_invoked"] is True
     assert result["provider_calls"] == 1
     assert result["handoff"]["provider_called"] is True
+
+
+def test_prepared_and_received_are_captured_at_distinct_points():
+    """Independent hooks: Titan send-boundary vs fake-provider POST body."""
+    result = _run(QUESTION_M_NOW, [MATCHING], canned_answer=CLEAN_ANSWER)
+    handoff = result["handoff"]
+    assert handoff["prepared_matches_provider_received"] is True
+    assert result["titan"]["capture_points"] == {
+        "prepared": "core.llm_stream._deepseek_request_body body['messages']",
+        "received": "FakeAsyncClient.post(json) body['messages']",
+    }
+    assert MATCHING["claim"] in flatten_messages(handoff["prepared_messages"])
+    assert MATCHING["claim"] in flatten_messages(handoff["provider_received"])
+
+
+def test_missing_confidence_in_actual_titan_prompt_renders_zero():
+    """FINDING: Titan formats a missing confidence key as conf=0.00.
+
+    The lab bridge does not invent a number. CanonicalView.STRICT drops a
+    fact with missing confidence before run_bridge, so this invokes Titan
+    directly with the converted record.
+    """
+    from tests.support.crystal_titan_bridge import (
+        default_titan_invoker,
+        ground_to_titan_record,
+    )
+
+    fact = dict(MATCHING)
+    fact.pop("confidence", None)
+    record = ground_to_titan_record(fact)
+    assert "confidence" not in record
+    assert record["confidence_repr"] == "missing"
+    assert "confidence=missing" in record["source"]
+    titan = default_titan_invoker()(QUESTION_M_NOW, [record])
+    blob = flatten_messages(titan["prepared_messages"])
+    received = flatten_messages(titan["provider_received_messages"])
+    assert "conf=0.00" in blob
+    assert "conf=0.00" in received
+    assert "confidence=missing" in blob
+    assert titan["prepared_matches_provider_received"] is True
+
+
+def test_selection_fingerprint_is_not_proof_of_identical_context():
+    shared = {
+        "fact_id": "g-m-current",
+        "claim": "M is operational MATCHING-GROUND-TEXT",
+        "primary_object": "M",
+    }
+    a = _canon({
+        **shared,
+        "source": "src-a",
+        "observed_at": "2026-11-09T12:00:00+01:00",
+        "valid_from": "2026-11-01T00:00:00+01:00",
+        "valid_until": "2026-11-10T00:00:00+01:00",
+        "metadata": {"provenance": {"origin": "a", "record": "PROV-A"}},
+    })
+    b = _canon({
+        **shared,
+        "source": "src-b",
+        "observed_at": "2026-11-09T11:00:00+01:00",
+        "valid_from": "2026-11-08T00:00:00+01:00",
+        "valid_until": "2026-11-30T00:00:00+01:00",
+        "metadata": {"provenance": {"origin": "b", "record": "PROV-B"}},
+    })
+    ra = _run(QUESTION_M_NOW, [a])
+    rb = _run(QUESTION_M_NOW, [b])
+    assert ra["selection_fingerprint"]["sha256"] == rb["selection_fingerprint"]["sha256"]
+    assert ra["selection_fingerprint"]["proves_identical_context"] is False
+    blob_a = flatten_messages(ra["final_messages"])
+    blob_b = flatten_messages(rb["final_messages"])
+    assert "src-a" in blob_a and "src-b" in blob_b
+    assert "PROV-A" in blob_a and "PROV-B" in blob_b
+    assert "valid_from=2026-11-01T00:00:00+01:00" in blob_a
+    assert "valid_from=2026-11-08T00:00:00+01:00" in blob_b

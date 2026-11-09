@@ -80,11 +80,13 @@ def selection_fingerprint(
     params: Mapping[str, Any] | None,
     kept: Sequence[Mapping[str, Any]],
 ) -> dict[str, Any]:
-    """Order-stable lab fingerprint of the admitted grounds set.
+    """Order-stable lab fingerprint of admitted fact_id + claim hash + question params.
 
-    Separate from ``provenance.build_receipt``: it does not include
-    ``created_at``, extractive answer text, or citation order. Do not use
-    it as a replacement digest.
+    This is not proof that two selections used the same context. It omits
+    source, provenance, observed_at, valid_from/valid_until, and the text
+    Titan actually sends. Separate from ``provenance.build_receipt``: it
+    also omits ``created_at``, extractive answer text, and citation order.
+    Do not use it as a replacement digest or as a context-identity check.
     """
     params = dict(params or {})
     grounds = sorted(
@@ -110,6 +112,7 @@ def selection_fingerprint(
         "canonical": canonical,
         "sha256": hashlib.sha256(canonical.encode("utf-8")).hexdigest(),
         "separate_from_receipt": True,
+        "proves_identical_context": False,
     }
 
 
@@ -117,17 +120,25 @@ def describe_handoff(
     *,
     records: list[dict[str, Any]],
     prepared_messages: Sequence[Mapping[str, Any]] | None,
+    provider_received: Sequence[Mapping[str, Any]] | None,
     provider_calls: int,
     reply: str | None,
 ) -> dict[str, Any]:
-    """Keep prepared / received / provider response as distinct fields."""
+    """Keep prepared / received / provider response as independently recorded fields."""
     called = provider_calls > 0
+    prepared = list(prepared_messages) if prepared_messages else None
+    received = list(provider_received) if called and provider_received else None
+    if prepared is not None and received is not None:
+        match: bool | None = prepared == received
+    else:
+        match = None
     return {
         "admitted_records_passed_to_titan": records,
-        "prepared_messages": list(prepared_messages) if prepared_messages else None,
-        "provider_received": list(prepared_messages) if called and prepared_messages else None,
+        "prepared_messages": prepared,
+        "provider_received": received,
         "provider_response": reply if called else None,
         "provider_called": called,
+        "prepared_matches_provider_received": match,
     }
 
 def ground_to_titan_record(fact: Mapping[str, Any]) -> dict[str, Any]:
@@ -410,7 +421,11 @@ def run_bridge(
             "bridge_answer_check": None,
             "shadow_support": None,
             "handoff": describe_handoff(
-                records=[], prepared_messages=None, provider_calls=0, reply=None
+                records=[],
+                prepared_messages=None,
+                provider_received=None,
+                provider_calls=0,
+                reply=None,
             ),
         }
     records = [ground_to_titan_record(fact) for fact in prep["kept"]]
@@ -422,7 +437,10 @@ def run_bridge(
     titan = caller(question, records)
     reply = titan.get("reply")
     provider_calls = int(titan.get("provider_calls") or 0)
-    prepared = titan.get("messages")
+    prepared = titan.get("prepared_messages")
+    received = titan.get("provider_received_messages")
+    if prepared is None:
+        prepared = titan.get("messages")
     return {
         "kind": "answer_request",
         "parsed": prep["parsed"],
@@ -446,6 +464,7 @@ def run_bridge(
         "handoff": describe_handoff(
             records=records,
             prepared_messages=prepared,
+            provider_received=received,
             provider_calls=provider_calls,
             reply=reply,
         ),

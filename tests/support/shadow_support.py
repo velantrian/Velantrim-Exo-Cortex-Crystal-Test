@@ -60,8 +60,17 @@ def evaluate_shadow_support(
     contradictions = []
     supports = []
     insufficient = []
+    matched_outside_context = []
     for fact in admitted:
         claim = str(fact.get("claim") or "")
+        if not _in_prepared(fact, prepared):
+            if claim and (
+                claim in text
+                or claim.lower() in text.lower()
+                or len(_tokens(claim) & _tokens(text)) >= 3
+            ):
+                matched_outside_context.append(fact.get("fact_id"))
+            continue
         if not claim:
             insufficient.append(fact.get("fact_id"))
             continue
@@ -113,6 +122,8 @@ def evaluate_shadow_support(
         verdict = "contradicts"
     elif supports:
         verdict = "supports"
+    elif matched_outside_context:
+        verdict = "not_in_context"
     else:
         verdict = "insufficient"
 
@@ -124,6 +135,7 @@ def evaluate_shadow_support(
         "citation_in_prepared_context": in_context,
         "missing_from_prepared_context": missing_from_context,
         "supports": supports,
+        "matched_outside_prepared_context": matched_outside_context,
         "contradicts": contradictions,
         "insufficient": insufficient,
         "cited_excluded": cited_excluded,

@@ -7,6 +7,7 @@ from __future__ import annotations
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from core.applicability import select
 from core.memory import get_fact, store_fact, transition_esm
 from core.provenance import RECEIPT_VERSION, verify_receipt
 from core.reconcile import REL_SUPERSEDED_BY, supersede
@@ -74,9 +75,7 @@ def test_case_a_old_record_already_out_of_current_state():
     assert "SUPERSEDED-OPEN-MARKER" not in blob
     # FINDING: drop happens because CanonicalView filters Deprecated ESM,
     # not because select() reads a SUPERSEDED_BY edge.
-    assert result["excluded"] == [] or all(
-        item.get("fact_id") != "g-m-open-old" or True for item in result["excluded"]
-    )
+    assert not any(item.get("fact_id") == "g-m-open-old" for item in result["excluded"])
 
 
 def test_case_b_unresolved_contradiction_admits_both():
@@ -180,13 +179,7 @@ def test_case_d_current_vs_past_as_of():
     blob = flatten_messages(past["final_messages"])
     assert "PAST-COVER-MARKER" in blob
     assert "MATCHING-GROUND-TEXT" not in blob
-    # After ESM deprecation the old current-state record is gone from STRICT
-    # grounding even if a caller asked about the past on that same timestamp.
-    past_of_deprecated = _run(QUESTION_M_NOW, [OLD_OPEN])
-    assert past_of_deprecated["kind"] == "no_matching_information"
-    assert "g-m-open-old" in {
-        f["fact_id"] for f in past_of_deprecated["canonical_view_excluded"]
-    }
+    assert past["parsed"]["params"]["as_of"] != current["parsed"]["params"]["as_of"]
 
 
 def test_case_e_foreign_object_correction_does_not_drop_m():
@@ -369,3 +362,95 @@ def test_normal_crystal_query_path_foreign_object_has_no_answer(durable):
     assert foreign_only["receipt"] is None
     assert foreign_only["receipt_error"]
     assert dumps(durable) == before
+
+
+QUESTION_M_NOV9_PAST = "Какой статус был у M 9 ноября 2026 в 12:00?"
+
+
+def test_past_as_of_against_deprecated_same_moment_correction():
+    """Deprecated same-moment record: models a correction, not a closed interval.
+
+    OLD_OPEN and NEW_CLOSED share observed_at=2026-11-09T12:00:00+01:00.
+    That is the 'correction of an error' shape: two claims about the same
+    moment. Crystal's supersede() does not distinguish this from 'end of a
+    previously true fact'; both become Validated → Contradicted → Deprecated.
+    Historical-read rules are unchanged here: CanonicalView.STRICT still
+    drops Deprecated regardless of as_of, so a past question about that
+    same timestamp does not recover the old record.
+    """
+    result = _run(QUESTION_M_NOV9_PAST, [OLD_OPEN])
+    assert result["parsed"]["kind"] == "parsed"
+    assert "2026-11-09" in (result["params"] or {}).get("as_of", "")
+    assert result["kind"] == "no_matching_information"
+    assert result["titan_invoked"] is False
+    assert "g-m-open-old" in {f["fact_id"] for f in result["canonical_view_excluded"]}
+    kept_by_select, _ = select(
+        [OLD_OPEN],
+        asked_object="M",
+        as_of=result["params"]["as_of"],
+        temporal_scope=result["params"].get("temporal_scope"),
+    )
+    assert [f["fact_id"] for f in kept_by_select] == ["g-m-open-old"]
+
+
+def test_past_as_of_against_deprecated_earlier_observation():
+    """Deprecated earlier observation: 'end of a previously true fact' shape.
+
+    Crystal still does not keep the old record for historical as_of: STRICT
+    projection removes Deprecated before select() runs. select() alone would
+    admit the covering past record.
+    """
+    deprecated_past = _canon({
+        "fact_id": "g-m-past-deprecated",
+        "claim": "M was in maintenance PAST-DEPRECATED-MARKER",
+        "source": "operator-log:m-past-deprecated",
+        "primary_object": "M",
+        "observed_at": "2026-10-01T10:00:00+02:00",
+    }, epistemic_state="Deprecated")
+    result = _run(QUESTION_M_PAST, [deprecated_past])
+    assert result["parsed"]["kind"] == "parsed"
+    assert "2026-10-01" in (result["params"] or {}).get("as_of", "")
+    assert result["kind"] == "no_matching_information"
+    assert result["titan_invoked"] is False
+    assert "g-m-past-deprecated" in {
+        f["fact_id"] for f in result["canonical_view_excluded"]
+    }
+    kept_by_select, _ = select(
+        [deprecated_past],
+        asked_object="M",
+        as_of=result["params"]["as_of"],
+        temporal_scope=result["params"].get("temporal_scope"),
+    )
+    assert [f["fact_id"] for f in kept_by_select] == ["g-m-past-deprecated"]
+
+
+def test_shadow_does_not_support_answer_from_unsent_admitted_record():
+    sent = _canon({
+        "fact_id": "g-m-sent-only",
+        "claim": "M north hall remains quiet this evening",
+        "source": "operator-log:m-sent-only",
+        "primary_object": "M",
+        "observed_at": "2026-11-09T12:00:00+01:00",
+    })
+    unsent = _canon({
+        "fact_id": "g-m-unsent-only",
+        "claim": "M south hall has spare capacity available",
+        "source": "operator-log:m-unsent-only",
+        "primary_object": "M",
+        "observed_at": "2026-11-09T12:00:00+01:00",
+    })
+    prepared = [{"role": "system", "content": sent["claim"]}]
+    shadow = evaluate_shadow_support(
+        answer=unsent["claim"],
+        prepared_messages=prepared,
+        admitted=[sent, unsent],
+        excluded=[],
+    )
+    assert shadow["verdict"] == "not_in_context"
+    assert shadow["verdict"] != "supports"
+    assert shadow["supports"] == []
+    assert "g-m-unsent-only" in shadow["matched_outside_prepared_context"]
+    assert any(
+        item["fact_id"] == "g-m-unsent-only"
+        for item in shadow["missing_from_prepared_context"]
+    )

@@ -166,6 +166,20 @@ def main() -> int:
 
     import httpx
     import server
+    import core.llm_router as llm_router
+    import core.llm_stream as llm_stream
+
+    prepared_payloads: list[Any] = []
+    orig_deepseek_body = llm_router._deepseek_request_body
+
+    def _capture_prepared(cfg, messages, **kwargs):
+        """Independent send-boundary capture: Titan's constructed provider body."""
+        body = orig_deepseek_body(cfg, messages, **kwargs)
+        prepared_payloads.append(copy.deepcopy(body.get("messages")))
+        return body
+
+    llm_router._deepseek_request_body = _capture_prepared
+    llm_stream._deepseek_request_body = _capture_prepared
 
     canned = payload.get("canned_answer")
     if not isinstance(canned, str) or not canned:
@@ -187,13 +201,24 @@ def main() -> int:
     )
     resp = asyncio.run(server.chat_endpoint(req))
     bodies = [r["body"] for r in fake.requests]
+    received = bodies[0].get("messages") if bodies else None
+    prepared = prepared_payloads[0] if prepared_payloads else None
     checks = _evaluate_response_checks(resp.reply, facts)
     out = {
         "titan_root": str(titan_root),
         "titan_commit": _git_head(titan_root),
         "expected_titan_commit_prefix": EXPECTED_TITAN_COMMIT_PREFIX,
         "provider_calls": len(fake.requests),
-        "messages": (bodies[0].get("messages") if bodies else None),
+        "prepared_messages": prepared,
+        "provider_received_messages": received,
+        "prepared_matches_provider_received": (
+            None if prepared is None or received is None else prepared == received
+        ),
+        "capture_points": {
+            "prepared": "core.llm_stream._deepseek_request_body body['messages']",
+            "received": "FakeAsyncClient.post(json) body['messages']",
+        },
+        "messages": prepared if prepared is not None else received,
         "request_bodies": bodies,
         "context_report": resp.context_report,
         "reply": resp.reply,
