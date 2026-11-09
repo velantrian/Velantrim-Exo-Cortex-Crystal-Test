@@ -16,11 +16,14 @@ from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
 from core.applicability import declarations, select
+from core.generation import ExtractiveGenerator
+from core.provenance import build_receipt, claim_digest, verify_receipt
 from core.query_parse import parse_question
 
 DEFAULT_TITAN_ROOT = Path(os.environ.get("TITAN_SANDBOX_ROOT", "/workspace/titan-sandbox"))
 SPY_SCRIPT = Path(__file__).with_name("titan_chat_spy.py")
 INVOKE_TITAN = Callable[[str, list[dict[str, Any]]], Mapping[str, Any]]
+EXCLUSION_MARKERS = ("FOREIGN-OBJECT-MARKER", "STALE-GROUND-MARKER")
 
 
 def _as_text(value: Any) -> str:
@@ -102,19 +105,115 @@ def parse_and_select(
     }
 
 
-def default_titan_invoker(titan_root: Path | None = None) -> INVOKE_TITAN:
+def build_selection_receipt(
+    question: str,
+    params: Mapping[str, Any] | None,
+    kept: Sequence[Mapping[str, Any]],
+    selection: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    """Wrap Crystal's real selection artifacts; do not invent a new receipt schema.
+
+    Sealed structure, when an extractive Crystal answer exists, is
+    ``provenance.build_receipt`` (version, created_at, query, answer,
+    citations with fact_id/claim_sha256/source/epistemic_state/truth_status,
+    digest). That receipt attests Crystal's extractive concatenation of
+    admitted claims — not a Titan-generated reply.
+
+    Object, as_of and exclusions come from ``parse_question`` params and
+    ``applicability.select`` (the ``applicability`` packet).
+    """
+    params = dict(params or {})
+    info = dict(selection or {
+        "exclusions": [],
+        "historical_facts": [],
+        "context_relations": [],
+        "request_error": None,
+    })
+    admitted = [
+        {
+            "fact_id": fact.get("fact_id"),
+            "claim": fact.get("claim"),
+            "claim_sha256": claim_digest(fact.get("claim", "")),
+        }
+        for fact in kept
+    ]
+    provenance_receipt = None
+    if kept:
+        extractive = ExtractiveGenerator().generate(question, list(kept))
+        provenance_receipt = build_receipt({
+            "query": question,
+            "answer": extractive,
+            "facts": list(kept),
+        })
+    return {
+        "certifies_response": False,
+        "does_not_certify": ["titan_generated_answer"],
+        "certifies": {
+            "admitted_fact_ids": [row["fact_id"] for row in admitted],
+            "claim_sha256": [row["claim_sha256"] for row in admitted],
+            "admitted_claims": [row["claim"] for row in admitted],
+            "asked_object": params.get("asked_object"),
+            "as_of": params.get("as_of"),
+            "temporal_scope": params.get("temporal_scope"),
+            "exclusions": list(info.get("exclusions") or []),
+        },
+        "asked_object": params.get("asked_object"),
+        "as_of": params.get("as_of"),
+        "temporal_scope": params.get("temporal_scope"),
+        "applicability": info,
+        "admitted": admitted,
+        "provenance_receipt": provenance_receipt,
+    }
+
+
+def receipt_digest_valid(receipt: Mapping[str, Any] | None) -> bool | None:
+    sealed = (receipt or {}).get("provenance_receipt")
+    if not sealed:
+        return None
+    return bool(verify_receipt(sealed).get("digest_valid"))
+
+
+def check_answer_excludes_rejected_grounds(
+    reply: str | None,
+    excluded: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Bridge-side check: the final answer must not mention excluded grounds."""
+    text = reply or ""
+    hits: list[str] = []
+    for marker in EXCLUSION_MARKERS:
+        if marker in text:
+            hits.append(marker)
+    for fact in excluded:
+        claim = str(fact.get("claim") or "")
+        if claim and claim in text:
+            hits.append(claim)
+    unique = list(dict.fromkeys(hits))
+    return {
+        "side": "bridge",
+        "passed": not unique,
+        "hits": unique,
+    }
+
+
+def default_titan_invoker(
+    titan_root: Path | None = None,
+    canned_answer: str | None = None,
+) -> INVOKE_TITAN:
     root = Path(titan_root or DEFAULT_TITAN_ROOT)
 
     def _invoke(message: str, records: list[dict[str, Any]]) -> dict[str, Any]:
-        payload = json.dumps(
-            {"message": message, "facts": records, "titan_root": str(root)},
-            ensure_ascii=False,
-        )
+        payload = {
+            "message": message,
+            "facts": records,
+            "titan_root": str(root),
+        }
+        if canned_answer is not None:
+            payload["canned_answer"] = canned_answer
         env = os.environ.copy()
         env["PYTHONDONTWRITEBYTECODE"] = "1"
         proc = subprocess.run(
             [sys.executable, str(SPY_SCRIPT)],
-            input=payload,
+            input=json.dumps(payload, ensure_ascii=False),
             capture_output=True,
             text=True,
             env=env,
@@ -139,6 +238,7 @@ def run_bridge(
     timezone: Any,
     invoke_titan: INVOKE_TITAN | None = None,
     titan_root: Path | None = None,
+    canned_answer: str | None = None,
 ) -> dict[str, Any]:
     prep = parse_and_select(
         question, candidate_facts, known_objects, now=now, timezone=timezone
@@ -151,16 +251,27 @@ def run_bridge(
             "params": None,
             "kept": [],
             "excluded": [],
+            "receipt": None,
             "titan_records": [],
             "titan_invoked": False,
             "provider_calls": 0,
             "final_messages": None,
             "context_report": None,
             "titan": None,
+            "reply": None,
+            "bridge_answer_check": None,
         }
+    receipt = build_selection_receipt(
+        question, prep["params"], prep["kept"], prep["selection"]
+    )
     records = [ground_to_titan_record(fact) for fact in prep["kept"]]
-    caller = invoke_titan if invoke_titan is not None else default_titan_invoker(titan_root)
+    caller = (
+        invoke_titan
+        if invoke_titan is not None
+        else default_titan_invoker(titan_root, canned_answer=canned_answer)
+    )
     titan = caller(question, records)
+    reply = titan.get("reply")
     return {
         "kind": "answer_request",
         "parsed": prep["parsed"],
@@ -168,12 +279,17 @@ def run_bridge(
         "params": prep["params"],
         "kept": prep["kept"],
         "excluded": prep["excluded"],
+        "receipt": receipt,
         "titan_records": records,
         "titan_invoked": True,
         "provider_calls": int(titan.get("provider_calls") or 0),
         "final_messages": titan.get("messages"),
         "context_report": titan.get("context_report"),
         "titan": titan,
+        "reply": reply,
+        "bridge_answer_check": check_answer_excludes_rejected_grounds(
+            reply, prep["excluded"]
+        ),
     }
 
 

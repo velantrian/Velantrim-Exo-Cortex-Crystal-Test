@@ -36,12 +36,13 @@ def _git_head(root: Path) -> str:
 
 
 class FakeProvider:
-    def __init__(self) -> None:
+    def __init__(self, canned_answer: str) -> None:
         self.requests: list[dict[str, Any]] = []
+        self.canned_answer = canned_answer
 
 
-def _install_fake(httpx_mod: Any) -> FakeProvider:
-    provider = FakeProvider()
+def _install_fake(httpx_mod: Any, canned_answer: str) -> FakeProvider:
+    provider = FakeProvider(canned_answer)
 
     class FakeAsyncClient:
         def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -58,7 +59,10 @@ def _install_fake(httpx_mod: Any) -> FakeProvider:
             request = httpx_mod.Request("POST", url)
             return httpx_mod.Response(
                 200,
-                json={"choices": [{"message": {"content": "ok"}}], "usage": {}},
+                json={
+                    "choices": [{"message": {"content": provider.canned_answer}}],
+                    "usage": {},
+                },
                 request=request,
             )
 
@@ -67,6 +71,76 @@ def _install_fake(httpx_mod: Any) -> FakeProvider:
 
     httpx_mod.AsyncClient = FakeAsyncClient
     return provider
+
+
+def _evaluate_response_checks(reply: str, source_facts: list[dict[str, Any]]) -> dict[str, Any]:
+    """Call Titan checkers standalone. /chat does not run them on the LLM reply."""
+    from core.output_faithfulness import (
+        OutputFaithfulnessChecker,
+        check_response_faithfulness,
+        is_output_faithfulness_enabled,
+    )
+    from core.response_audit import is_response_audit_enabled
+    from core.response_guardian import (
+        ResponseGuardian,
+        apply_response_guardian,
+        is_response_guardian_enabled,
+    )
+
+    trace = [{"fact_id": f.get("fact_id")} for f in source_facts if f.get("fact_id")]
+    avg_conf = 0.0
+    if source_facts:
+        avg_conf = sum(float(f.get("confidence") or 0.5) for f in source_facts) / len(source_facts)
+
+    gated_guardian = apply_response_guardian(reply, source_facts, trace)
+    gated_faith = check_response_faithfulness(reply, source_facts)
+    standalone_guardian = ResponseGuardian().validate(
+        response=reply,
+        confidence=avg_conf if source_facts else 1.0,
+        trace=[str(t["fact_id"]) for t in trace],
+        sources=source_facts,
+    )
+    standalone_faith = OutputFaithfulnessChecker().check(reply, source_facts)
+
+    def _flagged_faith(result: Any) -> bool | None:
+        if result is None:
+            return None
+        data = result if isinstance(result, dict) else result.to_dict()
+        return bool(data.get("unsupported")) or float(data.get("score") or 0) < 0.5
+
+    return {
+        "wired_on_chat_llm_reply": {
+            "response_guardian": False,
+            "output_faithfulness": False,
+            "response_audit": False,
+            "note": (
+                "At Titan 6b45854, chat_endpoint does not call ResponseGuardian, "
+                "OutputFaithfulnessChecker or ResponseAuditWorker on the LLM reply. "
+                "Those run inside core.pipeline.run on that pipeline's own "
+                "generate_answer, not on /chat's model text. Defaults: all three "
+                "feature flags are false."
+            ),
+        },
+        "feature_flags": {
+            "enable_response_guardian": is_response_guardian_enabled(),
+            "enable_output_faithfulness": is_output_faithfulness_enabled(),
+            "enable_response_audit": is_response_audit_enabled(),
+        },
+        "gated_as_configured": {
+            "response_guardian": gated_guardian.to_dict(),
+            "output_faithfulness": None if gated_faith is None else gated_faith.to_dict(),
+        },
+        "standalone_enabled": {
+            "response_guardian": standalone_guardian.to_dict(),
+            "output_faithfulness": standalone_faith.to_dict(),
+        },
+        "flagged": {
+            "gated_response_guardian": gated_guardian.decision.value != "approve",
+            "gated_output_faithfulness": _flagged_faith(gated_faith),
+            "standalone_response_guardian": standalone_guardian.decision.value != "approve",
+            "standalone_output_faithfulness": _flagged_faith(standalone_faith),
+        },
+    }
 
 
 def main() -> int:
@@ -80,17 +154,20 @@ def main() -> int:
     os.environ["VELANTRIM_REMOTE_DATA_MODE"] = "allowed"
     os.environ["VELANTRIM_DB_PATH"] = str(work / "velantrim.db")
     os.environ["VELANTRIM_NGRAM_DB"] = str(work / "ngram.db")
+    os.environ["SQLITE_AUDIT_PATH"] = str(work / "response_audit.db")
     os.environ["SLEEP_WORKER_ENABLED"] = "false"
     os.environ["LOG_LEVEL"] = "WARNING"
     os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
-    # Isolate relative paths (Titan defaults to ./data/...) from the checkout.
     os.chdir(work)
     sys.path.insert(0, str(titan_root))
 
     import httpx
     import server
 
-    fake = _install_fake(httpx)
+    canned = payload.get("canned_answer")
+    if not isinstance(canned, str) or not canned:
+        canned = "ok"
+    fake = _install_fake(httpx, canned)
     facts = list(payload.get("facts") or [])
     server.pipeline_run = lambda q, mode, domain: {"facts": facts, "error": None}
 
@@ -107,7 +184,7 @@ def main() -> int:
     )
     resp = asyncio.run(server.chat_endpoint(req))
     bodies = [r["body"] for r in fake.requests]
-    report = resp.context_report
+    checks = _evaluate_response_checks(resp.reply, facts)
     out = {
         "titan_root": str(titan_root),
         "titan_commit": _git_head(titan_root),
@@ -115,12 +192,13 @@ def main() -> int:
         "provider_calls": len(fake.requests),
         "messages": (bodies[0].get("messages") if bodies else None),
         "request_bodies": bodies,
-        "context_report": report,
+        "context_report": resp.context_report,
         "reply": resp.reply,
         "from_llm": resp.from_llm,
         "facts_count": resp.facts_count,
         "memory_saved": resp.memory_saved,
         "memory_auto_status": resp.memory_auto_status,
+        "titan_response_checks": checks,
     }
     json.dump(out, sys.stdout, ensure_ascii=False)
     sys.stdout.write("\n")
