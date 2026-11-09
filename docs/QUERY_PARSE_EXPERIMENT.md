@@ -543,3 +543,48 @@ for v4 (and for v3).
   candidate set it was confirmed for.
 * «по <word>», day-part table and the 4-letter near-miss heuristic unchanged
   from v3.
+
+## Independent check v4 (`docs/query_parse/independent_v4_results.json`)
+
+* Set: `tests/fixtures/query_parse/independent_v4.json`, 30 items, committed
+  unchanged (sha256 `4bd2d804b726eaac97120daa175eddd2a42dc67afcb91d3411f858298b0f4cb6`,
+  verified against the provided `.sha256`). It was read only after the freeze
+  commit `64e485a` and tag `query-parse-v4-frozen` were pushed.
+* Its own note: written by a different author (Grok Bot, the assistant) without
+  access to the parser code, tests, fixtures, docs or PR, but knowing the contract
+  and the v1–v3 defect classes — **not fully independent**.
+* Parser: frozen `core/query_parse.py` (sha256 `81e1f663…9d26`), no rule
+  changes. Runner: `python -m tests.query_parse_independent_v4 --write`; it only
+  maps formats (catalogue aliases → names, file `now`/`default_tz`, earlier
+  turns → structured context via the same parser, gold `object_id`/`as_of`/`date`
+  → harness gold; as_of compared as an instant).
+* Harness issue H1: the set has no facts, so grounds and "answers differ from
+  manual" are **n/a**, not 0.
+
+| Set | n | parse ✓ | misparse | clarif ✓ | clarif unnecessary | unsup ✓ | unsup wrong | clarif-for-unsup | answers differ |
+|---|---|---|---|---|---|---|---|---|---|
+| independent_v4 | 30 | 12 | 3 | 11 | 0 | 2 | 1 | 1 | n/a (H1) |
+
+For every clarification/unsupported item the spy confirms the query was not
+called. Catalogue rotations × name order (480 variants): no decision changed
+(not all 8! permutations).
+
+**Disagreements with gold (contract_gap = false):**
+
+| id | question | parser | gold | class |
+|---|---|---|---|---|
+| I13 | «…в десять утра 8 ноября?» | parsed L, date-only 2026-11-08 (query ran) | clarification | **parser error** — worded time silently dropped |
+| I20 | «У L статус сейчас лучше, чем у L2?» | clarification L/L2 (no query) | unsupported | **parser error** — comparison «лучше, чем» not detected (safe, wrong kind) |
+| I15 | «…будет 12 ноября в 10:00?» | unsupported (forecast) | clarification | gold/contract ambiguity — PR contract maps «будет» to unsupported; neither runs the query |
+
+**contract_gap items (listed separately):** I19, I21, I28, I29, I30 are
+flagged. Disagreements among them:
+
+| id | question | parser | gold (cautious) | class |
+|---|---|---|---|---|
+| I19 | «…котельной сегодня в 08:00?» | parsed K at 2026-11-09T08:00:00+01:00 | clarification | contract ambiguity; parser = the author's named alternative |
+| I30 | «…L2 был 7 ноября?» | parsed L2, date-only 2026-11-07 | clarification | contract ambiguity; PR contract says bare date = whole day; parser = named alternative |
+
+I21 («L, а не L2» → clarification), I28 (unknown «Мостик» → clarification) and
+I29 («Готов ли L2 сейчас?» → unsupported) agree with the cautious gold. Nothing
+was fixed; the two parser errors are open items for a later version.

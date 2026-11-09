@@ -1,0 +1,1044 @@
+{
+ "parser": "core/query_parse.py (frozen v4, tag query-parse-v4-frozen)",
+ "parser_sha256": "81e1f6632163ddd1d88d365b2d8a7f2121197ac00885c9452c865a93a9ac9d26",
+ "questions_file": "tests/fixtures/query_parse/independent_v4.json",
+ "questions_sha256": "4bd2d804b726eaac97120daa175eddd2a42dc67afcb91d3411f858298b0f4cb6",
+ "author_note": "Набор написан Grok Bot (ассистентом) без доступа к коду, тестам, фикстурам, документации и PR #14 разборщика; разборщик, память и фильтр не запускались. Автор знает контракт и предшествующую переписку (включая классы ошибок v1–v3), поэтому набор не полностью независим от автора правил контракта. Эталоны выведены только из контракта; где контракт неясен, выбран осторожный эталон и стоит флаг contract_gap. Для parsed с поясом сравнивать as_of как момент времени, а не как строку.",
+ "now": "2026-11-09T10:00:00+01:00",
+ "timezone": "Europe/Berlin",
+ "harness_mapping": {
+  "catalogue": "{id, aliases} -> known_objects {id, names: aliases} (order as given)",
+  "now / default_tz": "file 'now' and 'default_tz' are passed as now= and timezone=",
+  "turns": "all turns but the last are run through the same frozen parser and stored with context_turn (structured context); the last turn is the scored question. context_assumptions are not injected; the actual context kinds are recorded per item",
+  "gold": "gold_outcome -> kind; gold_parameters.object_id -> asked_object; as_of compared as an instant, gold 'date' compared to a date-only as_of; temporal_scope must be 'current'",
+  "query_fn": "a spy that records calls and returns a stub; the set supplies no facts, so the 'answers differ from manual' column is not applicable (harness issue H1)"
+ },
+ "harness_issues": [
+  {
+   "id": "H1",
+   "issue": "the independent set has no facts, so admitted grounds and the 'answers differ from manual' column cannot be computed; reported as n/a, not as 0"
+  }
+ ],
+ "n": 30,
+ "counts": {
+  "correct_parse": 12,
+  "confident_misparse": 3,
+  "correct_clarification": 11,
+  "unnecessary_clarification": 0,
+  "correct_unsupported": 2,
+  "wrong_unsupported": 1,
+  "clarification_instead_of_unsupported": 1
+ },
+ "answers_differ_from_manual": "n/a (H1)",
+ "clarifications_and_unsupported_with_no_query_call": true,
+ "rotation_invariance": {
+  "orders": "all rotations x names as given/reversed (not all 8! permutations)",
+  "variants": 480,
+  "changed": []
+ },
+ "disagreements": [
+  {
+   "id": "I13",
+   "category": "confident_misparse",
+   "contract_gap": false,
+   "classification": "parser_error",
+   "query_ran": true,
+   "note": "«в десять утра 8 ноября»: the worded time is silently dropped and the whole day 2026-11-08 is queried. Both the PR contract (time words → clarification) and the gold say clarification. Same class as K18 «в половине десятого», which v3/v4 do clarify; «десять утра» is not caught."
+  },
+  {
+   "id": "I15",
+   "category": "wrong_unsupported",
+   "contract_gap": false,
+   "classification": "gold_contract_ambiguity",
+   "query_ran": false,
+   "note": "«будет 12 ноября в 10:00»: the PR #14 contract table maps «будет»/future to unsupported (forecast); the independent gold says needs_clarification. Neither runs the query; the two contracts differ on which refusal kind a future moment gets."
+  },
+  {
+   "id": "I20",
+   "category": "clarification_instead_of_unsupported",
+   "contract_gap": false,
+   "classification": "parser_error",
+   "query_ran": false,
+   "note": "«лучше, чем у L2»: comparisons are unsupported in both contracts, but the parser only detects «сравн*»; it asks «L или L2?» instead. Safe (no query), wrong outcome kind."
+  }
+ ],
+ "contract_gap_disagreements": [
+  {
+   "id": "I19",
+   "category": "confident_misparse",
+   "contract_gap": true,
+   "classification": "gold_contract_ambiguity",
+   "query_ran": true,
+   "note": "«сегодня в 08:00»: parser takes the moment 2026-11-09T08:00:00+01:00, which is the alternative the gold author names; cautious gold is clarification. The contract does not define «сегодня» + explicit time."
+  },
+  {
+   "id": "I30",
+   "category": "confident_misparse",
+   "contract_gap": true,
+   "classification": "gold_contract_ambiguity",
+   "query_ran": true,
+   "note": "«был 7 ноября» without time: the PR #14 contract (table row «8 ноября» → date-only, whole day) gives date 2026-11-07, which is the gold author's named alternative; the independent contract defines whole day only for «сегодня», cautious gold is clarification."
+  }
+ ],
+ "contract_gap_items_all": [
+  "I19",
+  "I21",
+  "I28",
+  "I29",
+  "I30"
+ ],
+ "rows": [
+  {
+   "id": "I01",
+   "turns": [
+    "какой статус лини L сейчас"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T10:00:00+01:00"
+   },
+   "category": "correct_parse",
+   "parser": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "L",
+     "as_of": "2026-11-09T10:00:00+01:00",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": null,
+    "explanation": {
+     "asked_object": "название «L» → объект L (точное совпадение названия)",
+     "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T10:00:00+01:00",
+     "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+    }
+   },
+   "query_calls": 1,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I02",
+   "turns": [
+    "Сейчас какой статус у линии L2?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L2",
+    "as_of": "2026-11-09T10:00:00+01:00"
+   },
+   "category": "correct_parse",
+   "parser": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "L2",
+     "as_of": "2026-11-09T10:00:00+01:00",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": null,
+    "explanation": {
+     "asked_object": "название «линии L2» → объект L2 (совпадение через склонение)",
+     "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T10:00:00+01:00",
+     "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+    }
+   },
+   "query_calls": 1,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I03",
+   "turns": [
+    "Статус котельной сегодня?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "K",
+    "as_of": "2026-11-09"
+   },
+   "category": "correct_parse",
+   "parser": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "K",
+     "as_of": "2026-11-09",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": null,
+    "explanation": {
+     "asked_object": "название «котельной» → объект K (совпадение через склонение)",
+     "as_of": "день «сегодня» без времени → date-only as_of 2026-11-09 (весь день в поясе Europe/Berlin; относительно явно заданного текущего момента)",
+     "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+    }
+   },
+   "query_calls": 1,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I04",
+   "turns": [
+    "Какой был статус L 7 ноября в 15:45 по берлину"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-07T15:45:00+01:00"
+   },
+   "category": "correct_parse",
+   "parser": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "L",
+     "as_of": "2026-11-07T15:45:00+01:00",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": null,
+    "explanation": {
+     "asked_object": "название «L» → объект L (точное совпадение названия)",
+     "as_of": "«7 ноября» + «15:45» в явно заданном поясе Europe/Berlin → as_of 2026-11-07T15:45:00+01:00 (год взят из явно заданного текущего момента (2026)); часовой пояс назван в вопросе («по берлину») → Europe/Berlin",
+     "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+    }
+   },
+   "query_calls": 1,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I05",
+   "turns": [
+    "Какой статус L2 был 8 ноября в 09:15:30?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L2",
+    "as_of": "2026-11-08T09:15:30+01:00"
+   },
+   "category": "correct_parse",
+   "parser": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "L2",
+     "as_of": "2026-11-08T09:15:30+01:00",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": null,
+    "explanation": {
+     "asked_object": "название «L2» → объект L2 (точное совпадение названия)",
+     "as_of": "«8 ноября» + «09:15:30» в явно заданном поясе Europe/Berlin → as_of 2026-11-08T09:15:30+01:00 (год взят из явно заданного текущего момента (2026))",
+     "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+    }
+   },
+   "query_calls": 1,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I06",
+   "turns": [
+    "Какой статус был у линии L 8 ноября в 12:00 по московскому времени?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T12:00:00+03:00"
+   },
+   "category": "correct_parse",
+   "parser": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "L",
+     "as_of": "2026-11-08T12:00:00+03:00",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": null,
+    "explanation": {
+     "asked_object": "название «линии L» → объект L (совпадение через склонение)",
+     "as_of": "«8 ноября» + «12:00» в явно заданном поясе Europe/Moscow → as_of 2026-11-08T12:00:00+03:00 (год взят из явно заданного текущего момента (2026)); часовой пояс назван в вопросе («по московскому времени») → Europe/Moscow; заданный по умолчанию пояс Europe/Berlin не используется",
+     "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+    }
+   },
+   "query_calls": 1,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I07",
+   "turns": [
+    "КАКОЙ СТАТУС L БЫЛ 8 НОЯБРЯ В 09:00 ПО UTC?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T09:00:00+00:00"
+   },
+   "category": "correct_parse",
+   "parser": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "L",
+     "as_of": "2026-11-08T09:00:00+00:00",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": null,
+    "explanation": {
+     "asked_object": "название «L» → объект L (точное совпадение названия)",
+     "as_of": "«8 ноября» + «09:00» в явно заданном поясе UTC → as_of 2026-11-08T09:00:00+00:00 (год взят из явно заданного текущего момента (2026)); часовой пояс назван в вопросе («по utc») → UTC; заданный по умолчанию пояс Europe/Berlin не используется",
+     "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+    }
+   },
+   "query_calls": 1,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I08",
+   "turns": [
+    "Какой статус L был 8 ноября в 10:00 по парижу?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "category": "correct_clarification",
+   "parser": {
+    "kind": "needs_clarification",
+    "params": null,
+    "clarification": "В вопросе указан часовой пояс или место («по парижу»), который первая версия не разбирает. Уточните момент по Москве, по Берлину или в UTC.",
+    "reason": "часовой пояс назван в тексте, но не входит в закрытый список (Москва, Берлин, UTC)",
+    "candidates": [],
+    "limitation": null,
+    "explanation": null
+   },
+   "query_calls": 0,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I09",
+   "turns": [
+    "Какой сейчас статус щита?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "category": "correct_clarification",
+   "parser": {
+    "kind": "needs_clarification",
+    "params": null,
+    "clarification": "О каком объекте вы спрашиваете? Известные: B, K, L, L2, M, Q1, Q2, Y.",
+    "reason": "объект не назван",
+    "candidates": [
+     "B",
+     "K",
+     "L",
+     "L2",
+     "M",
+     "Q1",
+     "Q2",
+     "Y"
+    ],
+    "limitation": null,
+    "explanation": null
+   },
+   "query_calls": 0,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I10",
+   "turns": [
+    "Статус L2 на 8 ноября, 10:00 UTC+1 — какой?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "category": "correct_clarification",
+   "parser": {
+    "kind": "needs_clarification",
+    "params": null,
+    "clarification": "В вопросе указан часовой пояс или место («utc+1»), который первая версия не разбирает. Уточните момент по Москве, по Берлину или в UTC.",
+    "reason": "часовой пояс назван в тексте, но не входит в закрытый список (Москва, Берлин, UTC)",
+    "candidates": [],
+    "limitation": null,
+    "explanation": null
+   },
+   "query_calls": 0,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I11",
+   "turns": [
+    "Какой статус L был 8 ноября в 10:00:30.5?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "category": "correct_clarification",
+   "parser": {
+    "kind": "needs_clarification",
+    "params": null,
+    "clarification": "Форма или точность времени «10:00:30.5» не поддерживается; укажите время как ЧЧ:ММ или ЧЧ:ММ:СС (например «10:00:30») и дату отдельно.",
+    "reason": "время разбирается целиком; другая точность не усекается",
+    "candidates": [],
+    "limitation": null,
+    "explanation": null
+   },
+   "query_calls": 0,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I12",
+   "turns": [
+    "Не мост, а Главный мост — статус у него сейчас какой?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "B",
+    "as_of": "2026-11-09T10:00:00+01:00"
+   },
+   "category": "correct_parse",
+   "parser": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "B",
+     "as_of": "2026-11-09T10:00:00+01:00",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": null,
+    "explanation": {
+     "asked_object": "название «Главный мост» → объект B (точное совпадение названия); исключено по отрицанию: мост; местоимение относится к нему же в этой реплике",
+     "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T10:00:00+01:00",
+     "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+    }
+   },
+   "query_calls": 1,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I13",
+   "turns": [
+    "Какой статус L был в десять утра 8 ноября?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "category": "confident_misparse",
+   "parser": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "L",
+     "as_of": "2026-11-08",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": null,
+    "explanation": {
+     "asked_object": "название «L» → объект L (точное совпадение названия)",
+     "as_of": "день «8 ноября» без времени → date-only as_of 2026-11-08 (весь день в поясе Europe/Berlin; год взят из явно заданного текущего момента (2026))",
+     "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+    }
+   },
+   "query_calls": 1,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I14",
+   "turns": [
+    "Статус L на 2026-11-08T10:00?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "category": "correct_clarification",
+   "parser": {
+    "kind": "needs_clarification",
+    "params": null,
+    "clarification": "Форма или точность времени «2026-11-08t10:00» не поддерживается; укажите время как ЧЧ:ММ или ЧЧ:ММ:СС (например «10:00:30») и дату отдельно.",
+    "reason": "время разбирается целиком; другая точность не усекается",
+    "candidates": [],
+    "limitation": null,
+    "explanation": null
+   },
+   "query_calls": 0,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I15",
+   "turns": [
+    "Какой статус L будет 12 ноября в 10:00?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "category": "wrong_unsupported",
+   "parser": {
+    "kind": "unsupported",
+    "params": null,
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": "Первая версия разбирает только статус одного объекта на один момент; вопрос о будущем (прогноз) не поддерживается.",
+    "explanation": null
+   },
+   "query_calls": 0,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I16",
+   "turns": [
+    "Какой статус L2 был 6-го или 7-го ноября в 10:00?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "category": "correct_clarification",
+   "parser": {
+    "kind": "needs_clarification",
+    "params": null,
+    "clarification": "Какого дня это время (10:00)?",
+    "reason": "время указано без даты",
+    "candidates": [],
+    "limitation": null,
+    "explanation": null
+   },
+   "query_calls": 0,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I17",
+   "turns": [
+    "Статус L 8 ноября в 9:00 и в 11:00?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "category": "correct_clarification",
+   "parser": {
+    "kind": "needs_clarification",
+    "params": null,
+    "clarification": "В вопросе несколько моментов или вариантов («8 ноября», «9:00», «11:00»). На какой один момент ответить?",
+    "reason": "несколько выражений времени или альтернатива; первое совпадение не считается выбором пользователя",
+    "candidates": [],
+    "limitation": null,
+    "explanation": null
+   },
+   "query_calls": 0,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I18",
+   "turns": [
+    "Какой статус был у L за прошлую неделю?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "unsupported"
+   },
+   "category": "correct_unsupported",
+   "parser": {
+    "kind": "unsupported",
+    "params": null,
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": "Первая версия разбирает только статус одного объекта на один момент; вопрос о периоде («за …») не поддерживается.",
+    "explanation": null
+   },
+   "query_calls": 0,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I19",
+   "turns": [
+    "Какой статус у котельной сегодня в 08:00?"
+   ],
+   "contract_gap": true,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "category": "confident_misparse",
+   "parser": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "K",
+     "as_of": "2026-11-09T08:00:00+01:00",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": null,
+    "explanation": {
+     "asked_object": "название «котельной» → объект K (совпадение через склонение)",
+     "as_of": "«сегодня» + «08:00» в явно заданном поясе Europe/Berlin → as_of 2026-11-09T08:00:00+01:00 (относительно явно заданного текущего момента)",
+     "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+    }
+   },
+   "query_calls": 1,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I20",
+   "turns": [
+    "У L статус сейчас лучше, чем у L2?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "unsupported"
+   },
+   "category": "clarification_instead_of_unsupported",
+   "parser": {
+    "kind": "needs_clarification",
+    "params": null,
+    "clarification": "О каком объекте вопрос: L, L2? Первая версия отвечает про один объект.",
+    "reason": "упомянуто несколько объектов",
+    "candidates": [
+     "L",
+     "L2"
+    ],
+    "limitation": null,
+    "explanation": null
+   },
+   "query_calls": 0,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I21",
+   "turns": [
+    "Какой статус сейчас у L, а не у L2?"
+   ],
+   "contract_gap": true,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "category": "correct_clarification",
+   "parser": {
+    "kind": "needs_clarification",
+    "params": null,
+    "clarification": "О каком объекте вопрос: L, L2? Первая версия отвечает про один объект.",
+    "reason": "упомянуто несколько объектов",
+    "candidates": [
+     "L",
+     "L2"
+    ],
+    "limitation": null,
+    "explanation": null
+   },
+   "query_calls": 0,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I22",
+   "turns": [
+    "Какой статус Главного моста сейчас?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "B",
+    "as_of": "2026-11-09T10:00:00+01:00"
+   },
+   "category": "correct_parse",
+   "parser": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "B",
+     "as_of": "2026-11-09T10:00:00+01:00",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": null,
+    "explanation": {
+     "asked_object": "название «Главного моста» → объект B (совпадение через склонение)",
+     "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T10:00:00+01:00",
+     "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+    }
+   },
+   "query_calls": 1,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I23",
+   "turns": [
+    "Статус моста сейчас?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "category": "correct_clarification",
+   "parser": {
+    "kind": "needs_clarification",
+    "params": null,
+    "clarification": "Форма «моста» подходит к нескольким объектам: M (через склонение «мост»), Y (точное название «моста»). Какой из них?",
+    "reason": "коллизия названий",
+    "candidates": [
+     "M",
+     "Y"
+    ],
+    "limitation": null,
+    "explanation": null
+   },
+   "query_calls": 0,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I24",
+   "turns": [
+    "Какой статус объекта Y сейчас?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "Y",
+    "as_of": "2026-11-09T10:00:00+01:00"
+   },
+   "category": "correct_parse",
+   "parser": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "Y",
+     "as_of": "2026-11-09T10:00:00+01:00",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": null,
+    "explanation": {
+     "asked_object": "явный идентификатор «объект Y» → объект Y",
+     "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T10:00:00+01:00",
+     "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+    }
+   },
+   "query_calls": 1,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I25",
+   "turns": [
+    "Какой статус Моста сейчас?",
+    "Я про объект M.",
+    "А его статус 8 ноября в 10:00?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Ход 1 → needs_clarification (кандидаты M, Y); ход 2 записан в структурированном контексте как подтверждённый выбор пользователя M в ответ на это уточнение.",
+   "actual_context": [
+    {
+     "question": "Какой статус Моста сейчас?",
+     "kind": "needs_clarification",
+     "candidates": [
+      "M",
+      "Y"
+     ]
+    },
+    {
+     "question": "Я про объект M.",
+     "kind": "parsed",
+     "asked_object": "M",
+     "confirmed_object": "M"
+    }
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "M",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   },
+   "category": "correct_parse",
+   "parser": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "M",
+     "as_of": "2026-11-08T10:00:00+01:00",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": null,
+    "explanation": {
+     "asked_object": "из контекста: 1-я реплика с конца («Я про объект M.») → объект M",
+     "as_of": "«8 ноября» + «10:00» в явно заданном поясе Europe/Berlin → as_of 2026-11-08T10:00:00+01:00 (год взят из явно заданного текущего момента (2026))",
+     "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+    }
+   },
+   "query_calls": 1,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I26",
+   "turns": [
+    "Какой статус L2 сейчас?",
+    "А его статус сегодня?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Ход 1 → parsed L2 (now).",
+   "actual_context": [
+    {
+     "question": "Какой статус L2 сейчас?",
+     "kind": "parsed",
+     "asked_object": "L2"
+    }
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L2",
+    "as_of": "2026-11-09"
+   },
+   "category": "correct_parse",
+   "parser": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "L2",
+     "as_of": "2026-11-09",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": null,
+    "explanation": {
+     "asked_object": "из контекста: 1-я реплика с конца («Какой статус L2 сейчас?») → объект L2",
+     "as_of": "день «сегодня» без времени → date-only as_of 2026-11-09 (весь день в поясе Europe/Berlin; относительно явно заданного текущего момента)",
+     "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+    }
+   },
+   "query_calls": 1,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I27",
+   "turns": [
+    "Какой статус L сейчас?",
+    "А L2 по сравнению с ним за вчера?",
+    "Какой его статус сейчас?"
+   ],
+   "contract_gap": false,
+   "context_assumptions": "Ход 1 → parsed L; ход 2 → unsupported (сравнение/период), упоминает L2.",
+   "actual_context": [
+    {
+     "question": "Какой статус L сейчас?",
+     "kind": "parsed",
+     "asked_object": "L"
+    },
+    {
+     "question": "А L2 по сравнению с ним за вчера?",
+     "kind": "unsupported"
+    }
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "category": "correct_clarification",
+   "parser": {
+    "kind": "needs_clarification",
+    "params": null,
+    "clarification": "Уточните, о каком объекте: L, L2? После последнего разобранного вопроса упоминался другой объект.",
+    "reason": "возможная смена объекта: неразобранная реплика упоминала L2",
+    "candidates": [
+     "L",
+     "L2"
+    ],
+    "limitation": null,
+    "explanation": null
+   },
+   "query_calls": 0,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I28",
+   "turns": [
+    "Статус котельной сегодня?",
+    "Какой статус Мостика сейчас?",
+    "А его статус сейчас?"
+   ],
+   "contract_gap": true,
+   "context_assumptions": "Ход 1 → parsed K; ход 2 → needs_clarification (неизвестный объект 'Мостик').",
+   "actual_context": [
+    {
+     "question": "Статус котельной сегодня?",
+     "kind": "parsed",
+     "asked_object": "K"
+    },
+    {
+     "question": "Какой статус Мостика сейчас?",
+     "kind": "needs_clarification",
+     "candidates": [
+      "B",
+      "K",
+      "L",
+      "L2",
+      "M",
+      "Q1",
+      "Q2",
+      "Y"
+     ]
+    }
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "category": "correct_clarification",
+   "parser": {
+    "kind": "needs_clarification",
+    "params": null,
+    "clarification": "Уточните, о каком объекте: B, K, L, L2, M, Q1, Q2, Y?",
+    "reason": "предыдущая реплика не определила объект однозначно",
+    "candidates": [
+     "B",
+     "K",
+     "L",
+     "L2",
+     "M",
+     "Q1",
+     "Q2",
+     "Y"
+    ],
+    "limitation": null,
+    "explanation": null
+   },
+   "query_calls": 0,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I29",
+   "turns": [
+    "Готов ли L2 сейчас?"
+   ],
+   "contract_gap": true,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "unsupported"
+   },
+   "category": "correct_unsupported",
+   "parser": {
+    "kind": "unsupported",
+    "params": null,
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": "Первая версия разбирает только вопросы о статусе/состоянии объекта.",
+    "explanation": null
+   },
+   "query_calls": 0,
+   "ask_not_called_on_non_parsed": true
+  },
+  {
+   "id": "I30",
+   "turns": [
+    "Какой статус L2 был 7 ноября?"
+   ],
+   "contract_gap": true,
+   "context_assumptions": "Нет контекста.",
+   "actual_context": [],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "category": "confident_misparse",
+   "parser": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "L2",
+     "as_of": "2026-11-07",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "reason": null,
+    "candidates": null,
+    "limitation": null,
+    "explanation": {
+     "asked_object": "название «L2» → объект L2 (точное совпадение названия)",
+     "as_of": "день «7 ноября» без времени → date-only as_of 2026-11-07 (весь день в поясе Europe/Berlin; год взят из явно заданного текущего момента (2026))",
+     "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+    }
+   },
+   "query_calls": 1,
+   "ask_not_called_on_non_parsed": true
+  }
+ ]
+}
