@@ -5,16 +5,19 @@ Same questions, same isolated data, two conditions:
   parser -- parameters produced by core.query_parse.
 
 Both go through the same ported #503 filter (core.pipeline.generate_answer).
-Run:  python -m tests.query_parse_eval  [--version v1|v2] [--write]
+Run:  python -m tests.query_parse_eval  [--version v1|v2|v3] [--write]   (default v3)
 
 v1 = frozen snapshot of the original parser (tests/query_parse_v1.py, byte-identical
      to core/query_parse.py at d550f3f) on the original splits dev/heldout/probes;
      --write regenerates docs/query_parse/eval_results_v1.json, demo_v1.{json,md}
      (must be byte-identical to the committed v1 report).
-v2 = current core.query_parse on dev/heldout/probes + counterexamples_v2, and the
-     v1 snapshot on the same items for the before -> after table;
-     --write produces docs/query_parse/eval_results_v2.json, demo_v2.{json,md},
-     before_after_v2.json.
+v2 = frozen snapshot tests/query_parse_v2.py (byte-identical to core/query_parse.py
+     at eee4062) on dev/heldout/probes + counterexamples_v2, v1 snapshot for the
+     before -> after table; --write regenerates eval_results_v2.json, demo_v2.*,
+     before_after_v2.json (must be byte-identical to the committed v2 report).
+v3 = current core.query_parse on all splits incl. counterexamples_v3, v2 snapshot
+     for before -> after; --write produces eval_results_v3.json, demo_v3.*,
+     before_after_v3.json.
 """
 import json
 import sys
@@ -23,8 +26,9 @@ from pathlib import Path
 
 from core.applicability import _parse_temporal_instant
 from core.pipeline import generate_answer
-import core.query_parse as parser_v2
+import core.query_parse as parser_current
 from tests import query_parse_v1 as parser_v1
+from tests import query_parse_v2 as parser_v2_frozen
 
 ROOT = Path(__file__).resolve().parent.parent
 FIX = ROOT / "tests" / "fixtures" / "query_parse"
@@ -42,7 +46,11 @@ def _fact(f):
 
 V1_SPLITS = ("dev", "heldout", "probes")
 V2_SPLITS = V1_SPLITS + ("counterexamples_v2",)
-PARSERS = {"v1": parser_v1, "v2": parser_v2}
+V3_SPLITS = V2_SPLITS + ("counterexamples_v3",)
+PARSERS = {"v1": parser_v1, "v2": parser_v2_frozen, "v3": parser_current}
+SPLITS = {"v1": V1_SPLITS, "v2": V2_SPLITS, "v3": V3_SPLITS}
+PREVIOUS = {"v2": "v1", "v3": "v2"}
+PREV_LABEL = {"v2": "v1 snapshot, d550f3f", "v3": "v2 snapshot, eee4062"}
 
 
 def load_split(split):
@@ -114,7 +122,7 @@ CATEGORIES = ("correct_parse", "confident_misparse", "correct_clarification", "u
               "correct_unsupported", "wrong_unsupported", "clarification_instead_of_unsupported")
 
 
-def evaluate(split, parser=parser_v2):
+def evaluate(split, parser=parser_current):
     data = load_split(split)
     items = data["items"]
     objects = split_objects(data)
@@ -158,13 +166,16 @@ DEMO_IDS = ("D01", "D02", "D03", "D04", "D05", "D07", "D08", "H05", "H07", "H12"
 
 
 DEMO_IDS_V2 = DEMO_IDS + ("P01", "P09", "C01", "C02", "C03", "C05", "C09", "C12", "C13", "C14", "C17", "C20")
+DEMO_IDS_V3 = DEMO_IDS_V2 + ("K01", "K02", "K04", "K07", "K09", "K10", "K11", "K13", "K16", "K17", "K18",
+                             "K20", "K21", "K22")
+DEMO_IDS_BY = {"v1": DEMO_IDS, "v2": DEMO_IDS_V2, "v3": DEMO_IDS_V3}
 
 
 def demo(results, ids=DEMO_IDS, version="v1"):
     rows = [r for res in results for r in res["rows"] if r["id"] in ids]
     before = {}
     if version != "v1":
-        before = {(b["split"], b["id"]): b["v1"] for b in before_after(results)}
+        before = {(b["split"], b["id"]): b[PREVIOUS[version]] for b in before_after(results, version)}
         split_of = {r["id"]: res["split"] for res in results for r in res["rows"]}
     title = "# Query-parse demonstration (isolated data, generated)" if version == "v1" else \
         "# Query-parse demonstration %s (isolated data, generated)" % version
@@ -202,30 +213,31 @@ def demo(results, ids=DEMO_IDS, version="v1"):
             "DIFFERENT — manual answer %r, grounds %s" % (r["manual"]["grounds_answer"], r["manual"]["grounds_admitted"])))
         b = before.get((split_of[r["id"]], r["id"])) if before else None
         if b:
-            lines.append("- **Before (v1 snapshot, d550f3f)**: %s; %s; query %s; grounds %s; answer %r" % (
-                b["category"], json.dumps(b["params"], ensure_ascii=False) if b["params"] else (b["clarification"] or b["limitation"]),
+            lines.append("- **Before (%s)**: %s; %s; query %s; grounds %s; answer %r" % (
+                PREV_LABEL[version], b["category"], json.dumps(b["params"], ensure_ascii=False) if b["params"] else (b["clarification"] or b["limitation"]),
                 "ran" if b["query_called"] else "not run", b["grounds_admitted"], b["grounds_answer"]))
         lines.append("")
     return rows, "\n".join(lines)
 
 
-def before_after(v2_results):
-    """Same items, v1 snapshot vs v2: every item whose category, parse or grounds changed."""
+def before_after(v2_results, version="v2"):
+    """Same items, previous snapshot vs ``version``: every item whose category, parse or grounds changed."""
+    old, new = PREVIOUS[version], version
     out = []
     for res2 in v2_results:
-        res1 = evaluate(res2["split"], parser_v1)
+        res1 = evaluate(res2["split"], PARSERS[old])
         for r1, r2 in zip(res1["rows"], res2["rows"]):
             assert r1["id"] == r2["id"]
             key = lambda r: (r["category"], r["parser"]["kind"], r["parser"]["params"], r["parser"]["grounds_admitted"],
                              r["parser"]["grounds_answer"], r["parser"]["clarification"], r["parser"]["limitation"])
             if key(r1) != key(r2):
                 out.append({"split": res2["split"], "id": r2["id"], "question": r2["question"],
-                            "context_v1": r1["context"], "context_v2": r2["context"], "gold": r2["gold"],
-                            "v1": {k: r1["parser"][k] for k in ("kind", "params", "clarification", "limitation",
+                            "context_" + old: r1["context"], "context_" + new: r2["context"], "gold": r2["gold"],
+                            old: {k: r1["parser"][k] for k in ("kind", "params", "clarification", "limitation",
                                                                "grounds_admitted", "grounds_answer")}
                                   | {"category": r1["category"], "query_called": r1["parser"]["grounds_query_called"],
                                      "answers_differ_from_manual": r1["answers_differ"]},
-                            "v2": {k: r2["parser"][k] for k in ("kind", "params", "clarification", "limitation",
+                            new: {k: r2["parser"][k] for k in ("kind", "params", "clarification", "limitation",
                                                                "grounds_admitted", "grounds_answer")}
                                   | {"category": r2["category"], "query_called": r2["parser"]["grounds_query_called"],
                                      "answers_differ_from_manual": r2["answers_differ"]}})
@@ -234,9 +246,9 @@ def before_after(v2_results):
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
-    version = argv[argv.index("--version") + 1] if "--version" in argv else "v2"
+    version = argv[argv.index("--version") + 1] if "--version" in argv else "v3"
     parser = PARSERS[version]
-    splits = V1_SPLITS if version == "v1" else V2_SPLITS
+    splits = SPLITS[version]
     results = [evaluate(s, parser) for s in splits]
     for res in results:
         print(res["split"], res["n"], json.dumps(res["counts"], ensure_ascii=False), "answers differ:", res["answers_differ"])
@@ -255,17 +267,54 @@ def write(results, version):
     if version != "v1":
         payload = {"version": version, "parser": "core/query_parse.py", "setup": SETUP,
                    "extra_setup": {s: {k: load_split(s).get(k, []) for k in ("extra_known_objects", "extra_facts")}
-                                   for s in V2_SPLITS if "extra_known_objects" in load_split(s)},
+                                   for s in SPLITS[version] if "extra_known_objects" in load_split(s)},
                    "results": results}
     (OUT / f"eval_results_{version}.json").write_text(json.dumps(payload, ensure_ascii=False, indent=1) + "\n",
                                                      encoding="utf-8")
-    rows, md = demo(results, DEMO_IDS if version == "v1" else DEMO_IDS_V2, version)
+    rows, md = demo(results, DEMO_IDS_BY[version], version)
     (OUT / f"demo_{version}.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     (OUT / f"demo_{version}.md").write_text(md + "\n", encoding="utf-8")
     if version != "v1":
         (OUT / f"before_after_{version}.json").write_text(
-            json.dumps(before_after(results), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+            json.dumps(before_after(results, version), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":
     main()
+
+
+# ── catalogue-order invariance (stdlib itertools only) ─────────────────────
+
+def catalogue_variants(objects, full=True):
+    """Every permutation of the catalogue (full) or all rotations (cheap), each
+    with names in given and in reversed order."""
+    import itertools
+    n = len(objects)
+    orders = itertools.permutations(range(n)) if full else (tuple((i + k) % n for i in range(n)) for k in range(n))
+    for order in orders:
+        for rev in (False, True):
+            yield [dict(objects[i], names=list(reversed(objects[i].get("names", []))) if rev
+                        else list(objects[i].get("names", []))) for i in order]
+
+
+def decision(result):
+    """Order-sensitive parts of a parse result that must not depend on the catalogue order."""
+    return (result["kind"], json.dumps(result.get("params"), sort_keys=True), tuple(sorted(result.get("candidates", []))),
+            result.get("question"), result.get("limitation"), tuple(result.get("mentioned_objects", [])))
+
+
+def permutation_check(parser, split, full=True):
+    """Return {'items': n, 'variants': k, 'changed': [ids whose decision differs across catalogue orders]}."""
+    data = load_split(split)
+    base_objects = split_objects(data)
+    changed, variants = [], 0
+    for it in data["items"]:
+        tz = it["timezone"] if "timezone" in it else SETUP["timezone"]
+        seen = set()
+        for objects in catalogue_variants(base_objects, full):
+            ctx = build_context(parser, it, objects, tz)
+            seen.add(decision(parser.parse_question(it["question"], objects, ctx, now=NOW, timezone=tz)))
+            variants += 1
+        if len(seen) > 1:
+            changed.append(it["id"])
+    return {"split": split, "items": len(data["items"]), "variants": variants, "changed": changed}

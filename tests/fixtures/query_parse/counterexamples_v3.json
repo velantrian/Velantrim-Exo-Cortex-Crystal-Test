@@ -1,0 +1,35 @@
+{
+  "_note": "V3 COUNTEREXAMPLES. Written AFTER the v2 review found three more defect classes (zone-name case changes the decision; clock truncated to minutes; object choice depends on catalogue order) and BEFORE the v3 fixes; gold fixed in this commit. Not held-out, not independent: the same author writes the fixes. Isolated synthetic data; extends setup.json only for this file with object Y whose exact alias «Моста» coincides with an inflected form of M's alias «Мост». Other fixture files are unchanged.",
+  "extra_known_objects": [
+    {"id": "Y", "names": ["Y", "Моста"]}
+  ],
+  "extra_facts": [
+    {"fact_id": "Y-open", "claim": "Y: статус — открыт",
+     "applicability": {"primary_object": "Y", "valid_from": "2026-11-01"}}
+  ],
+  "items": [
+    {"id": "K01", "group": "zone_case", "question": "Какой статус L был 8 ноября в 13:00 по лондону?", "gold": {"kind": "needs_clarification"}},
+    {"id": "K02", "group": "zone_case", "question": "По Лондону какой статус L был 8 ноября в 13:00?", "gold": {"kind": "needs_clarification"}},
+    {"id": "K03", "group": "zone_case", "question": "Какой статус L был 8 ноября в 13:00 ПО ЛОНДОНУ?", "gold": {"kind": "needs_clarification"}},
+    {"id": "K04", "group": "zone_case", "question": "Какой статус L был 8 ноября в 13:00 по Московскому времени?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-08T13:00:00+03:00"}},
+    {"id": "K05", "group": "zone_case", "question": "Какой статус L был 8 ноября в 13:00 ПО МОСКВЕ?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-08T13:00:00+03:00"}},
+    {"id": "K06", "group": "zone_case", "question": "Какой статус L был 8 ноября в 13:00 utc?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-08T13:00:00+00:00"}},
+    {"id": "K07", "group": "zone_case", "question": "Какой статус L был 8 ноября в 13:00 по берлину?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-08T13:00:00+01:00"}},
+    {"id": "K08", "group": "zone_case", "question": "Какой статус L был 8 ноября в 13:00 по Киевскому Времени?", "gold": {"kind": "needs_clarification"}},
+    {"id": "K09", "group": "zone_case", "question": "Какой статус L по состоянию на 8 ноября 13:00?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-08T13:00:00+01:00"}, "_why": "control: «по состоянию» is not a place"},
+    {"id": "K10", "group": "clock_precision", "question": "Какой статус L был 8 ноября в 10:00:30?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-08T10:00:30+01:00"}},
+    {"id": "K11", "group": "clock_precision", "question": "Какой статус L был 8 ноября в 10:00:30.5?", "gold": {"kind": "needs_clarification"}},
+    {"id": "K12", "group": "clock_precision", "question": "Какой статус L был 8 ноября в 10.00?", "gold": {"kind": "needs_clarification"}},
+    {"id": "K13", "group": "clock_precision", "question": "Какой статус L был 8 ноября в 10:00:30 по Москве?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-08T10:00:30+03:00"}},
+    {"id": "K14", "group": "clock_precision", "question": "Статус L на 2026-11-08 10:00:30?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-08T10:00:30+01:00"}},
+    {"id": "K15", "group": "clock_precision", "question": "Какой статус L был 8 ноября в 10:00:61?", "gold": {"kind": "needs_clarification"}},
+    {"id": "K16", "group": "clock_precision", "question": "Какой статус L был 8 ноября в 10 часов 30 минут?", "gold": {"kind": "needs_clarification"}},
+    {"id": "K17", "group": "clock_precision", "question": "Какой статус L был 8 ноября в 10:30 вечера?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-08T22:30:00+01:00"}},
+    {"id": "K18", "group": "clock_precision", "question": "Какой статус L был 8 ноября в половине десятого?", "gold": {"kind": "needs_clarification"}},
+    {"id": "K19", "group": "clock_precision", "question": "Статус L на 2026-11-08T10:00:30?", "gold": {"kind": "needs_clarification"}},
+    {"id": "K20", "group": "catalogue_order", "question": "Какой статус Моста сейчас?", "gold": {"kind": "parsed", "asked_object": "Y", "as_of": "2026-11-09T07:58:00+01:00"}, "_why": "exact alias of Y beats the inflected form of M's alias «Мост»"},
+    {"id": "K21", "group": "catalogue_order", "question": "Какой статус Мостами сейчас?", "gold": {"kind": "needs_clarification"}, "_why": "both M («Мост»+ами) and Y («Моста» -> мост+ами) match only by inflection: equal rank"},
+    {"id": "K22", "group": "catalogue_order", "question": "Какой статус Мост сейчас?", "gold": {"kind": "parsed", "asked_object": "M", "as_of": "2026-11-09T07:58:00+01:00"}},
+    {"id": "K23", "group": "catalogue_order", "question": "Какой статус Пульсаром сейчас?", "gold": {"kind": "needs_clarification"}}
+  ]
+}

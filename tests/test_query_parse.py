@@ -210,7 +210,7 @@ def test_non_parsed_never_queries_and_parsed_always_carries_full_filter(split):
     for it in data["items"]:
         tz = it["timezone"] if "timezone" in it else TZ
         calls = []
-        ctx = ev.build_context(ev.parser_v2, it, objects, tz)
+        ctx = ev.build_context(ev.parser_current, it, objects, tz)
         out = ask(it["question"], objects, ctx, now=NOW, timezone=tz,
                   query_fn=lambda q, **kw: calls.append(kw) or {"answer": "x"})
         if out["parse"]["kind"] == "parsed":

@@ -260,7 +260,7 @@ def test_mention_outside_bounded_window_is_forgotten_with_the_turn():
 @pytest.mark.parametrize("it", CE["items"], ids=[i["id"] for i in CE["items"]])
 def test_counterexample_gold_v2(it):
     objects = ev.split_objects(CE)
-    ctx = ev.build_context(ev.parser_v2, it, objects, TZ)
+    ctx = ev.build_context(ev.parser_current, it, objects, TZ)
     out, calls = spy_ask(it["question"], ctx, objects)
     gold = it["gold"]
     assert out["parse"]["kind"] == gold["kind"]
