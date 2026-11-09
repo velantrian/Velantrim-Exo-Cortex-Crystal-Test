@@ -37,6 +37,17 @@ longer multi-word alias -> clarification, and multi-word aliases are inflected
 word by word. Every result records ``mentioned_objects`` so a later pronoun
 cannot silently skip an object mentioned in an unsupported/clarified turn.
 The frozen v1 is kept at ``tests/query_parse_v1.py`` for evidence.
+
+v3 (after review of eee4062; frozen v2 at ``tests/query_parse_v2.py``):
+* zone/place detection is case-insensitive («по Лондону» = «по лондону» =
+  «ПО ЛОНДОНУ» -> clarification);
+* the clock is parsed whole: seconds are kept exactly; fractional seconds,
+  minute/second words, «половина/четверть/полдень/полночь», «в 10.00» and ISO
+  «…T10:00» -> clarification; a day part after a clock («10:30 вечера», «в 10
+  часов вечера») is applied, conflicting combinations -> clarification;
+* object choice does not depend on catalogue order: all aliases matching at a
+  position are collected, then ranked (1) longest span, (2) exact name over
+  match via inflection; a tie between different objects -> clarification.
 """
 import re
 from datetime import date, datetime, time, timedelta, timezone as _utc_mod, tzinfo
@@ -102,7 +113,14 @@ _ZONE_LIKE = (
     r"\b(?:utc|gmt|мск|msk)\s*[+\-−]\s*\d{1,2}(?::?\d{2})?",
     r"\b\d{1,2}:\d{2}(?::\d{2})?\s*(?:[+\-−]\d{1,2}(?::?\d{2})?|z)\b",
 )
-_CITY_AFTER_PO = re.compile(r"\bпо\s+([А-ЯЁ][а-яё]+)")  # «по Лондону» (case-sensitive, original text)
+# v3: case-insensitive «по <word>» place detection on the casefolded text. A word
+# after «по» is treated as a possible place/zone unless it is an object alias, a
+# pronoun or starts with one of these non-place stems («по статусу», «по
+# состоянию на», «по данным», «по умолчанию» …) -> unknown places clarify.
+_PO_WORD = re.compile(r"\bпо\s+([a-zа-яё][a-zа-яё0-9]*)")
+_PO_NOT_PLACE = ("статус", "состояни", "данн", "информаци", "документ", "источник", "факт", "отчёт", "отчет",
+                 "итог", "сут", "существ", "дел", "правил", "умолчани", "ошибк", "причин", "запрос", "вопрос",
+                 "мнени", "оценк", "смысл", "поводу", "порядк")
 _TIME_ALTERNATIVE = r"\b\d{1,2}(?::\d{2})?\s+(?:или|либо|и)\s+(?:в\s+|на\s+)?\d{1,2}\b"
 _STATUS = r"\bстатус\w*|\bсостояни\w*"
 
@@ -168,40 +186,69 @@ def _near_misses(tokens, index, mentions):
     neighbouring words (e.g. «Главнейшего моста» vs «Главный мост» / «Мост")."""
     out = []
     for m in mentions:
-        key = m["key"]
-        for longer, ids in index.items():
-            if len(longer) <= len(key) or set(ids) == set(m["ids"]):
-                continue
-            for j in range(len(longer) - len(key) + 1):
-                if longer[j:j + len(key)] != key:
+        for key in m["keys"]:
+            for longer, ids in index.items():
+                if len(longer) <= len(key) or set(ids) == set(m["ids"]):
                     continue
-                start = m["pos"] - j
-                end = start + len(longer)
-                if start < 0 or end > len(tokens):
-                    continue
-                others = [k for k in range(len(longer)) if not j <= k < j + len(key)]
-                if all(_near(tokens[start + k][0], longer[k]) for k in others):
-                    out.append({"short": m, "longer_ids": sorted(ids),
-                                "longer": " ".join(longer)})
-    return out
+                for j in range(len(longer) - len(key) + 1):
+                    if longer[j:j + len(key)] != key:
+                        continue
+                    start = m["pos"] - j
+                    end = start + len(longer)
+                    if start < 0 or end > len(tokens):
+                        continue
+                    others = [k for k in range(len(longer)) if not j <= k < j + len(key)]
+                    if all(_near(tokens[start + k][0], longer[k]) for k in others):
+                        out.append({"short": m, "longer_ids": sorted(ids),
+                                    "longer": " ".join(longer)})
+    # v3: deterministic regardless of catalogue order
+    return sorted(out, key=lambda n: (n["longer"], n["longer_ids"], n["short"]["pos"]))
+
+
+_EXACT, _INFLECTED = 2, 1
+
+
+def _match_rank(tokens, i, key) -> int:
+    """_EXACT if every word equals the alias word (casefolded), _INFLECTED if some
+    word matches only via the ending table, 0 if no match."""
+    if i + len(key) > len(tokens):
+        return 0
+    rank = _EXACT
+    for j, alias_word in enumerate(key):
+        t = tokens[i + j][0].casefold()
+        if t == alias_word:
+            continue
+        if not _token_matches(t, alias_word):
+            return 0
+        rank = _INFLECTED
+    return rank
 
 
 def _mentions(tokens, index):
-    """Longest-match object mentions: [{'ids','alias','pos','negated'}]."""
+    """Object mentions, independent of catalogue order (v3).
+
+    At each position ALL matching aliases are collected first, then resolved:
+    (1) the longest span wins (it covers more of the user's words);
+    (2) among equally long spans an exact name beats a match via inflection;
+    (3) every object left at the top tier is kept in ``ids`` -> more than one
+        id is an unresolvable collision (the caller asks for clarification).
+    Returns [{'ids','alias','pos','negated','keys','match','outranked'}].
+    """
     found, i = [], 0
-    keys = sorted(index, key=len, reverse=True)
     while i < len(tokens):
-        hit = None
-        for key in keys:
-            n = len(key)
-            if i + n <= len(tokens) and all(_token_matches(tokens[i + j][0], key[j]) for j in range(n)):
-                hit = key
-                break
-        if hit:
+        hits = [(len(key), _match_rank(tokens, i, key), key) for key in index]
+        hits = [h for h in hits if h[1]]
+        if hits:
+            best = max((n, r) for n, r, _ in hits)
+            top = sorted(key for n, r, key in hits if (n, r) == best)
+            ids = sorted({oid for key in top for oid in index[key]})
+            outranked = sorted({oid for n, r, key in hits if n == best[0] and r < best[1] for oid in index[key]} - set(ids))
+            n = best[0]
             negated = i > 0 and tokens[i - 1][0].casefold() == "не"
-            found.append({"ids": sorted(index[hit]), "alias": " ".join(t[0] for t in tokens[i:i + len(hit)]),
-                          "pos": i, "negated": negated, "key": hit})
-            i += len(hit)
+            found.append({"ids": ids, "alias": " ".join(t[0] for t in tokens[i:i + n]), "pos": i, "len": n,
+                          "negated": negated, "keys": top,
+                          "match": "exact" if best[1] == _EXACT else "inflection", "outranked": outranked})
+            i += n
         else:
             i += 1
     return found
@@ -231,9 +278,10 @@ def _zone_in_text(text: str, low: str, alias_words) -> Dict[str, Any]:
             if not any(a <= m.start() and m.end() <= b for a, b in spans):
                 unknown.append(m.group(0))
                 spans.append(m.span())
-    for m in _CITY_AFTER_PO.finditer(text):
-        word = m.group(1).casefold()
-        if any(a <= m.start() and m.end() <= b for a, b in spans) or any(_token_matches(word, w) for w in alias_words):
+    for m in _PO_WORD.finditer(low):
+        word = m.group(1)
+        if (any(a <= m.start() and m.end() <= b for a, b in spans) or any(_token_matches(word, w) for w in alias_words)
+                or word in _PRONOUNS or word.startswith(_PO_NOT_PLACE)):
             continue
         unknown.append(m.group(0))
         spans.append(m.span())
@@ -252,7 +300,14 @@ def _zone_in_text(text: str, low: str, alias_words) -> Dict[str, Any]:
     return {"spans": spans}
 
 
-_CLOCK_PATTERNS = (r"\b(\d{1,2}):(\d{2})\b", r"\bв\s+(\d{1,2})\s+(час\w*|утра|дня|вечера|ночи)\b")
+_DAY_PART = r"утра|дня|вечера|ночи"
+_CLOCK_COLON = re.compile(r"(?<![\d:.,])(\d{1,2}):(\d{2})(?::(\d{2}))?([.,]\d+)?(?![\d:])(?:\s*(%s)\b)?" % _DAY_PART)
+_CLOCK_WORD = re.compile(r"\bв\s+(\d{1,2})\s+(?:час\w*(?:\s+(%s))?|(%s))\b" % (_DAY_PART, _DAY_PART))
+_CLOCK_PATTERNS = (_CLOCK_COLON.pattern, _CLOCK_WORD.pattern)
+# v3: clock forms that carry more (or other) precision than we parse -> clarification, never truncation
+_PRECISION_WORDS = r"\bминут\w*|\bсекунд\w*|\bполовин\w*|\bчетверт\w*|\bполдень\b|\bполудн\w*|\bполночь\b|\bполуноч\w*"
+_ISO_T = r"\b\d{4}-\d{2}-\d{2}t[\d:.,+\-z]+"
+_DOTTED_CLOCK = r"\bв\s+\d{1,2}\.\d{2}\b(?!\.\d)"
 _DAY_PATTERNS = (r"\b\d{4}-\d{2}-\d{2}\b", r"\b\d{1,2}\.\d{1,2}(?:\.\d{4})?\b",
                  r"\b\d{1,2}\s+(?:%s)\b" % "|".join(_MONTHS), r"\b(?:сегодня|вчера|позавчера)\b")
 
@@ -262,9 +317,17 @@ def _spans(patterns, low):
     return sorted((m.start(), m.end(), m.group(0)) for pattern in patterns for m in re.finditer(pattern, low))
 
 
+def _blank(low: str, spans) -> str:
+    for a, b, _ in spans:
+        low = low[:a] + " " * (b - a) + low[b:]
+    return low
+
+
 def _several_moments(low: str):
-    """v2: several clocks, several days, or a numeric alternative -> the list of expressions."""
-    clocks, days = _spans(_CLOCK_PATTERNS, low), _spans(_DAY_PATTERNS, low)
+    """v2: several clocks, several days, or a numeric alternative -> the list of expressions.
+    v3: day patterns are searched outside clock spans (so «10:00:30.5» is one clock)."""
+    clocks = _spans(_CLOCK_PATTERNS, low)
+    days = _spans(_DAY_PATTERNS, _blank(low, clocks))
     alt = re.search(_TIME_ALTERNATIVE, low)
     if len(clocks) > 1 or len(days) > 1 or alt:
         exprs = list(dict.fromkeys(t for _, _, t in sorted(clocks + days)))
@@ -285,20 +348,44 @@ def _local(day: date, clock: time, tz: tzinfo):
     return first
 
 
+def _apply_day_part(h: int, part: Optional[str]) -> Optional[int]:
+    """24h hour for «h <part>», or None when the combination is not unambiguous."""
+    if part is None:
+        return h
+    if part == "утра":
+        return h if 0 <= h <= 11 else None
+    if part == "дня":
+        return h + 12 if 1 <= h <= 5 else h if 12 <= h <= 17 else None
+    if part == "вечера":
+        return h + 12 if 5 <= h <= 11 else h if 17 <= h <= 23 else None
+    # «ночи»
+    return 0 if h == 12 else h if 0 <= h <= 4 or 21 <= h <= 23 else h + 12 if 9 <= h <= 11 else None
+
+
 def _parse_clock(low: str):
-    """Return (time, token) or None. Only explicit clock forms."""
-    m = re.search(r"\b(\d{1,2}):(\d{2})\b", low)
+    """Return (time, token), ('invalid'|'precision'|'day_part', token) or None.
+
+    v3: the clock is parsed whole (hours, minutes, optional seconds kept
+    exactly); fractional seconds -> 'precision'; a following day part is applied.
+    """
+    m = _CLOCK_COLON.search(low)
     if m:
-        h, mi = int(m.group(1)), int(m.group(2))
-        return (time(h, mi), m.group(0)) if h < 24 and mi < 60 else ("invalid", m.group(0))
-    m = re.search(r"\bв\s+(\d{1,2})\s+(час\w*|утра|дня|вечера|ночи)\b", low)
+        h, mi, sec, frac, part = int(m.group(1)), int(m.group(2)), m.group(3), m.group(4), m.group(5)
+        token = m.group(0)
+        if frac:
+            return ("precision", token)
+        sec = int(sec) if sec is not None else 0
+        if not (h < 24 and mi < 60 and sec < 60):
+            return ("invalid", token)
+        hh = _apply_day_part(h, part)
+        return (time(hh, mi, sec), token) if hh is not None else ("day_part", token)
+    m = _CLOCK_WORD.search(low)
     if m:
-        h, word = int(m.group(1)), m.group(2)
-        if word in ("дня", "вечера") and 1 <= h <= 11:
-            h += 12
-        if word == "ночи" and h == 12:
-            h = 0
-        return (time(h, 0), m.group(0)) if h < 24 else ("invalid", m.group(0))
+        h, part = int(m.group(1)), m.group(2) or m.group(3)
+        if h >= 24:
+            return ("invalid", m.group(0))
+        hh = _apply_day_part(h, part)
+        return (time(hh, 0), m.group(0)) if hh is not None else ("day_part", m.group(0))
     return None
 
 
@@ -349,11 +436,20 @@ def _time_reference(low: str, now: Optional[datetime], tz: Optional[tzinfo]):
     # explicit now offset is used only to detect date words, then we clarify.
     now_local = (now.astimezone(tz) if tz is not None else now) if now is not None else None
     clock = _parse_clock(low)
-    day = _parse_day(low, now_local)
+    day = _parse_day(_blank(low, _spans(_CLOCK_PATTERNS, low)), now_local)
     vague = re.search(_VAGUE_PARTS, low)
     if has_now and (day or clock):
         return _result_clarify("Вы спрашиваете о статусе сейчас или на указанный момент?",
                                "в вопросе одновременно «сейчас» и конкретная дата/время")
+    form = (re.search(_PRECISION_WORDS, low) or re.search(_ISO_T, low) or re.search(_DOTTED_CLOCK, low))
+    if form or (isinstance(clock, tuple) and clock[0] == "precision"):
+        token = form.group(0) if form else clock[1]
+        return _result_clarify("Форма или точность времени «%s» не поддерживается; укажите время как ЧЧ:ММ или ЧЧ:ММ:СС "
+                               "(например «10:00:30») и дату отдельно." % token,
+                               "время разбирается целиком; другая точность не усекается")
+    if isinstance(clock, tuple) and clock[0] == "day_part":
+        return _result_clarify("Уточните время «%s»: часть суток не согласуется с часом. Укажите ЧЧ:ММ в 24-часовом формате."
+                               % clock[1], "противоречивая часть суток")
     if several:
         return _result_clarify("В вопросе несколько моментов или вариантов (%s). На какой один момент ответить?"
                                % ", ".join("«%s»" % e for e in several),
@@ -458,7 +554,7 @@ def _parse(text, low, tokens, index, mentions, context, now, tz, timezone_param)
     zone = _zone_in_text(text, low, alias_words)
     zone_spans = zone["spans"]
     positive = [m for m in mentions if not m["negated"]]
-    covered = {m["pos"] for m in mentions}
+    covered = {m["pos"] + k for m in mentions for k in range(m["len"])}
     unknown = [t[0] for i, t in enumerate(tokens) if i not in covered and _IDENT_LIKE.match(t[0])
                and not any(a <= t[1] and t[2] <= b for a, b in zone_spans)]  # «UTC» is a zone, not an object
     has_pronoun = any(w in _PRONOUNS for w in words)
@@ -481,14 +577,19 @@ def _parse(text, low, tokens, index, mentions, context, now, tz, timezone_param)
         near = _near_misses(tokens, index, positive)
         if near:
             n = near[0]
-            cands = sorted(set(ids) | set(n["longer_ids"]))
+            cands = sorted(set(ids).union(*(x["longer_ids"] for x in near)))
             return _result_clarify("Вы имеете в виду «%s» (%s) или «%s» (%s)?"
                                    % (n["longer"], ", ".join(n["longer_ids"]), n["short"]["alias"], ", ".join(ids)),
                                    "короткое название внутри почти совпавшего составного названия; не подменяем одно другим",
                                    cands)
         asked = ids[0]
         neg = [m["alias"] for m in mentions if m["negated"]]
+        how = [m for m in positive if asked in m["ids"]][0]
         explanation["asked_object"] = ("название «%s» → объект %s" % (positive[0]["alias"], asked)
+                                       + (" (точное совпадение названия)" if how["match"] == "exact"
+                                          else " (совпадение через склонение)")
+                                       + ("; точное совпадение важнее склонения, отклонено: %s" % ", ".join(how["outranked"])
+                                          if how["outranked"] else "")
                                        + ("; исключено по отрицанию: %s" % ", ".join(neg) if neg else "")
                                        + ("; местоимение относится к нему же в этой реплике" if has_pronoun else ""))
     elif unknown:

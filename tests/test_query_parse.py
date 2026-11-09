@@ -297,6 +297,12 @@ def test_eval_counts_are_reproducible():
         "correct_parse": 8, "confident_misparse": 0, "correct_clarification": 12,
         "unnecessary_clarification": 0, "correct_unsupported": 0, "wrong_unsupported": 0,
         "clarification_instead_of_unsupported": 0}
+    assert res["counterexamples_v3"]["n"] == 23
+    assert res["counterexamples_v3"]["counts"] == {
+        "correct_parse": 11, "confident_misparse": 0, "correct_clarification": 12,
+        "unnecessary_clarification": 0, "correct_unsupported": 0, "wrong_unsupported": 0,
+        "clarification_instead_of_unsupported": 0}
+    assert ev.evaluate("counterexamples_v3", ev.parser_v2_frozen)["counts"]["confident_misparse"] == 12
     v1 = {r["split"]: r for r in ev.main(["--version", "v1"])}
     assert set(v1) == {"dev", "heldout", "probes"} and v1["probes"]["counts"]["confident_misparse"] == 1
     assert ev.evaluate("counterexamples_v2", ev.parser_v1)["counts"]["confident_misparse"] == 14
