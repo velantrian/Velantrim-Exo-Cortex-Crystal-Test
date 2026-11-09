@@ -162,6 +162,10 @@ DEMO_IDS_V2 = DEMO_IDS + ("P01", "P09", "C01", "C02", "C03", "C05", "C09", "C12"
 
 def demo(results, ids=DEMO_IDS, version="v1"):
     rows = [r for res in results for r in res["rows"] if r["id"] in ids]
+    before = {}
+    if version != "v1":
+        before = {(b["split"], b["id"]): b["v1"] for b in before_after(results)}
+        split_of = {r["id"]: res["split"] for res in results for r in res["rows"]}
     title = "# Query-parse demonstration (isolated data, generated)" if version == "v1" else \
         "# Query-parse demonstration %s (isolated data, generated)" % version
     cmd = "`python -m tests.query_parse_eval --write`" if version == "v1" else \
@@ -174,7 +178,9 @@ def demo(results, ids=DEMO_IDS, version="v1"):
         lines += ["## %s — «%s»" % (r["id"], r["question"]), ""]
         if r["context"]:
             lines.append("- Context (bounded, structured): " + "; ".join(
-                "«%s» → %s" % (c["question"], c.get("asked_object") or c.get("candidates")) for c in r["context"]))
+                "«%s» → %s" % (c["question"], c.get("asked_object") or c.get("candidates") or (
+                    "%s; mentioned %s" % (c["kind"], c["mentioned_objects"]) if c.get("mentioned_objects") else None))
+                for c in r["context"]))
         lines.append("- Parse: `%s`" % p["kind"])
         if p["params"]:
             lines.append("- Parameters: `%s`" % json.dumps(p["params"], ensure_ascii=False))
@@ -194,6 +200,11 @@ def demo(results, ids=DEMO_IDS, version="v1"):
             if r["manual"]["params"] is None else
             "same answer and grounds" if not r["answers_differ"] else
             "DIFFERENT — manual answer %r, grounds %s" % (r["manual"]["grounds_answer"], r["manual"]["grounds_admitted"])))
+        b = before.get((split_of[r["id"]], r["id"])) if before else None
+        if b:
+            lines.append("- **Before (v1 snapshot, d550f3f)**: %s; %s; query %s; grounds %s; answer %r" % (
+                b["category"], json.dumps(b["params"], ensure_ascii=False) if b["params"] else (b["clarification"] or b["limitation"]),
+                "ran" if b["query_called"] else "not run", b["grounds_admitted"], b["grounds_answer"]))
         lines.append("")
     return rows, "\n".join(lines)
 
@@ -206,7 +217,7 @@ def before_after(v2_results):
         for r1, r2 in zip(res1["rows"], res2["rows"]):
             assert r1["id"] == r2["id"]
             key = lambda r: (r["category"], r["parser"]["kind"], r["parser"]["params"], r["parser"]["grounds_admitted"],
-                             r["parser"]["grounds_answer"])
+                             r["parser"]["grounds_answer"], r["parser"]["clarification"], r["parser"]["limitation"])
             if key(r1) != key(r2):
                 out.append({"split": res2["split"], "id": r2["id"], "question": r2["question"],
                             "context_v1": r1["context"], "context_v2": r2["context"], "gold": r2["gold"],
