@@ -1,0 +1,254 @@
+{
+ "_note": "GOLD VERSION 2 of counterexamples_v3 (same 23 questions, same isolated extension). counterexamples_v3.json (gold v1) is unchanged and remains the gold of the historical v3 report. Written and committed BEFORE the v4 code change.",
+ "gold_version": 2,
+ "supersedes": "tests/fixtures/query_parse/counterexamples_v3.json (gold v1)",
+ "rule_change": {
+  "date": "2026-11-09",
+  "by": "user",
+  "text": "Если одна форма подходит двум объектам — напрямую и через склонение — сохраняй обоих кандидатов и спрашивай, если контекст не разрешает выбор. Явный идентификатор («объекта M») выбирает объект. Подтверждённый выбор пользователя можно использовать в последующем контексте."
+ },
+ "gold_changes": [
+  {
+   "id": "K20",
+   "question": "Какой статус Моста сейчас?",
+   "old_gold": {
+    "kind": "parsed",
+    "asked_object": "Y",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   "new_gold": {
+    "kind": "needs_clarification"
+   },
+   "reason": "User's rule change on 2026-11-09: if one word form matches two objects — one directly and one via inflection — keep both candidates and ask unless context resolves the choice. The old gold encoded the v3 design rule 'exact beats inflection'. This is a change of the contract by the user, NOT a consequence of any parser result."
+  }
+ ],
+ "unchanged_review": "Every other item was checked against the new rule: K21 (both via inflection) and K23 (same alias) were already clarifications; K22 «Мост» matches M directly and does not match Y («Моста») via the ending table; zone/clock items are unaffected.",
+ "extra_known_objects": [
+  {
+   "id": "Y",
+   "names": [
+    "Y",
+    "Моста"
+   ]
+  }
+ ],
+ "extra_facts": [
+  {
+   "fact_id": "Y-open",
+   "claim": "Y: статус — открыт",
+   "applicability": {
+    "primary_object": "Y",
+    "valid_from": "2026-11-01"
+   }
+  }
+ ],
+ "items": [
+  {
+   "id": "K01",
+   "group": "zone_case",
+   "question": "Какой статус L был 8 ноября в 13:00 по лондону?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "K02",
+   "group": "zone_case",
+   "question": "По Лондону какой статус L был 8 ноября в 13:00?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "K03",
+   "group": "zone_case",
+   "question": "Какой статус L был 8 ноября в 13:00 ПО ЛОНДОНУ?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "K04",
+   "group": "zone_case",
+   "question": "Какой статус L был 8 ноября в 13:00 по Московскому времени?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T13:00:00+03:00"
+   }
+  },
+  {
+   "id": "K05",
+   "group": "zone_case",
+   "question": "Какой статус L был 8 ноября в 13:00 ПО МОСКВЕ?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T13:00:00+03:00"
+   }
+  },
+  {
+   "id": "K06",
+   "group": "zone_case",
+   "question": "Какой статус L был 8 ноября в 13:00 utc?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T13:00:00+00:00"
+   }
+  },
+  {
+   "id": "K07",
+   "group": "zone_case",
+   "question": "Какой статус L был 8 ноября в 13:00 по берлину?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T13:00:00+01:00"
+   }
+  },
+  {
+   "id": "K08",
+   "group": "zone_case",
+   "question": "Какой статус L был 8 ноября в 13:00 по Киевскому Времени?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "K09",
+   "group": "zone_case",
+   "question": "Какой статус L по состоянию на 8 ноября 13:00?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T13:00:00+01:00"
+   },
+   "_why": "control: «по состоянию» is not a place"
+  },
+  {
+   "id": "K10",
+   "group": "clock_precision",
+   "question": "Какой статус L был 8 ноября в 10:00:30?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:30+01:00"
+   }
+  },
+  {
+   "id": "K11",
+   "group": "clock_precision",
+   "question": "Какой статус L был 8 ноября в 10:00:30.5?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "K12",
+   "group": "clock_precision",
+   "question": "Какой статус L был 8 ноября в 10.00?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "K13",
+   "group": "clock_precision",
+   "question": "Какой статус L был 8 ноября в 10:00:30 по Москве?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:30+03:00"
+   }
+  },
+  {
+   "id": "K14",
+   "group": "clock_precision",
+   "question": "Статус L на 2026-11-08 10:00:30?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:30+01:00"
+   }
+  },
+  {
+   "id": "K15",
+   "group": "clock_precision",
+   "question": "Какой статус L был 8 ноября в 10:00:61?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "K16",
+   "group": "clock_precision",
+   "question": "Какой статус L был 8 ноября в 10 часов 30 минут?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "K17",
+   "group": "clock_precision",
+   "question": "Какой статус L был 8 ноября в 10:30 вечера?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T22:30:00+01:00"
+   }
+  },
+  {
+   "id": "K18",
+   "group": "clock_precision",
+   "question": "Какой статус L был 8 ноября в половине десятого?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "K19",
+   "group": "clock_precision",
+   "question": "Статус L на 2026-11-08T10:00:30?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "K20",
+   "group": "catalogue_order",
+   "question": "Какой статус Моста сейчас?",
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "_why": "gold v2: «Моста» matches Y directly and M via inflection; by the 2026-11-09 rule both candidates are kept and the user is asked"
+  },
+  {
+   "id": "K21",
+   "group": "catalogue_order",
+   "question": "Какой статус Мостами сейчас?",
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "_why": "both M («Мост»+ами) and Y («Моста» -> мост+ами) match only by inflection: equal rank"
+  },
+  {
+   "id": "K22",
+   "group": "catalogue_order",
+   "question": "Какой статус Мост сейчас?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "M",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "K23",
+   "group": "catalogue_order",
+   "question": "Какой статус Пульсаром сейчас?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  }
+ ]
+}

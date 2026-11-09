@@ -5,7 +5,7 @@ Same questions, same isolated data, two conditions:
   parser -- parameters produced by core.query_parse.
 
 Both go through the same ported #503 filter (core.pipeline.generate_answer).
-Run:  python -m tests.query_parse_eval  [--version v1|v2|v3] [--write]   (default v3)
+Run:  python -m tests.query_parse_eval  [--version v1|v2|v3|v4] [--write]   (default v4)
 
 v1 = frozen snapshot of the original parser (tests/query_parse_v1.py, byte-identical
      to core/query_parse.py at d550f3f) on the original splits dev/heldout/probes;
@@ -15,9 +15,14 @@ v2 = frozen snapshot tests/query_parse_v2.py (byte-identical to core/query_parse
      at eee4062) on dev/heldout/probes + counterexamples_v2, v1 snapshot for the
      before -> after table; --write regenerates eval_results_v2.json, demo_v2.*,
      before_after_v2.json (must be byte-identical to the committed v2 report).
-v3 = current core.query_parse on all splits incl. counterexamples_v3, v2 snapshot
-     for before -> after; --write produces eval_results_v3.json, demo_v3.*,
-     before_after_v3.json.
+v3 = frozen snapshot tests/query_parse_v3.py (byte-identical to core/query_parse.py
+     at a6d11f3) on all v3 splits, v2 snapshot for before -> after; --write
+     regenerates the v3 report byte-identically (eval_results_v3.json, demo_v3.*,
+     before_after_v3.json, permutation_invariance_v3.json).
+v4 = current core.query_parse on all splits; counterexamples_v3 is scored against
+     the NEW gold version counterexamples_v3_gold_v2 (old gold file unchanged) and
+     the new counterexamples_v4; v3 snapshot for before -> after; --write produces
+     eval_results_v4.json, demo_v4.*, before_after_v4.json, permutation_invariance_v4.json.
 """
 import json
 import sys
@@ -29,6 +34,7 @@ from core.pipeline import generate_answer
 import core.query_parse as parser_current
 from tests import query_parse_v1 as parser_v1
 from tests import query_parse_v2 as parser_v2_frozen
+from tests import query_parse_v3 as parser_v3_frozen
 
 ROOT = Path(__file__).resolve().parent.parent
 FIX = ROOT / "tests" / "fixtures" / "query_parse"
@@ -47,10 +53,11 @@ def _fact(f):
 V1_SPLITS = ("dev", "heldout", "probes")
 V2_SPLITS = V1_SPLITS + ("counterexamples_v2",)
 V3_SPLITS = V2_SPLITS + ("counterexamples_v3",)
-PARSERS = {"v1": parser_v1, "v2": parser_v2_frozen, "v3": parser_current}
-SPLITS = {"v1": V1_SPLITS, "v2": V2_SPLITS, "v3": V3_SPLITS}
-PREVIOUS = {"v2": "v1", "v3": "v2"}
-PREV_LABEL = {"v2": "v1 snapshot, d550f3f", "v3": "v2 snapshot, eee4062"}
+V4_SPLITS = V2_SPLITS + ("counterexamples_v3_gold_v2", "counterexamples_v4")
+PARSERS = {"v1": parser_v1, "v2": parser_v2_frozen, "v3": parser_v3_frozen, "v4": parser_current}
+SPLITS = {"v1": V1_SPLITS, "v2": V2_SPLITS, "v3": V3_SPLITS, "v4": V4_SPLITS}
+PREVIOUS = {"v2": "v1", "v3": "v2", "v4": "v3"}
+PREV_LABEL = {"v2": "v1 snapshot, d550f3f", "v3": "v2 snapshot, eee4062", "v4": "v3 snapshot, a6d11f3"}
 
 
 def load_split(split):
@@ -168,7 +175,8 @@ DEMO_IDS = ("D01", "D02", "D03", "D04", "D05", "D07", "D08", "H05", "H07", "H12"
 DEMO_IDS_V2 = DEMO_IDS + ("P01", "P09", "C01", "C02", "C03", "C05", "C09", "C12", "C13", "C14", "C17", "C20")
 DEMO_IDS_V3 = DEMO_IDS_V2 + ("K01", "K02", "K04", "K07", "K09", "K10", "K11", "K13", "K16", "K17", "K18",
                              "K20", "K21", "K22")
-DEMO_IDS_BY = {"v1": DEMO_IDS, "v2": DEMO_IDS_V2, "v3": DEMO_IDS_V3}
+DEMO_IDS_V4 = DEMO_IDS_V3 + ("E01", "E03", "E05", "E06", "F01", "F02", "F04", "F05", "F07", "F09", "F10", "F13")
+DEMO_IDS_BY = {"v1": DEMO_IDS, "v2": DEMO_IDS_V2, "v3": DEMO_IDS_V3, "v4": DEMO_IDS_V4}
 
 
 def demo(results, ids=DEMO_IDS, version="v1"):
@@ -246,7 +254,7 @@ def before_after(v2_results, version="v2"):
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
-    version = argv[argv.index("--version") + 1] if "--version" in argv else "v3"
+    version = argv[argv.index("--version") + 1] if "--version" in argv else "v4"
     parser = PARSERS[version]
     splits = SPLITS[version]
     results = [evaluate(s, parser) for s in splits]
@@ -277,13 +285,14 @@ def write(results, version):
     if version != "v1":
         (OUT / f"before_after_{version}.json").write_text(
             json.dumps(before_after(results, version), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    if version == "v3":
+    if version in ("v3", "v4"):
+        prev = "v2" if version == "v3" else "v3"
         perm = {"_note": "decision (kind, params, candidates, clarification/limitation text, mentioned_objects) for every "
                          "permutation of the split's catalogue x {names as given, names reversed}; 'changed' lists items "
                          "whose decision differs between catalogue orders",
-                "v2": [permutation_check(parser_v2_frozen, s) for s in V3_SPLITS],
-                "v3": [permutation_check(parser_current, s) for s in V3_SPLITS]}
-        (OUT / "permutation_invariance_v3.json").write_text(json.dumps(perm, ensure_ascii=False, indent=1) + "\n",
+                prev: [permutation_check(PARSERS[prev], s) for s in SPLITS[version]],
+                version: [permutation_check(PARSERS[version], s) for s in SPLITS[version]]}
+        (OUT / f"permutation_invariance_{version}.json").write_text(json.dumps(perm, ensure_ascii=False, indent=1) + "\n",
                                                            encoding="utf-8")
 
 

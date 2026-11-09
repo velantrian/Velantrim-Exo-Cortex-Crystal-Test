@@ -1,0 +1,292 @@
+{
+ "_note": "V4 COUNTEREXAMPLES: explicit identifiers and confirmed-choice context, under the user's 2026-11-09 rule (see counterexamples_v3_gold_v2.json). Written and committed BEFORE the v4 code change; same author as the fixes, not independent. Isolated extension: object Y («Моста»), as in counterexamples_v3. Items with context_questions build their context by running the parser under test on those questions in order.",
+ "extra_known_objects": [
+  {
+   "id": "Y",
+   "names": [
+    "Y",
+    "Моста"
+   ]
+  }
+ ],
+ "extra_facts": [
+  {
+   "fact_id": "Y-open",
+   "claim": "Y: статус — открыт",
+   "applicability": {
+    "primary_object": "Y",
+    "valid_from": "2026-11-01"
+   }
+  }
+ ],
+ "items": [
+  {
+   "id": "E01",
+   "group": "explicit_id",
+   "question": "Какой статус объекта M сейчас?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "M",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "E02",
+   "group": "explicit_id",
+   "question": "Какой статус объекта Y сейчас?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "Y",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "E03",
+   "group": "explicit_id",
+   "question": "Какой статус Моста (объект M) сейчас?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "M",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "E04",
+   "group": "explicit_id",
+   "question": "Какой статус Моста, объекта Y, сейчас?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "Y",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "E05",
+   "group": "explicit_id",
+   "question": "Какой статус Моста (объект L) сейчас?",
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "_why": "explicit identifier L conflicts with «Моста» (M/Y)"
+  },
+  {
+   "id": "E06",
+   "group": "explicit_id",
+   "question": "Какой статус Моста и объекта Y сейчас?",
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "_why": "«и» joins two references: possibly two objects"
+  },
+  {
+   "id": "E07",
+   "group": "explicit_id",
+   "question": "Какой статус объекта Z сейчас?",
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "_why": "unknown identifier"
+  },
+  {
+   "id": "E08",
+   "group": "explicit_id",
+   "question": "Какой статус Пульсара (объект P2) сейчас?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "P2",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "E09",
+   "group": "explicit_id",
+   "question": "Какой статус Мост сейчас?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "M",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "F01",
+   "group": "confirmed_choice",
+   "question": "M",
+   "context_questions": [
+    "Какой статус Моста сейчас?"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "M",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   "_why": "bare answer to the clarification «M или Y?» selects M; the clarified question asked «сейчас»"
+  },
+  {
+   "id": "F02",
+   "group": "confirmed_choice",
+   "question": "А его статус сейчас?",
+   "context_questions": [
+    "Какой статус Моста сейчас?",
+    "M"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "M",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "F03",
+   "group": "confirmed_choice",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус Моста сейчас?",
+    "Y"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "Y",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "F04",
+   "group": "confirmed_choice",
+   "question": "Какой статус Моста сейчас?",
+   "context_questions": [
+    "Какой статус Моста сейчас?",
+    "M"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "M",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   "_why": "the same ambiguous form, resolved by the confirmed choice in bounded context"
+  },
+  {
+   "id": "F05",
+   "group": "confirmed_choice",
+   "question": "Какой статус Моста сейчас?",
+   "context_questions": [
+    "Какой статус Моста сейчас?",
+    "M",
+    "Что менялось у Y за неделю?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "_why": "context conflicts: after confirming M the user mentioned Y"
+  },
+  {
+   "id": "F06",
+   "group": "confirmed_choice",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус Моста сейчас?",
+    "M",
+    "Что менялось у Y за неделю?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "_why": "possible object switch after the confirmation"
+  },
+  {
+   "id": "F07",
+   "group": "confirmed_choice",
+   "question": "L",
+   "context_questions": [
+    "Какой статус Моста сейчас?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "_why": "answer is not among the offered candidates"
+  },
+  {
+   "id": "F08",
+   "group": "confirmed_choice",
+   "question": "P2",
+   "context_questions": [
+    "Какой статус Пульсара сейчас?"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "P2",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "F09",
+   "group": "confirmed_choice",
+   "question": "Y",
+   "context_questions": [
+    "Какой статус Мостами был 8 ноября в 10:00?"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "Y",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   },
+   "_why": "bare answer reuses the clarified question's absolute moment"
+  },
+  {
+   "id": "F10",
+   "group": "confirmed_choice",
+   "question": "M",
+   "context_questions": [
+    "Какой статус Моста?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "_why": "the clarified question had no time: ask for it"
+  },
+  {
+   "id": "F11",
+   "group": "confirmed_choice",
+   "question": "А Y?",
+   "context_questions": [
+    "Какой статус Моста сейчас?",
+    "M"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "Y",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   "_why": "explicit object in follow-up inherits time of the confirmation turn"
+  },
+  {
+   "id": "F12",
+   "group": "confirmed_choice",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус Моста сейчас?",
+    "объект M"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "M",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "F13",
+   "group": "confirmed_choice",
+   "question": "Какой статус Моста сейчас?",
+   "context_questions": [
+    "Какой статус Моста сейчас?",
+    "M",
+    "Какой статус L сейчас?",
+    "Какой статус L2 сейчас?",
+    "Какой статус P1 сейчас?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "_why": "the confirmation is outside the bounded 3-turn context"
+  }
+ ]
+}

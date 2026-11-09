@@ -297,8 +297,8 @@ def test_eval_counts_are_reproducible():
         "correct_parse": 8, "confident_misparse": 0, "correct_clarification": 12,
         "unnecessary_clarification": 0, "correct_unsupported": 0, "wrong_unsupported": 0,
         "clarification_instead_of_unsupported": 0}
-    assert res["counterexamples_v3"]["n"] == 23
-    assert res["counterexamples_v3"]["counts"] == {
+    assert ev.evaluate("counterexamples_v3")["n"] == 23
+    assert ev.evaluate("counterexamples_v3")["counts"] == {
         "correct_parse": 11, "confident_misparse": 0, "correct_clarification": 12,
         "unnecessary_clarification": 0, "correct_unsupported": 0, "wrong_unsupported": 0,
         "clarification_instead_of_unsupported": 0}
