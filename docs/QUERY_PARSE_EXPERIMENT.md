@@ -840,3 +840,51 @@ clarification/unsupported item.
 
 **The experiment is closed with v6.** Final summary and the next (separate)
 task: `docs/query_parse/EXPERIMENT_SUMMARY.md`.
+
+---
+
+# v6.1 — blocking stale time inheritance (user decision 2026-11-09), fixed BEFORE the code change
+
+v6 is frozen as `tests/query_parse_v6.py` (sha256
+`e1ffd85719ff0adca17d91b2b36987b8ef1342db8b59977030793f3c073e3c70` = tag
+`query-parse-v6-frozen`; no tag moved). Only this behaviour changes; no vocabulary.
+
+**Defect in v6:** a pronoun follow-up («А его статус?») took the object *and the
+time* from the newest **parsed** turn, skipping newer non-parsed turns. So
+«L сейчас?» → «L вчера?» (clarification) → «А его статус?» silently went back to
+«сейчас».
+
+## Rule
+
+* Inheriting an exact moment from unambiguous context stays (documented v1 rule).
+* It is **blocked** if any turn newer than the parsed source turn (inside the
+  bounded 3-turn context) has:
+  * an **unresolved time**: a clarification caused by the time (day without hours,
+    word time, unknown zone, alternatives, no time) or an unfinished time
+    clarification; or
+  * an unsupported question that carries a time reference: future, whole day,
+    period, or any time expression that does not resolve to a moment; or
+  * a time that resolves to a **different** moment than the source turn («сейчас»
+    vs 8 Nov 10:00).
+* **Not blocking (decision):**
+  * an intermediate non-parsed turn with **no time expression at all** (e.g.
+    «Что менялось у L?», «У L статус лучше?»). The cautious option is used only
+    when the turn carries a time reference;
+  * a turn with the **same** time («Расскажи про L сейчас» after «L сейчас?»,
+    as cv2 C20).
+* When blocked, the follow-up asks for the moment. A new explicit time in the
+  latest turn is used («А его статус вчера в 10:00?»). Answering the clarification
+  with a time makes that moment the newest parsed turn, so later follow-ups
+  inherit it.
+* The time state of a non-parsed turn is stored structurally in the context turn
+  (`time_state`); old text is never re-parsed. The object rules are unchanged:
+  a named-object follow-up («А L2?») still looks only at the last turn.
+* Bare «Вчера в 10:00» without «А»/object stays an object clarification
+  (unchanged; not a new phrasing).
+
+## Gold
+
+New file `counterexamples_v6_1.json` (S01–S21): blocked sequences, positive
+controls, unsupported without time / with the same time, new explicit time,
+resolution. Existing golds were reviewed for sequences with an intermediate
+non-parsed turn; see results for any change.

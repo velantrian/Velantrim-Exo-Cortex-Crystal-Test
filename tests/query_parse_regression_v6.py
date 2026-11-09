@@ -11,7 +11,7 @@ from datetime import datetime
 from tests import query_parse_eval as ev
 from tests import query_parse_independent_v4 as ind
 from tests import query_parse_v5 as parser_v5  # frozen v5 (= tag query-parse-v5-frozen)
-import core.query_parse as parser_v6
+from tests import query_parse_v6 as parser_v6  # frozen v6 (= tag query-parse-v6-frozen)
 
 GOLDS = (("original", "independent_v4.json"), ("gold_v2", "independent_v4_gold_v2.json"),
          ("gold_v3", "independent_v4_gold_v3.json"))
