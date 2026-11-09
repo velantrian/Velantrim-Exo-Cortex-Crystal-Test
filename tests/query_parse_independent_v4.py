@@ -10,7 +10,7 @@ import json
 import sys
 from datetime import datetime
 
-import core.query_parse as parser
+from tests import query_parse_v4 as parser  # frozen v4 (byte-identical to tag query-parse-v4-frozen)
 from tests import query_parse_eval as ev
 
 FILE = ev.FIX / "independent_v4.json"
@@ -39,8 +39,8 @@ def load():
     raw = FILE.read_bytes()
     expected = SHA_FILE.read_text(encoding="utf-8").split()[0]
     assert hashlib.sha256(raw).hexdigest() == expected, "independent_v4.json sha256 mismatch"
-    assert hashlib.sha256((ev.ROOT / "core" / "query_parse.py").read_bytes()).hexdigest() == FROZEN_SHA, \
-        "core/query_parse.py is not the frozen v4 file"
+    assert hashlib.sha256((ev.ROOT / "tests" / "query_parse_v4.py").read_bytes()).hexdigest() == FROZEN_SHA, \
+        "tests/query_parse_v4.py is not the frozen v4 file"
     return json.loads(raw.decode("utf-8")), expected
 
 

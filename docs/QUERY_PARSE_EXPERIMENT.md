@@ -588,3 +588,66 @@ flagged. Disagreements among them:
 I21 («L, а не L2» → clarification), I28 (unknown «Мостик» → clarification) and
 I29 («Готов ли L2 сейчас?» → unsupported) agree with the cautious gold. Nothing
 was fixed; the two parser errors are open items for a later version.
+
+---
+
+# v5 — rules R1–R6 (user/Astra decision 2026-11-09), fixed BEFORE the code change
+
+v4 is frozen as `tests/query_parse_v4.py` (sha256
+`81e1f6632163ddd1d88d365b2d8a7f2121197ac00885c9452c865a93a9ac9d26`, equal to
+`core/query_parse.py` at tag `query-parse-v4-frozen`, which is not moved). All
+v1–v4 report files and `independent_v4_results.json` regenerate byte-identically
+from the frozen snapshots. No vocabulary or new phrasings are added: no «готов ли
+L», no new date forms; markers below are used only to **block** a query.
+
+## Rules
+
+* **R1 — time not parsed ⇒ no query.** A time in words («в десять утра 8 ноября»)
+  → clarification while word-time is unsupported; a time expression is never
+  dropped in favour of a whole-day query. General form: after the parsed clock,
+  date, «сейчас» and zone spans are removed, any remaining *time-like marker*
+  blocks the query with a clarification. Marker list (detection only, nothing is
+  parsed from them): day-part words `утра дня вечера ночи утром днём днем вечером
+  ночью` (bare «утром…» without a clock keeps the v1 «часть суток» clarification);
+  `час…`; «в» + a 1–2 digit number not consumed by a clock or date («в 10»);
+  «в» + an hour numeral word `один/одного … двадцать четыре`.
+* **R2 — «сегодня в 08:00»** = the moment today (date from the explicit `now` in
+  the explicit zone) at 08:00 in that zone; no explicit zone → clarification. (v4
+  already behaved so; now pinned.)
+* **R3 — explicit calendar date without a time** («был 7 ноября», «на
+  2026-11-07», «на 07.11», follow-up «А 7 ноября?») → clarification asking for the
+  time. Replaces the v1–v4 «8 ноября» → date-only whole day.
+* **R4 — «весь день 7 ноября».** Finding: v4 does **not** support this phrasing
+  explicitly (no rule, not documented); it ignored «весь день» and its bare-date
+  rule happened to give date-only `2026-11-07`. So nothing is added: in v5 R3
+  applies → **clarification** (never a moment, never another day).
+  «сегодня» alone keeps its documented behaviour (date-only, whole day); so does
+  «вчера» alone, which R3 does not name. **Inconsistency, reported, not decided:**
+  «был 7 ноября» asks for the time, while «сегодня» / «вчера» without a time still
+  ask about the whole day. «весь день сегодня» = «сегодня» (same day, whole day).
+* **R5 — future moment ⇒ unsupported**, decided by the resolved time vs the
+  explicit `now`, not by the word: «Какой статус L 12 ноября в 10:00?» (now =
+  9 Nov) → unsupported (v2–v4: year clarification), «был 12 ноября» → unsupported,
+  «сегодня в 08:00» at 07:58 → unsupported. Checked before the object (as v4 did
+  for «будет»). **«будет» with a past/current resolved time** («будет 8 ноября в
+  10:00») → clarification: the tense and the time contradict; neither a forecast
+  refusal nor a silent past query. «будет» with no time → unsupported (forecast).
+  «завтра/послезавтра» stay unsupported.
+* **R6 — comparisons ⇒ unsupported.** Marker list (comparison detection only):
+  `сравн…` (v1), `лучше`, `хуже`, `чем`, `отлича…`, `разниц…`, `одинаков…`.
+
+## Gold versions (existing fixture files are not edited)
+
+* `dev_gold_v2.json`: **D15** «Какой статус L был 8 ноября?» parsed date-only
+  `2026-11-08` → clarification (R3); **D23** «…20 декабря в 10:00?» clarification
+  (year) → unsupported (R5).
+* `independent_v4_gold_v2.json` — the 30 opened questions are now a **regression
+  set (not independent)**: **I15** «будет 12 ноября в 10:00» clarification →
+  unsupported (R5); **I19** «сегодня в 08:00» clarification → parsed K
+  `2026-11-09T08:00:00+01:00` (R2). I13, I20, I30 already matched R1/R6/R3.
+* Each change has `old_gold`, `new_gold`, `rule`, `reason` (= decision of
+  2026-11-09, not a parser result). heldout, probes, cv2, cv3_gold_v2, cv4 were
+  reviewed: no item affected.
+* `counterexamples_v5.json`: 36 new items (V01–V36) for R1–R6, including the
+  morning/evening example on the shared setup (L «на ремонте» until
+  2026-11-08T11:59:59+01:00, «готов» from 12:00).
