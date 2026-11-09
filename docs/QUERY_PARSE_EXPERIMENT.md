@@ -784,3 +784,59 @@ No vocabulary expansion, no «готов ли L».
   contract decision of 2026-11-09, not a parser result). probes, cv2,
   cv3_gold_v2 and cv4 were reviewed and are unaffected.
 * `counterexamples_v6.json`: 22 new items G01–G22.
+
+## Results v6 (`docs/query_parse/eval_results_v6.json`, `python -m tests.query_parse_eval --version v6 --write`)
+
+Code commit `85bf6cb` follows the rules/gold commit `cb4ae4e`. Latest gold versions:
+
+| Split | n | parse ✓ | misparse | clarif ✓ | clarif unnecessary | unsup ✓ | unsup wrong | clarif-for-unsup | answers differ |
+|---|---|---|---|---|---|---|---|---|---|
+| dev_gold_v3 | 28 | 12 | 0 | 9 | 0 | 7 | 0 | 0 | 0 |
+| heldout_gold_v2 | 24 | 14 | 0 | 6 | 1 | 3 | 0 | 0 | 1 (H23) |
+| probes | 10 | 3 | 0 | 4 | 2 | 0 | 1 | 0 | 3 (P02, P05, P10) |
+| counterexamples_v2 | 20 | 8 | 0 | 12 | 0 | 0 | 0 | 0 | 0 |
+| counterexamples_v3_gold_v2 | 23 | 10 | 0 | 13 | 0 | 0 | 0 | 0 | 0 |
+| counterexamples_v4 | 22 | 14 | 0 | 8 | 0 | 0 | 0 | 0 | 0 |
+| counterexamples_v5_gold_v2 | 36 | 6 | 0 | 14 | 0 | 16 | 0 | 0 | 0 |
+| counterexamples_v6 | 22 | 7 | 0 | 9 | 0 | 6 | 0 | 0 | 0 |
+| *v5 on dev_gold_v3* | 28 | 12 | 1 (D07) | 8 | 0 | 7 | 0 | 0 | 1 |
+| *v5 on heldout_gold_v2* | 24 | 14 | 1 (H12) | 5 | 1 | 3 | 0 | 0 | 2 |
+| *v5 on cv5_gold_v2* | 36 | 6 | 3 (V16, V17, V19) | 12 | 0 | 14 | 0 | 1 (V18) | 2 |
+| *v5 on cv6* | 22 | 7 | 7 | 4 | 0 | 3 | 0 | 1 (G08) | 5 |
+
+v5 on cv6: misparse G01, G02, G09, G10, G18, G19, G21 (all date-only queries).
+probes, cv2, cv3_gold_v2, cv4 identical for v5 and v6. Before→after:
+`before_after_v6.json` (16 items: D07, H11 (text), H12, V16–V19, G01, G02, G08–G11,
+G18, G19, G21).
+
+* **No date-only `as_of` reaches `ask()`:** checked over every turn of every
+  fixture file (all gold versions, contexts included) and the regression set.
+* **Permutation invariance** (`permutation_invariance_v6.json`): 122 400 variants
+  over the eight v6 sets, `changed = []` for v6 and v5. Regression set: 2 419 200
+  variants (all 8! × name order), `changed = []`.
+* Guarantees re-checked on v6 (tests): zones/case, seconds, alternatives,
+  compound names/near miss, collision, explicit id, confirmed choice and
+  conflict, object switch after an unsupported turn, R1/R6, morning/evening
+  (09:00 «на ремонте», 18:00 / 21:00 «готов»; word times, a bare day and a whole day give no query),
+  no memory mutation (live-store test).
+
+### Regression set (formerly independent), `regression_independent_v6.json`
+
+| gold | parser | parse ✓ | misparse | clarif ✓ | clarif unnecessary | unsup ✓ | unsup wrong | not correct |
+|---|---|---|---|---|---|---|---|---|
+| gold_v3 (latest) | v6 | 11 | 0 | 15 | 0 | 4 | 0 | — |
+| gold_v3 | v5 | 11 | 2 | 13 | 0 | 4 | 0 | I03, I26 |
+| gold_v2 | v6 | 11 | 0 | 13 | 2 | 4 | 0 | I03, I26 (gold changed by C1) |
+| original | v6 | 10 | 1 | 13 | 2 | 3 | 1 | I03, I15, I19, I26 |
+
+n = 30 in every row; "answers differ" n/a (no facts). No query on any
+clarification/unsupported item.
+
+### Demo v6 (`demo_v6.md`)
+
+1. «Какой статус L вчера в 10:00?» → `2026-11-08T10:00:00+01:00` → L-repair → «L: статус — на ремонте» (receipt: L-repair).
+2. «Какой статус L сегодня?» → no query → «На какое время сегодня нужен статус? Укажите время, например «сегодня в 10:00».»
+3. «Какой статус L был весь день 7 ноября?» → no query → «Проверка состояния за весь день разборщиком пока не поддерживается; укажите момент (например «8 ноября в 10:00») или «сейчас».»
+
+**The experiment is closed with v6.** Final summary and the next (separate)
+task: `docs/query_parse/EXPERIMENT_SUMMARY.md`.

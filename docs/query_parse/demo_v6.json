@@ -1,0 +1,120 @@
+[
+ {
+  "id": "G04",
+  "question": "Какой статус L вчера в 10:00?",
+  "context": [],
+  "timezone": "Europe/Berlin",
+  "gold": {
+   "kind": "parsed",
+   "asked_object": "L",
+   "as_of": "2026-11-08T10:00:00+01:00"
+  },
+  "category": "correct_parse",
+  "parser": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "explanation": {
+    "asked_object": "название «L» → объект L (точное совпадение названия)",
+    "as_of": "«вчера» + «10:00» в явно заданном поясе Europe/Berlin → as_of 2026-11-08T10:00:00+01:00 (относительно явно заданного текущего момента)",
+    "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_query_called": true,
+   "grounds_admitted": [
+    "L-repair"
+   ],
+   "grounds_answer": "L: статус — на ремонте",
+   "grounds_error": null,
+   "grounds_historical_only": [
+    "L-dev"
+   ],
+   "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+  },
+  "manual": {
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "grounds_query_called": true,
+   "grounds_admitted": [
+    "L-repair"
+   ],
+   "grounds_answer": "L: статус — на ремонте",
+   "grounds_error": null,
+   "grounds_historical_only": [
+    "L-dev"
+   ],
+   "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+  },
+  "answers_differ": false,
+  "group": "day_with_clock",
+  "receipt": {
+   "answer": "L: статус — на ремонте",
+   "citations": [
+    "L-repair"
+   ]
+  }
+ },
+ {
+  "id": "G01",
+  "question": "Какой статус L сегодня?",
+  "context": [],
+  "timezone": "Europe/Berlin",
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "category": "correct_clarification",
+  "parser": {
+   "kind": "needs_clarification",
+   "params": null,
+   "explanation": null,
+   "clarification": "На какое время сегодня нужен статус? Укажите время, например «сегодня в 10:00».",
+   "limitation": null,
+   "grounds_query_called": false,
+   "grounds_admitted": [],
+   "grounds_answer": null
+  },
+  "manual": {
+   "params": null,
+   "grounds_query_called": false,
+   "grounds_admitted": [],
+   "grounds_answer": null
+  },
+  "answers_differ": false,
+  "group": "day_no_time"
+ },
+ {
+  "id": "G08",
+  "question": "Какой статус L был весь день 7 ноября?",
+  "context": [],
+  "timezone": "Europe/Berlin",
+  "gold": {
+   "kind": "unsupported"
+  },
+  "category": "correct_unsupported",
+  "parser": {
+   "kind": "unsupported",
+   "params": null,
+   "explanation": null,
+   "clarification": null,
+   "limitation": "Проверка состояния за весь день разборщиком пока не поддерживается; укажите момент (например «8 ноября в 10:00») или «сейчас».",
+   "grounds_query_called": false,
+   "grounds_admitted": [],
+   "grounds_answer": null
+  },
+  "manual": {
+   "params": null,
+   "grounds_query_called": false,
+   "grounds_admitted": [],
+   "grounds_answer": null
+  },
+  "answers_differ": false,
+  "group": "whole_day"
+ }
+]
