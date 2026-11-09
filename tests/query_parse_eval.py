@@ -315,10 +315,7 @@ def write(results, version):
                                                      encoding="utf-8")
     rows, md = demo(results, DEMO_IDS_BY[version], version)
     if version == "v5":
-        rows = sorted(rows, key=lambda r: DEMO_IDS_BY["v5"].index(r["id"]))
-        for i, label in DEMO_V5:
-            md = md.replace("## %s — " % i, "## %s: %s — " % (label, i))
-        md = md.replace("Path: **", "Exactly three outcomes. Path: **")
+        rows, md = demo_v5(rows, md)
     (OUT / f"demo_{version}.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     (OUT / f"demo_{version}.md").write_text(md + "\n", encoding="utf-8")
     if version != "v1":
@@ -337,6 +334,28 @@ def write(results, version):
         me = morning_evening()
         (OUT / "morning_evening_v5.json").write_text(json.dumps(me, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         (OUT / "morning_evening_v5.md").write_text(morning_evening_md(me) + "\n", encoding="utf-8")
+
+
+def demo_v5(rows, md):
+    """Exactly three outcomes in a fixed order; the answer carries its receipt (citations)."""
+    from core import provenance
+    order = [i for i, _ in DEMO_V5]
+    rows = sorted(rows, key=lambda r: order.index(r["id"]))
+    head, *sections = md.split("\n## ")
+    by_id = {sec.split(" — ", 1)[0]: sec for sec in sections}
+    out = [head.replace("Path: **", "Exactly three outcomes. Path: **")]
+    for i, label in DEMO_V5:
+        sec = "%s: %s" % (label, by_id[i])
+        row = next(r for r in rows if r["id"] == i)
+        if row["parser"]["kind"] == "parsed":
+            g = PARSERS["v5"].ask(row["question"], SETUP["known_objects"], None, now=NOW, timezone=SETUP["timezone"],
+                                  query_fn=run_filter)
+            rec = provenance.build_receipt(g["result"])
+            row["receipt"] = {"answer": rec["answer"], "citations": [c["fact_id"] for c in rec["citations"]]}
+            sec = sec.replace("\n- Manual-parameter condition", "\n- Receipt: answer %r, citations %s\n- Manual-parameter condition"
+                              % (rec["answer"], ", ".join(row["receipt"]["citations"])))
+        out.append(sec)
+    return rows, "\n## ".join(out)
 
 
 # ── v5: losing the time changes the answer (isolated setup facts for L) ─────

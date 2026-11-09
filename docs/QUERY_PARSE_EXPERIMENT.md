@@ -651,3 +651,82 @@ L», no new date forms; markers below are used only to **block** a query.
 * `counterexamples_v5.json`: 36 new items (V01–V36) for R1–R6, including the
   morning/evening example on the shared setup (L «на ремонте» until
   2026-11-08T11:59:59+01:00, «готов» from 12:00).
+
+## Results v5 (`docs/query_parse/eval_results_v5.json`, `python -m tests.query_parse_eval --version v5 --write`)
+
+Code commit `5a16e6c` follows the rules/gold commit `483ff98`.
+
+| Split | n | parse ✓ | misparse | clarif ✓ | clarif unnecessary | unsup ✓ | unsup wrong | clarif-for-unsup | answers differ |
+|---|---|---|---|---|---|---|---|---|---|
+| dev_gold_v2 | 28 | 13 | 0 | 8 | 0 | 7 | 0 | 0 | 0 |
+| heldout | 24 | 15 | 0 | 5 | 1 | 3 | 0 | 0 | 1 (H23) |
+| probes | 10 | 3 | 0 | 4 | 2 | 0 | 1 | 0 | 3 (P02, P05, P10) |
+| counterexamples_v2 | 20 | 8 | 0 | 12 | 0 | 0 | 0 | 0 | 0 |
+| counterexamples_v3_gold_v2 | 23 | 10 | 0 | 13 | 0 | 0 | 0 | 0 | 0 |
+| counterexamples_v4 | 22 | 14 | 0 | 8 | 0 | 0 | 0 | 0 | 0 |
+| counterexamples_v5 | 36 | 9 | 0 | 13 | 0 | 14 | 0 | 0 | 0 |
+| *v4 snapshot on dev_gold_v2* | 28 | 13 | 1 (D15) | 7 | 0 | 6 | 0 | 1 (D23) | 0 |
+| *v4 snapshot on counterexamples_v5* | 36 | 9 | 11 | 1 | 0 | 5 | 1 | 9 | 6 |
+
+The v4 report's dev numbers (14 / 0 misparse) refer to the old dev gold. v4 on
+cv5: misparse V01–V06, V12–V15, V18 (time dropped or bare date → whole-day or
+wrong-moment query); wrong unsupported V24; clarification instead of
+unsupported V20, V21, V26, V27 (future) and V28–V32 (comparison). Other sets are
+identical for v4 and v5. Before→after: `before_after_v5.json` (26 items).
+
+**Permutation invariance** (`permutation_invariance_v5.json`): every catalogue
+permutation × name order over the seven v5 sets, 117 120 variants, `changed = []`
+for v5 and v4. Regression set: all 8! permutations × name order, 2 419 200
+variants, `changed = []`.
+
+### Regression set (formerly independent; `regression_independent_v5.json`)
+
+The 30 questions were opened after the v4 run → **regression, not independent**.
+
+| gold | parser | n | parse ✓ | misparse | clarif ✓ | clarif unnecessary | unsup ✓ | unsup wrong | clarif-for-unsup | not correct |
+|---|---|---|---|---|---|---|---|---|---|---|
+| original | v4 | 30 | 12 | 3 | 11 | 0 | 2 | 1 | 1 | I13, I15, I19, I20, I30 |
+| original | v5 | 30 | 12 | 1 | 13 | 0 | 3 | 1 | 0 | I15, I19 (gold changed by R5/R2) |
+| gold_v2 | v4 | 30 | 13 | 2 | 11 | 0 | 3 | 0 | 1 | I13, I20, I30 |
+| gold_v2 | v5 | 30 | 13 | 0 | 13 | 0 | 4 | 0 | 0 | — |
+
+"answers differ" is n/a (the set has no facts, H1). No query was called on any
+clarification/unsupported item (spy), for both parsers and both golds.
+
+### Morning vs evening (`morning_evening_v5.md`)
+
+Setup L: «на ремонте» until 2026-11-08T11:59:59+01:00, «готов» from 12:00.
+Manual parameters: 09:00 / 10:00 → «на ремонте»; 18:00 / 21:00 → «готов».
+
+| question | v4 (frozen) | v5 |
+|---|---|---|
+| «…в десять утра 8 ноября?» | date-only `2026-11-08`, query ran, **no answer** (whole day not covered) | clarification, no query |
+| «…8 ноября в 9:00 вечером?» | `09:00`, query ran, **«на ремонте»** («вечером» dropped; 21:00 would be «готов») | clarification, no query |
+| «…8 ноября в шесть вечера?» | date-only, query ran, **no answer** (manual 18:00: «готов») | clarification, no query |
+
+### Demo (`demo_v5.md`): exactly three outcomes
+
+1. **Correct answer** — «Какой статус L был 8 ноября в 09:00?» → `L`, `2026-11-08T09:00:00+01:00` →
+   grounds L-repair → «L: статус — на ремонте», receipt cites L-repair.
+2. **Useful clarification** — «Какой статус L был в десять утра 8 ноября?» → no query →
+   «Время «в десять утра» в такой форме не разобрано … Укажите время как ЧЧ:ММ, например «8 ноября в 10:00».»
+3. **Understandable limitation** — «У L статус сейчас лучше, чем у L2?» → no query →
+   «Первая версия разбирает только статус одного объекта на один момент; сравнение не поддерживается.»
+
+### Still open / caveats (v5)
+
+* Open from before: H23 «позавчера», P02 «в прошлую пятницу», P10 non-adjacent
+  negation, P05 «Был ли L готов…» (wrong unsupported; «готов ли» not added by
+  instruction).
+* **Inconsistency (reported, not decided):** «был 7 ноября» now asks for the time,
+  while «сегодня» / «вчера» without a time still mean the whole day.
+* «весь день 7 ноября» is not supported (v4 never supported it explicitly) →
+  clarification; «весь день сегодня» = «сегодня».
+* «будет» + past/current time → clarification is an engineering decision
+  documented here; the rules did not name it.
+* R1/R6 marker lists are closed lists for blocking only; unknown wordings of time
+  or comparison outside them are not detected. «чем» is blocked as a comparison
+  marker in any status question.
+* Rules, gold and fixes have the same author; the regression set is no longer
+  independent. 100 % statement/branch coverage of `core/query_parse.py`;
+  coverage ≠ correctness. No claim of general "understanding".
