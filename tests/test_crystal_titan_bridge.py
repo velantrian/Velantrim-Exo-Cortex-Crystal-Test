@@ -10,6 +10,7 @@ import copy
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from core.applicability import select
 from core.provenance import claim_digest, verify_receipt
 from tests.support.crystal_titan_bridge import (
     flatten_messages,
@@ -27,33 +28,96 @@ KNOWN = (
 QUESTION_M_NOW = "Какой статус у M сейчас?"
 QUESTION_AMBIGUOUS = "Какой статус?"
 
-MATCHING = {
+def _canon(fact, **extra):
+    """A fact that passes CanonicalView.STRICT (same fields generate_answer uses)."""
+    row = {
+        "claim_type": "WORLD_FACT",
+        "source_status": "EXTERNAL",
+        "truth_status": "VERIFIED",
+        "epistemic_state": "Validated",
+        "restricted": False,
+        "confidence": 1.0,
+    }
+    row.update(fact)
+    row.update(extra)
+    return row
+
+
+MATCHING = _canon({
     "fact_id": "g-m-current",
     "claim": "M is operational MATCHING-GROUND-TEXT",
     "source": "operator-log:m-current",
-    "confidence": 1.0,
     "primary_object": "M",
     "observed_at": "2026-11-09T12:00:00+01:00",
     "metadata": {"provenance": {"origin": "fixture", "record": "PROV-M-CURRENT"}},
-}
-FOREIGN = {
+})
+FOREIGN = _canon({
     "fact_id": "g-l-foreign",
     "claim": "L is offline FOREIGN-OBJECT-MARKER",
     "source": "operator-log:l-foreign",
-    "confidence": 1.0,
     "primary_object": "L",
     "observed_at": "2026-11-09T12:00:00+01:00",
     "metadata": {"provenance": {"origin": "fixture", "record": "PROV-L-FOREIGN"}},
-}
-STALE = {
+})
+STALE = _canon({
     "fact_id": "g-m-stale",
     "claim": "M was in maintenance STALE-GROUND-MARKER",
     "source": "operator-log:m-stale",
-    "confidence": 1.0,
     "primary_object": "M",
     "observed_at": "2026-10-01T10:00:00+01:00",
     "metadata": {"provenance": {"origin": "fixture", "record": "PROV-M-STALE"}},
-}
+})
+# After reconcile.supersede the old fact is Deprecated. CanonicalView drops it;
+# applicability.select does not read SUPERSEDED_BY edges.
+OLD_OPEN = _canon({
+    "fact_id": "g-m-open-old",
+    "claim": "M is open SUPERSEDED-OPEN-MARKER",
+    "source": "operator-log:m-open-old",
+    "primary_object": "M",
+    "observed_at": "2026-11-09T12:00:00+01:00",
+    "metadata": {"provenance": {"origin": "fixture", "record": "PROV-M-OPEN-OLD"}},
+}, epistemic_state="Deprecated")
+NEW_CLOSED = _canon({
+    "fact_id": "g-m-closed-new",
+    "claim": "M is closed CORRECTION-CLOSED-MARKER",
+    "source": "operator-log:m-closed-new",
+    "primary_object": "M",
+    "observed_at": "2026-11-09T12:00:00+01:00",
+    "metadata": {"provenance": {"origin": "fixture", "record": "PROV-M-CLOSED-NEW"}},
+})
+NEGATED = _canon({
+    "fact_id": "g-m-not-operational",
+    "claim": "M is NOT operational NEGATION-NOT-MARKER",
+    "source": "operator-log:m-not",
+    "primary_object": "M",
+    "observed_at": "2026-11-09T12:00:00+01:00",
+    "metadata": {"provenance": {"origin": "fixture", "record": "PROV-M-NOT"}},
+})
+CONDITIONAL = _canon({
+    "fact_id": "g-m-if-power",
+    "claim": "M is operational only if power is restored CONDITION-IF-MARKER",
+    "source": "operator-log:m-if-power",
+    "primary_object": "M",
+    "observed_at": "2026-11-09T12:00:00+01:00",
+    "valid_from": "2026-11-01T00:00:00+01:00",
+    "valid_until": "2026-11-30T23:59:59+01:00",
+    "metadata": {"provenance": {"origin": "fixture", "record": "PROV-M-IF-POWER"}},
+})
+ORDER_A = _canon({
+    "fact_id": "g-m-order-a",
+    "claim": "M north door is locked ORDER-A-MARKER",
+    "source": "operator-log:m-order-a",
+    "primary_object": "M",
+    "observed_at": "2026-11-09T12:00:00+01:00",
+})
+ORDER_B = _canon({
+    "fact_id": "g-m-order-b",
+    "claim": "M south door is locked ORDER-B-MARKER",
+    "source": "operator-log:m-order-b",
+    "primary_object": "M",
+    "observed_at": "2026-11-09T12:00:00+01:00",
+})
+DIRTY_SUPERSEDED_ANSWER = "Still reporting that M is open SUPERSEDED-OPEN-MARKER."
 
 CLEAN_ANSWER = "M is operational MATCHING-GROUND-TEXT as of the current check."
 DIRTY_FOREIGN_ANSWER = "Also, L is offline FOREIGN-OBJECT-MARKER."
@@ -289,3 +353,120 @@ def test_bridge_side_flags_excluded_markers_in_answer():
     assert "STALE-GROUND-MARKER" in stale["bridge_answer_check"]["hits"]
     assert clean["bridge_answer_check"]["passed"] is True
     assert clean["bridge_answer_check"]["hits"] == []
+
+
+def test_applicability_select_currently_keeps_deprecated_fact_that_covers_as_of():
+    """FINDING: select() ignores ESM and SUPERSEDED_BY; both covering facts stay."""
+    kept, info = select(
+        [OLD_OPEN, NEW_CLOSED],
+        asked_object="M",
+        as_of="2026-11-09T12:00:00+01:00",
+        temporal_scope="current",
+    )
+    assert [f["fact_id"] for f in kept] == ["g-m-open-old", "g-m-closed-new"]
+    assert info["exclusions"] == []
+
+
+def test_correction_only_the_validated_successor_reaches_titan():
+    result = _run(QUESTION_M_NOW, [OLD_OPEN, NEW_CLOSED])
+    blob = flatten_messages(result["final_messages"])
+    assert [f["fact_id"] for f in result["kept"]] == ["g-m-closed-new"]
+    assert NEW_CLOSED["claim"] in blob
+    assert "CORRECTION-CLOSED-MARKER" in blob
+    assert "M is closed CORRECTION-CLOSED-MARKER" in blob
+    assert "SUPERSEDED-OPEN-MARKER" not in blob
+    assert "M is open SUPERSEDED-OPEN-MARKER" not in blob
+    assert "g-m-open-old" not in blob
+    dropped = {f["fact_id"] for f in result["canonical_view_excluded"]}
+    assert dropped == {"g-m-open-old"}
+    # Crystal does not attach a 'superseded' reason in select(); the old
+    # record is dropped by CanonicalView because epistemic_state is Deprecated.
+    assert result["excluded"] == []
+    receipt = result["receipt"]
+    assert receipt["certifies"]["admitted_fact_ids"] == ["g-m-closed-new"]
+    assert receipt["canonical_view_excluded_fact_ids"] == ["g-m-open-old"]
+    assert receipt["provenance_receipt"]["answer"] == NEW_CLOSED["claim"]
+    assert [c["fact_id"] for c in receipt["provenance_receipt"]["citations"]] == [
+        "g-m-closed-new"
+    ]
+    assert receipt_digest_valid(receipt) is True
+
+
+def test_negation_reaches_titan_with_not_intact():
+    result = _run(QUESTION_M_NOW, [NEGATED])
+    blob = flatten_messages(result["final_messages"])
+    assert "M is NOT operational NEGATION-NOT-MARKER" in blob
+    assert " NOT " in blob
+    assert NEGATED["claim"] in blob
+    assert result["receipt"]["certifies"]["admitted_claims"] == [NEGATED["claim"]]
+
+
+def test_condition_text_and_validity_window_reach_titan_intact():
+    result = _run(QUESTION_M_NOW, [CONDITIONAL])
+    blob = flatten_messages(result["final_messages"])
+    assert "M is operational only if power is restored CONDITION-IF-MARKER" in blob
+    assert "only if power is restored" in blob
+    assert "valid_from=2026-11-01T00:00:00+01:00" in blob
+    assert "valid_until=2026-11-30T23:59:59+01:00" in blob
+    assert result["receipt"]["certifies"]["admitted_fact_ids"] == ["g-m-if-power"]
+
+
+def test_order_invariance_sent_set_is_stable():
+    forward = _run(QUESTION_M_NOW, [OLD_OPEN, NEW_CLOSED, ORDER_A, ORDER_B])
+    backward = _run(QUESTION_M_NOW, [ORDER_B, ORDER_A, NEW_CLOSED, OLD_OPEN])
+    sent_fwd = {f["fact_id"] for f in forward["kept"]}
+    sent_bwd = {f["fact_id"] for f in backward["kept"]}
+    assert sent_fwd == sent_bwd == {"g-m-closed-new", "g-m-order-a", "g-m-order-b"}
+    assert set(forward["receipt"]["certifies"]["admitted_fact_ids"]) == sent_fwd
+    assert set(backward["receipt"]["certifies"]["admitted_fact_ids"]) == sent_bwd
+    blob_fwd = flatten_messages(forward["final_messages"])
+    blob_bwd = flatten_messages(backward["final_messages"])
+    assert "CORRECTION-CLOSED-MARKER" in blob_fwd and "CORRECTION-CLOSED-MARKER" in blob_bwd
+    assert "SUPERSEDED-OPEN-MARKER" not in blob_fwd
+    assert "SUPERSEDED-OPEN-MARKER" not in blob_bwd
+
+
+def test_receipt_digest_currently_depends_on_created_at():
+    """FINDING: build_receipt seals created_at, so two identical runs differ."""
+    first = _run(QUESTION_M_NOW, [NEW_CLOSED])
+    second = _run(QUESTION_M_NOW, [NEW_CLOSED])
+    a = first["receipt"]["provenance_receipt"]
+    b = second["receipt"]["provenance_receipt"]
+    assert a["query"] == b["query"]
+    assert a["answer"] == b["answer"]
+    assert a["citations"] == b["citations"]
+    if a["created_at"] != b["created_at"]:
+        assert a["digest"] != b["digest"]
+
+
+def test_receipt_digest_currently_depends_on_admitted_order():
+    """FINDING: extractive answer and citations follow input order of kept facts."""
+    forward = _run(QUESTION_M_NOW, [ORDER_A, ORDER_B])
+    backward = _run(QUESTION_M_NOW, [ORDER_B, ORDER_A])
+    assert forward["receipt"]["certifies"]["admitted_fact_ids"] == [
+        "g-m-order-a", "g-m-order-b"
+    ]
+    assert backward["receipt"]["certifies"]["admitted_fact_ids"] == [
+        "g-m-order-b", "g-m-order-a"
+    ]
+    assert forward["receipt"]["provenance_receipt"]["answer"] == (
+        "M north door is locked ORDER-A-MARKER | M south door is locked ORDER-B-MARKER"
+    )
+    assert backward["receipt"]["provenance_receipt"]["answer"] == (
+        "M south door is locked ORDER-B-MARKER | M north door is locked ORDER-A-MARKER"
+    )
+
+
+def test_bridge_side_flags_dirty_answer_repeating_superseded_status():
+    result = _run(
+        QUESTION_M_NOW, [OLD_OPEN, NEW_CLOSED],
+        canned_answer=DIRTY_SUPERSEDED_ANSWER,
+    )
+    assert result["reply"] == DIRTY_SUPERSEDED_ANSWER
+    assert result["bridge_answer_check"]["passed"] is False
+    assert any("SUPERSEDED-OPEN-MARKER" in hit for hit in result["bridge_answer_check"]["hits"])
+    checks = result["titan"]["titan_response_checks"]
+    faith = checks["standalone_enabled"]["output_faithfulness"]
+    # Record Titan's current score; do not treat it as a contract to fix.
+    assert "unsupported" in faith
+    assert "score" in faith

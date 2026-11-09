@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
 from core.applicability import declarations, select
+from core.canonical_view import project_canonical
 from core.generation import ExtractiveGenerator
 from core.provenance import build_receipt, claim_digest, verify_receipt
 from core.query_parse import parse_question
@@ -86,11 +87,22 @@ def parse_and_select(
             "params": None,
             "kept": [],
             "excluded": [],
+            "canonical_view_excluded": [],
             "selection": None,
         }
     params = parsed.get("params") or {}
+    # Same order as generate_answer: CanonicalView, then applicability.select.
+    # select() itself does not read SUPERSEDED_BY edges or ESM; a Deprecated
+    # fact that still covers as_of would pass select() alone.
+    candidates = list(candidate_facts)
+    projected = project_canonical(candidates)
+    projected_ids = {fact.get("fact_id") for fact in projected}
+    canonical_view_excluded = [
+        fact for fact in candidates
+        if fact.get("fact_id") not in projected_ids
+    ]
     kept, info = select(
-        list(candidate_facts),
+        projected,
         asked_object=params.get("asked_object"),
         as_of=params.get("as_of"),
         temporal_scope=params.get("temporal_scope"),
@@ -101,6 +113,7 @@ def parse_and_select(
         "params": params,
         "kept": kept,
         "excluded": list(info.get("exclusions") or []),
+        "canonical_view_excluded": canonical_view_excluded,
         "selection": info,
     }
 
@@ -110,6 +123,7 @@ def build_selection_receipt(
     params: Mapping[str, Any] | None,
     kept: Sequence[Mapping[str, Any]],
     selection: Mapping[str, Any] | None,
+    canonical_view_excluded: Sequence[Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Wrap Crystal's real selection artifacts; do not invent a new receipt schema.
 
@@ -162,6 +176,9 @@ def build_selection_receipt(
         "temporal_scope": params.get("temporal_scope"),
         "applicability": info,
         "admitted": admitted,
+        "canonical_view_excluded_fact_ids": [
+            fact.get("fact_id") for fact in (canonical_view_excluded or [])
+        ],
         "provenance_receipt": provenance_receipt,
     }
 
@@ -171,6 +188,15 @@ def receipt_digest_valid(receipt: Mapping[str, Any] | None) -> bool | None:
     if not sealed:
         return None
     return bool(verify_receipt(sealed).get("digest_valid"))
+
+
+
+def _not_sent_facts(
+    candidates: Sequence[Mapping[str, Any]],
+    kept: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    kept_ids = {fact.get("fact_id") for fact in kept}
+    return [fact for fact in candidates if fact.get("fact_id") not in kept_ids]
 
 
 def check_answer_excludes_rejected_grounds(
@@ -262,7 +288,8 @@ def run_bridge(
             "bridge_answer_check": None,
         }
     receipt = build_selection_receipt(
-        question, prep["params"], prep["kept"], prep["selection"]
+        question, prep["params"], prep["kept"], prep["selection"],
+        canonical_view_excluded=prep.get("canonical_view_excluded"),
     )
     records = [ground_to_titan_record(fact) for fact in prep["kept"]]
     caller = (
@@ -287,8 +314,9 @@ def run_bridge(
         "context_report": titan.get("context_report"),
         "titan": titan,
         "reply": reply,
+        "canonical_view_excluded": prep.get("canonical_view_excluded") or [],
         "bridge_answer_check": check_answer_excludes_rejected_grounds(
-            reply, prep["excluded"]
+            reply, _not_sent_facts(candidate_facts, prep["kept"])
         ),
     }
 
