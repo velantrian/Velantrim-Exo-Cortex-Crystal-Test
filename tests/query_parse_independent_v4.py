@@ -53,7 +53,7 @@ def gold_of(it):
     return g
 
 
-def run_item(it, objects, now, tz):
+def run_item(it, objects, now, tz, parser=parser):
     ctx = []
     for q in it["turns"][:-1]:
         ctx.append(parser.context_turn(q, parser.parse_question(q, objects, ctx, now=now, timezone=tz)))

@@ -61,6 +61,20 @@ v4 (user rule change 2026-11-09; frozen v3 at ``tests/query_parse_v3.py``):
   choice: it answers the clarified question when that question had a usable
   time (stored structurally as ``pending_time``), otherwise asks for the time;
   ``confirmed_object`` is kept in the structured context.
+
+v5 (user/Astra decision 2026-11-09, rules R1–R6; frozen v4 at
+``tests/query_parse_v4.py``). No new phrasings are parsed; markers only block:
+* R1: a time-like marker left over after the parsed clock/date/«сейчас» spans
+  (day-part words, «час…», «в» + number or hour numeral word) -> clarification;
+  a time is never dropped in favour of a whole-day query;
+* R2: «сегодня в 08:00» = today's date in the explicit zone at 08:00 (unchanged);
+* R3: an explicit calendar date without a time -> ask for the time («сегодня» and
+  «вчера» alone keep the documented whole-day date-only as_of);
+* R5: a resolved moment/day after the explicit now -> unsupported (no year
+  clarification), decided before the object; «будет» without a time ->
+  unsupported, «будет» with a past/current time -> clarification;
+* R6: comparison markers (сравн…, лучше, хуже, чем, отлича…, разниц…,
+  одинаков…) -> unsupported.
 """
 import re
 from datetime import date, datetime, time, timedelta, timezone as _utc_mod, tzinfo
@@ -104,9 +118,12 @@ _PERIOD_PATTERNS = (
     (r"\bнедел\w*|\bмесяц\w*", "вопрос о периоде (неделя/месяц)"),
     (r"\bменял\w*|\bизмен\w*|\bдинамик\w*", "вопрос об изменениях"),
     (r"\bсравн\w*", "сравнение"),
+    # v5 R6: comparison markers (detection only)
+    (r"\bлучше\b|\bхуже\b|\bчем\b|\bотлича\w*|\bразниц\w*|\bодинаков\w*", "сравнение"),
     (r"\bистори\w*", "история статусов"),
     (r"\bкогда\b", "вопрос о времени события («когда …»)"),
-    (r"\bбудет\b|\bзавтра\b|\bпослезавтра\b", "вопрос о будущем (прогноз)"),
+    # v5 R5: «будет» is decided by the resolved time (see _time_reference)
+    (r"\bзавтра\b|\bпослезавтра\b", "вопрос о будущем (прогноз)"),
 )
 _VAGUE_PARTS = r"\b(?:утром|днём|днем|вечером|ночью)\b"
 
@@ -332,6 +349,13 @@ _CLOCK_PATTERNS = (_CLOCK_COLON.pattern, _CLOCK_WORD.pattern)
 _PRECISION_WORDS = r"\bминут\w*|\bсекунд\w*|\bполовин\w*|\bчетверт\w*|\bполдень\b|\bполудн\w*|\bполночь\b|\bполуноч\w*"
 _ISO_T = r"\b\d{4}-\d{2}-\d{2}t[\d:.,+\-z]+"
 _DOTTED_CLOCK = r"\bв\s+\d{1,2}\.\d{2}\b(?!\.\d)"
+# v5 R1: time-like markers that block a query when left unparsed (detection only, nothing is parsed from them)
+_HOUR_WORDS = ("один|одного|два|двух|три|трёх|трех|четыре|четырёх|четырех|пять|пяти|шесть|шести|семь|семи|восемь|восьми|"
+               "девять|девяти|десять|десяти|одиннадцать|одиннадцати|двенадцать|двенадцати|тринадцать|тринадцати|"
+               "четырнадцать|четырнадцати|пятнадцать|пятнадцати|шестнадцать|шестнадцати|семнадцать|семнадцати|"
+               "восемнадцать|восемнадцати|девятнадцать|девятнадцати|двадцать|двадцати")
+_TIME_MARKERS = r"\b(?:%s)\b|\bчас\w*|\bв\s+\d{1,2}\b|\bв\s+(?:%s)\b" % (_DAY_PART, _HOUR_WORDS)
+_FUTURE_WORD = r"\bбудет\b"
 _DAY_PATTERNS = (r"\b\d{4}-\d{2}-\d{2}\b", r"\b\d{1,2}\.\d{1,2}(?:\.\d{4})?\b",
                  r"\b\d{1,2}\s+(?:%s)\b" % "|".join(_MONTHS), r"\b(?:сегодня|вчера|позавчера)\b")
 
@@ -447,12 +471,33 @@ def _parse_day(low: str, now_local: Optional[datetime]):
         if re.search(r"\b%s\b" % word, low):
             if now_local is None:
                 return {"error": "no_clock"}
-            return {"day": now_local.date() + timedelta(days=delta), "token": word,
+            return {"day": now_local.date() + timedelta(days=delta), "token": word, "relative": True,
                     "year_source": "относительно явно заданного текущего момента"}
     return None
 
 
+def _future(limitation: str) -> Dict[str, Any]:
+    r = _result_unsupported(limitation)
+    r["_future"] = True  # internal marker (removed before returning): decided before the object
+    return r
+
+
 def _time_reference(low: str, now: Optional[datetime], tz: Optional[tzinfo]):
+    """v5 wrapper: «будет» is judged by the resolved time (R5)."""
+    r = _time_reference_core(low, now, tz)
+    m = re.search(_FUTURE_WORD, low)
+    if not m:
+        return r
+    if r is None:
+        return _future("Первая версия разбирает только статус одного объекта на один момент; "
+                       "вопрос о будущем (прогноз) не поддерживается.")
+    if r.get("ref"):
+        return _result_clarify("В вопросе «будет», но момент %s не в будущем. Вы спрашиваете о статусе на этот момент?"
+                               % r["as_of"], "будущее время глагола и прошедший/текущий момент противоречат друг другу")
+    return r
+
+
+def _time_reference_core(low: str, now: Optional[datetime], tz: Optional[tzinfo]):
     """Return {'ref': 'now'|'absolute'|'date', 'as_of', 'why'} or a result dict, or None if no time words."""
     has_now = any(re.search(p, low) for p in _NOW_PATTERNS)
     several = _several_moments(low)
@@ -478,6 +523,16 @@ def _time_reference(low: str, now: Optional[datetime], tz: Optional[tzinfo]):
         return _result_clarify("В вопросе несколько моментов или вариантов (%s). На какой один момент ответить?"
                                % ", ".join("«%s»" % e for e in several),
                                "несколько выражений времени или альтернатива; первое совпадение не считается выбором пользователя")
+    # v5 R1: nothing time-like may be left unparsed (and silently dropped)
+    clock_spans = _spans(_CLOCK_PATTERNS, low)
+    rest = _blank(low, clock_spans)
+    rest = _blank(rest, _spans(_DAY_PATTERNS + _NOW_PATTERNS, rest))
+    left = [m.group(0) for m in re.finditer(_TIME_MARKERS + ("|" + _VAGUE_PARTS if clock is not None else ""), rest)]
+    if left:
+        return _result_clarify("Время «%s» в такой форме не разобрано (время словами или неполное время пока не поддерживается), "
+                               "поэтому запрос не выполняется. Укажите время как ЧЧ:ММ, например «8 ноября в 10:00»."
+                               % " ".join(left),
+                               "в вопросе есть выражение времени, которое не разобрано; его нельзя отбросить")
     if has_now:
         if now is None:
             return _result_unsupported("нет явно заданного текущего момента: «сейчас» не берётся из часов сервера")
@@ -507,10 +562,12 @@ def _time_reference(low: str, now: Optional[datetime], tz: Optional[tzinfo]):
         return _result_unsupported("нет явно заданного текущего момента: нельзя проверить, что момент не в будущем")
     if clock is None:
         if day["day"] > now_local.date():
-            if day.get("year_inferred"):
-                return _result_clarify("Какой год вы имеете в виду для «%s»?" % day["token"],
-                                       "в текущем году эта дата ещё не наступила")
-            return _result_unsupported("вопрос о будущем дне: прогноз статуса не поддерживается")
+            return _future("Вопрос о будущем дне: «%s» ещё не наступил (явно заданный текущий момент %s); "
+                           "состояние на будущий день не поддерживается (прогноз)." % (day["token"], now.isoformat()))
+        if not day.get("relative"):  # v5 R3
+            return _result_clarify("На какое время %s нужен статус? Укажите время, например «%s в 10:00»."
+                                   % (day["token"], day["token"]),
+                                   "дата без времени: статус мог меняться в течение дня; весь день не подставляется")
         as_of = day["day"].isoformat()
         return {"ref": "date", "as_of": as_of,
                 "why": "день «%s» без времени → date-only as_of %s (весь день в поясе %s; %s)"
@@ -520,10 +577,8 @@ def _time_reference(low: str, now: Optional[datetime], tz: Optional[tzinfo]):
         return _result_clarify("Местное время %s %s неоднозначно или не существует (переход на летнее/зимнее время). Уточните смещение UTC."
                                % (day["token"], clock[1]), "DST")
     if moment > now:
-        if day.get("year_inferred"):
-            return _result_clarify("Какой год вы имеете в виду для «%s»?" % day["token"],
-                                   "в текущем году этот момент ещё не наступил")
-        return _result_unsupported("вопрос о будущем моменте: прогноз статуса не поддерживается")
+        return _future("Вопрос о будущем моменте: %s позже явно заданного текущего момента %s; "
+                       "состояние на будущий момент не поддерживается (прогноз)." % (moment.isoformat(), now.isoformat()))
     as_of = moment.isoformat()
     return {"ref": "absolute", "as_of": as_of,
             "why": "«%s» + «%s» в явно заданном поясе %s → as_of %s (%s)"
@@ -603,6 +658,10 @@ def _parse(text, low, tokens, index, mentions, context, now, tz, timezone_param)
     alias_words = {w for key in index for w in key}
     zone = _zone_in_text(text, low, alias_words)
     zone_spans = zone["spans"]
+    if "clarify" not in zone:  # v5 R5: a future moment is unsupported whatever the object
+        pre = _time_reference(low, now, zone["tz"] if zone.get("zone") else tz)
+        if isinstance(pre, dict) and pre.pop("_future", False):
+            return pre
     positive = [m for m in mentions if not m["negated"]]
     covered = {m["pos"] + k for m in mentions for k in range(m["len"])}
     unknown = [t[0] for i, t in enumerate(tokens) if i not in covered and _IDENT_LIKE.match(t[0])
@@ -791,6 +850,7 @@ def _parse_time_part(low, now, tz, zone, context, follow_up, from_context):
             if default is not None and str(default) != zone["zone"] else "")
     ref = _time_reference(low, now, tz)
     if isinstance(ref, dict) and ref.get("kind"):
+        ref.pop("_future", None)
         return ("result", ref)
     prior = from_context if from_context is not None else (
         _bounded(context)[-1] if follow_up and _bounded(context) else None)

@@ -70,8 +70,9 @@ def test_follow_up_time_inherits_absolute_and_date_and_reanchors_now():
     later = NOW + timedelta(hours=2)
     ctx = [context_turn("q", p("Какой статус L был 8 ноября в 10:00?"))]
     assert p("А его статус?", ctx)["params"]["as_of"] == "2026-11-08T10:00:00+01:00"
-    ctx_date = [context_turn("q", p("Какой статус L был 8 ноября?"))]
-    assert p("А его статус?", ctx_date)["params"]["as_of"] == "2026-11-08"
+    # v5 R3: an explicit date without a time asks for the time; «сегодня» alone keeps date-only
+    ctx_date = [context_turn("q", p("Какой статус L сегодня?"))]
+    assert p("А его статус?", ctx_date)["params"]["as_of"] == "2026-11-09"
     ctx_now = [context_turn("q", p("Какой статус L сейчас?"))]
     assert p("А его статус?", ctx_now, now=later)["params"]["as_of"] == later.astimezone(
         ev_tz()).isoformat()
@@ -156,8 +157,10 @@ def test_multiword_alias_and_inflection():
     ("Какой статус L на 2026-13-01?", "needs_clarification", "некорректная дата"),
     ("Какой статус L был 8 ноября в 25:00?", "needs_clarification", "не является временем"),
     ("Какой статус L был 8 ноября в 25 часов?", "needs_clarification", "не является временем"),
-    ("Какой статус L был 20 декабря?", "needs_clarification", "Какой год"),
-    ("Какой статус L был 20 декабря в 10:00?", "needs_clarification", "Какой год"),
+    # v5 R5 (decision 2026-11-09): a future day/moment is unsupported (v2-v4: year clarification)
+    ("Какой статус L был 20 декабря?", "unsupported", "будущем"),
+    ("Какой статус L был 20 декабря в 10:00?", "unsupported", "будущем"),
+    ("Какой статус L был 8 ноября 2026 года?", "needs_clarification", "На какое время"),  # v5 R3
     ("Какой статус L был 8 ноября 2027?", "unsupported", "будущем"),
     ("Какой статус L был 8 ноября 2027 в 10:00?", "unsupported", "будущем"),
     ("Какой статус L был 25 октября в 02:30?", "needs_clarification", "неоднозначно"),
@@ -174,7 +177,8 @@ def test_explicit_failure_modes(q, kind, needle):
     ("Какой статус L был 8 ноября в 3 дня?", "2026-11-08T15:00:00+01:00"),
     ("Какой статус L был 8 ноября в 12 ночи?", "2026-11-08T00:00:00+01:00"),
     ("Статус M на 2026-11-08 10:00?", "2026-11-08T10:00:00+01:00"),
-    ("Какой статус L был 8 ноября 2026 года?", "2026-11-08"),
+    ("Какой статус L был 8 ноября 2026 года в 10:00?", "2026-11-08T10:00:00+01:00"),
+    ("Какой статус L был вчера?", "2026-11-08"),  # «вчера» alone: date-only, unchanged in v5
 ])
 def test_supported_date_and_clock_forms(q, as_of):
     assert p(q)["params"]["as_of"] == as_of
@@ -265,7 +269,10 @@ def test_live_store_parsed_question_memory_unchanged_and_receipts(durable):
     assert [h["fact_id"] for h in cur["result"]["applicability"]["historical_facts"]] == ["L-dev"]
     past = ask("Какой статус L был 8 ноября в 10:00?", OBJ, now=NOW, timezone=TZ, query_fn=query)
     assert past["answer"] == "L: статус — на ремонте"
-    day = ask("Какой статус L был 8 ноября?", OBJ, now=NOW, timezone=TZ, query_fn=query)
+    # v5 R3: an explicit date without a time is a clarification (no query) ...
+    assert ask("Какой статус L был 8 ноября?", OBJ, now=NOW, timezone=TZ, query_fn=_never)["query_called"] is False
+    # ... «вчера» alone still asks for whole-day coverage of 8 Nov, which no fact gives
+    day = ask("Какой статус L был вчера?", OBJ, now=NOW, timezone=TZ, query_fn=query)
     assert day["answer"] is None
     with pytest.raises(ValueError):
         provenance.build_receipt(day["result"])
@@ -281,7 +288,19 @@ def test_live_store_parsed_question_memory_unchanged_and_receipts(durable):
 
 def test_eval_counts_are_reproducible():
     res = {r["split"]: r for r in ev.main([])}
-    assert res["dev"]["counts"]["correct_parse"] == 14 and res["dev"]["counts"]["confident_misparse"] == 0
+    # v5: dev is scored against gold v2 (D15 -> clarification R3, D23 -> unsupported R5)
+    assert res["dev_gold_v2"]["counts"] == {
+        "correct_parse": 13, "confident_misparse": 0, "correct_clarification": 8,
+        "unnecessary_clarification": 0, "correct_unsupported": 7, "wrong_unsupported": 0,
+        "clarification_instead_of_unsupported": 0}
+    assert ev.evaluate("dev", ev.parser_v4_frozen)["counts"]["correct_parse"] == 14
+    v4_new = ev.evaluate("dev_gold_v2", ev.parser_v4_frozen)
+    assert [(r["id"], r["category"]) for r in v4_new["rows"] if not r["category"].startswith("correct")] == [
+        ("D15", "confident_misparse"), ("D23", "clarification_instead_of_unsupported")]
+    assert res["counterexamples_v5"]["counts"] == {
+        "correct_parse": 9, "confident_misparse": 0, "correct_clarification": 13,
+        "unnecessary_clarification": 0, "correct_unsupported": 14, "wrong_unsupported": 0,
+        "clarification_instead_of_unsupported": 0}
     assert res["heldout"]["n"] == 24
     assert res["heldout"]["counts"] == {
         "correct_parse": 15, "confident_misparse": 0, "correct_clarification": 5,

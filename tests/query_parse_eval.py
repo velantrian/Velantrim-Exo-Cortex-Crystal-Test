@@ -23,6 +23,13 @@ v4 = current core.query_parse on all splits; counterexamples_v3 is scored agains
      the NEW gold version counterexamples_v3_gold_v2 (old gold file unchanged) and
      the new counterexamples_v4; v3 snapshot for before -> after; --write produces
      eval_results_v4.json, demo_v4.*, before_after_v4.json, permutation_invariance_v4.json.
+     Since v5 the v4 parser is the frozen snapshot tests/query_parse_v4.py (= tag
+     query-parse-v4-frozen); the v4 report regenerates byte-identically.
+v5 = current core.query_parse (rules R1-R6, 2026-11-09) on dev_gold_v2 (dev.json
+     unchanged), heldout, probes, cv2, cv3_gold_v2, cv4 and counterexamples_v5; v4
+     snapshot for before -> after; --write produces eval_results_v5.json (with the
+     v4 snapshot on the v5 sets), demo_v5.* (exactly three outcomes),
+     before_after_v5.json, permutation_invariance_v5.json, morning_evening_v5.*.
 """
 import json
 import sys
@@ -55,11 +62,14 @@ V1_SPLITS = ("dev", "heldout", "probes")
 V2_SPLITS = V1_SPLITS + ("counterexamples_v2",)
 V3_SPLITS = V2_SPLITS + ("counterexamples_v3",)
 V4_SPLITS = V2_SPLITS + ("counterexamples_v3_gold_v2", "counterexamples_v4")
+V5_SPLITS = ("dev_gold_v2", "heldout", "probes", "counterexamples_v2", "counterexamples_v3_gold_v2", "counterexamples_v4",
+             "counterexamples_v5")
 PARSERS = {"v1": parser_v1, "v2": parser_v2_frozen, "v3": parser_v3_frozen, "v4": parser_v4_frozen,
            "v5": parser_current}
-SPLITS = {"v1": V1_SPLITS, "v2": V2_SPLITS, "v3": V3_SPLITS, "v4": V4_SPLITS}
-PREVIOUS = {"v2": "v1", "v3": "v2", "v4": "v3"}
-PREV_LABEL = {"v2": "v1 snapshot, d550f3f", "v3": "v2 snapshot, eee4062", "v4": "v3 snapshot, a6d11f3"}
+SPLITS = {"v1": V1_SPLITS, "v2": V2_SPLITS, "v3": V3_SPLITS, "v4": V4_SPLITS, "v5": V5_SPLITS}
+PREVIOUS = {"v2": "v1", "v3": "v2", "v4": "v3", "v5": "v4"}
+PREV_LABEL = {"v2": "v1 snapshot, d550f3f", "v3": "v2 snapshot, eee4062", "v4": "v3 snapshot, a6d11f3",
+              "v5": "v4 snapshot, tag query-parse-v4-frozen"}
 
 
 def load_split(split):
@@ -178,7 +188,11 @@ DEMO_IDS_V2 = DEMO_IDS + ("P01", "P09", "C01", "C02", "C03", "C05", "C09", "C12"
 DEMO_IDS_V3 = DEMO_IDS_V2 + ("K01", "K02", "K04", "K07", "K09", "K10", "K11", "K13", "K16", "K17", "K18",
                              "K20", "K21", "K22")
 DEMO_IDS_V4 = DEMO_IDS_V3 + ("E01", "E03", "E05", "E06", "F01", "F02", "F04", "F05", "F07", "F09", "F10", "F13")
-DEMO_IDS_BY = {"v1": DEMO_IDS, "v2": DEMO_IDS_V2, "v3": DEMO_IDS_V3, "v4": DEMO_IDS_V4}
+# v5: exactly three outcomes through the full path
+DEMO_V5 = (("V34", "Outcome 1 — correct answer"), ("V01", "Outcome 2 — useful clarification (no query)"),
+           ("V28", "Outcome 3 — understandable limitation (unsupported, no query)"))
+DEMO_IDS_BY = {"v1": DEMO_IDS, "v2": DEMO_IDS_V2, "v3": DEMO_IDS_V3, "v4": DEMO_IDS_V4,
+               "v5": tuple(i for i, _ in DEMO_V5)}
 
 
 def demo(results, ids=DEMO_IDS, version="v1"):
@@ -256,7 +270,7 @@ def before_after(v2_results, version="v2"):
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
-    version = argv[argv.index("--version") + 1] if "--version" in argv else "v4"
+    version = argv[argv.index("--version") + 1] if "--version" in argv else "v5"
     parser = PARSERS[version]
     splits = SPLITS[version]
     results = [evaluate(s, parser) for s in splits]
@@ -288,16 +302,30 @@ def write(results, version):
             "results": [{"split": r["split"], "n": r["n"], "counts": r["counts"], "answers_differ": r["answers_differ"],
                          "not_correct": [x["id"] for x in r["rows"] if not x["category"].startswith("correct")]}
                         for r in prev]}
+    if version == "v5":
+        prev = [evaluate(s, PARSERS["v4"]) for s in SPLITS["v5"]]
+        payload["v4_snapshot_on_v5_sets"] = {
+            "_note": "frozen v4 parser (tests/query_parse_v4.py, = tag query-parse-v4-frozen) scored on the v5 sets. "
+                     "dev_gold_v2 is dev.json with D15/D23 relabelled by the user/Astra decision of 2026-11-09 "
+                     "(rules R1-R6); the v4 report's numbers on dev refer to the old gold.",
+            "results": [{"split": r["split"], "n": r["n"], "counts": r["counts"], "answers_differ": r["answers_differ"],
+                         "not_correct": [x["id"] for x in r["rows"] if not x["category"].startswith("correct")]}
+                        for r in prev]}
     (OUT / f"eval_results_{version}.json").write_text(json.dumps(payload, ensure_ascii=False, indent=1) + "\n",
                                                      encoding="utf-8")
     rows, md = demo(results, DEMO_IDS_BY[version], version)
+    if version == "v5":
+        rows = sorted(rows, key=lambda r: DEMO_IDS_BY["v5"].index(r["id"]))
+        for i, label in DEMO_V5:
+            md = md.replace("## %s — " % i, "## %s: %s — " % (label, i))
+        md = md.replace("Path: **", "Exactly three outcomes. Path: **")
     (OUT / f"demo_{version}.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     (OUT / f"demo_{version}.md").write_text(md + "\n", encoding="utf-8")
     if version != "v1":
         (OUT / f"before_after_{version}.json").write_text(
             json.dumps(before_after(results, version), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    if version in ("v3", "v4"):
-        prev = "v2" if version == "v3" else "v3"
+    if version in ("v3", "v4", "v5"):
+        prev = PREVIOUS[version]
         perm = {"_note": "decision (kind, params, candidates, clarification/limitation text, mentioned_objects) for every "
                          "permutation of the split's catalogue x {names as given, names reversed}; 'changed' lists items "
                          "whose decision differs between catalogue orders",
@@ -305,6 +333,59 @@ def write(results, version):
                 version: [permutation_check(PARSERS[version], s) for s in SPLITS[version]]}
         (OUT / f"permutation_invariance_{version}.json").write_text(json.dumps(perm, ensure_ascii=False, indent=1) + "\n",
                                                            encoding="utf-8")
+    if version == "v5":
+        me = morning_evening()
+        (OUT / "morning_evening_v5.json").write_text(json.dumps(me, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        (OUT / "morning_evening_v5.md").write_text(morning_evening_md(me) + "\n", encoding="utf-8")
+
+
+# ── v5: losing the time changes the answer (isolated setup facts for L) ─────
+
+MORNING_EVENING = (("V01", "10:00"), ("V05", "09:00 or 21:00"), ("V06", "18:00"))
+MANUAL_MOMENTS = ("2026-11-08T09:00:00+01:00", "2026-11-08T10:00:00+01:00", "2026-11-08T18:00:00+01:00",
+                  "2026-11-08T21:00:00+01:00")
+
+
+def morning_evening():
+    items = {it["id"]: it for it in load_split("counterexamples_v5")["items"]}
+    objects, tz = split_objects({}), SETUP["timezone"]
+
+    def side(parser, q):
+        g = parser.ask(q, objects, None, now=NOW, timezone=tz, query_fn=run_filter)
+        p, res = g["parse"], _summary(g.get("result"))
+        return {"kind": p["kind"], "params": p.get("params"), "clarification": p.get("question"),
+                "limitation": p.get("limitation"), "query_called": g["query_called"],
+                "grounds_admitted": res["admitted"], "answer": res["answer"], "error": res.get("error")}
+
+    manual = []
+    for at in MANUAL_MOMENTS:
+        res = _summary(run_filter("manual", asked_object="L", as_of=at, temporal_scope="current"))
+        manual.append({"as_of": at, "grounds_admitted": res["admitted"], "answer": res["answer"], "error": res.get("error")})
+    return {"_note": "Setup facts: L «на ремонте» valid until 2026-11-08T11:59:59+01:00, L «готов» from "
+                     "2026-11-08T12:00:00+01:00. Manual rows use hand-set parameters with the same filter.",
+            "manual": manual,
+            "items": [{"id": i, "question": items[i]["question"], "intended_time": intended,
+                       "v4": side(PARSERS["v4"], items[i]["question"]), "v5": side(PARSERS["v5"], items[i]["question"])}
+                      for i, intended in MORNING_EVENING]}
+
+
+def morning_evening_md(me):
+    def show(x):
+        if x["query_called"]:
+            return "parsed `%s` → query ran → grounds %s → answer: %s" % (
+                json.dumps(x["params"], ensure_ascii=False), x["grounds_admitted"] or "none",
+                x["answer"] if x["answer"] is not None else "none — %s" % x["error"])
+        return "%s, **no query**: %s" % (x["kind"], x["clarification"] or x["limitation"])
+    lines = ["# Morning vs evening: losing the time changes the answer (v4 → v5, generated)", "",
+             "Generated by `python -m tests.query_parse_eval --version v5 --write`. " + me["_note"], "",
+             "| manual as_of | admitted grounds | answer |", "|---|---|---|"]
+    lines += ["| `%s` | %s | %s |" % (m["as_of"], ", ".join(m["grounds_admitted"]) or "none",
+                                        m["answer"] if m["answer"] is not None else "none — %s" % m["error"])
+              for m in me["manual"]]
+    for it in me["items"]:
+        lines += ["", "## %s — «%s» (intended %s)" % (it["id"], it["question"], it["intended_time"]), "",
+                  "- **v4** (frozen): " + show(it["v4"]), "- **v5**: " + show(it["v5"])]
+    return "\n".join(lines)
 
 
 
