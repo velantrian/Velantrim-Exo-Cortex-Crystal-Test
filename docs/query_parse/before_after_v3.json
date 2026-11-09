@@ -1,0 +1,624 @@
+[
+ {
+  "split": "counterexamples_v2",
+  "id": "C07",
+  "question": "Какой статус L был 8 ноября в 13:00 по Лондону?",
+  "context_v2": [],
+  "context_v3": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v2": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "В вопросе указан часовой пояс или место («по Лондону»), который первая версия не разбирает. Уточните момент по Москве, по Берлину или в UTC.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "В вопросе указан часовой пояс или место («по лондону»), который первая версия не разбирает. Уточните момент по Москве, по Берлину или в UTC.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3",
+  "id": "K01",
+  "question": "Какой статус L был 8 ноября в 13:00 по лондону?",
+  "context_v2": [],
+  "context_v3": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v2": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08T13:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "В вопросе указан часовой пояс или место («по лондону»), который первая версия не разбирает. Уточните момент по Москве, по Берлину или в UTC.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3",
+  "id": "K02",
+  "question": "По Лондону какой статус L был 8 ноября в 13:00?",
+  "context_v2": [],
+  "context_v3": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v2": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08T13:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "В вопросе указан часовой пояс или место («по лондону»), который первая версия не разбирает. Уточните момент по Москве, по Берлину или в UTC.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3",
+  "id": "K03",
+  "question": "Какой статус L был 8 ноября в 13:00 ПО ЛОНДОНУ?",
+  "context_v2": [],
+  "context_v3": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v2": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08T13:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "В вопросе указан часовой пояс или место («по лондону»), который первая версия не разбирает. Уточните момент по Москве, по Берлину или в UTC.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3",
+  "id": "K10",
+  "question": "Какой статус L был 8 ноября в 10:00:30?",
+  "context_v2": [],
+  "context_v3": [],
+  "gold": {
+   "kind": "parsed",
+   "asked_object": "L",
+   "as_of": "2026-11-08T10:00:30+01:00"
+  },
+  "v2": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-repair"
+   ],
+   "grounds_answer": "L: статус — на ремонте",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  },
+  "v3": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:30+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-repair"
+   ],
+   "grounds_answer": "L: статус — на ремонте",
+   "category": "correct_parse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3",
+  "id": "K11",
+  "question": "Какой статус L был 8 ноября в 10:00:30.5?",
+  "context_v2": [],
+  "context_v3": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v2": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "В вопросе несколько моментов или вариантов («8 ноября», «10:00», «30.5»). На какой один момент ответить?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Форма или точность времени «10:00:30.5» не поддерживается; укажите время как ЧЧ:ММ или ЧЧ:ММ:СС (например «10:00:30») и дату отдельно.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3",
+  "id": "K12",
+  "question": "Какой статус L был 8 ноября в 10.00?",
+  "context_v2": [],
+  "context_v3": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v2": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "В вопросе несколько моментов или вариантов («8 ноября», «10.00»). На какой один момент ответить?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Форма или точность времени «в 10.00» не поддерживается; укажите время как ЧЧ:ММ или ЧЧ:ММ:СС (например «10:00:30») и дату отдельно.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3",
+  "id": "K13",
+  "question": "Какой статус L был 8 ноября в 10:00:30 по Москве?",
+  "context_v2": [],
+  "context_v3": [],
+  "gold": {
+   "kind": "parsed",
+   "asked_object": "L",
+   "as_of": "2026-11-08T10:00:30+03:00"
+  },
+  "v2": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+03:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-repair"
+   ],
+   "grounds_answer": "L: статус — на ремонте",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  },
+  "v3": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:30+03:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-repair"
+   ],
+   "grounds_answer": "L: статус — на ремонте",
+   "category": "correct_parse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3",
+  "id": "K14",
+  "question": "Статус L на 2026-11-08 10:00:30?",
+  "context_v2": [],
+  "context_v3": [],
+  "gold": {
+   "kind": "parsed",
+   "asked_object": "L",
+   "as_of": "2026-11-08T10:00:30+01:00"
+  },
+  "v2": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-repair"
+   ],
+   "grounds_answer": "L: статус — на ремонте",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  },
+  "v3": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:30+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-repair"
+   ],
+   "grounds_answer": "L: статус — на ремонте",
+   "category": "correct_parse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3",
+  "id": "K15",
+  "question": "Какой статус L был 8 ноября в 10:00:61?",
+  "context_v2": [],
+  "context_v3": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v2": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-repair"
+   ],
+   "grounds_answer": "L: статус — на ремонте",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Уточните время: «10:00:61» не является временем суток.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3",
+  "id": "K16",
+  "question": "Какой статус L был 8 ноября в 10 часов 30 минут?",
+  "context_v2": [],
+  "context_v3": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v2": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-repair"
+   ],
+   "grounds_answer": "L: статус — на ремонте",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Форма или точность времени «минут» не поддерживается; укажите время как ЧЧ:ММ или ЧЧ:ММ:СС (например «10:00:30») и дату отдельно.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3",
+  "id": "K17",
+  "question": "Какой статус L был 8 ноября в 10:30 вечера?",
+  "context_v2": [],
+  "context_v3": [],
+  "gold": {
+   "kind": "parsed",
+   "asked_object": "L",
+   "as_of": "2026-11-08T22:30:00+01:00"
+  },
+  "v2": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:30:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-repair"
+   ],
+   "grounds_answer": "L: статус — на ремонте",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v3": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08T22:30:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "correct_parse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3",
+  "id": "K18",
+  "question": "Какой статус L был 8 ноября в половине десятого?",
+  "context_v2": [],
+  "context_v3": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v2": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Форма или точность времени «половине» не поддерживается; укажите время как ЧЧ:ММ или ЧЧ:ММ:СС (например «10:00:30») и дату отдельно.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3",
+  "id": "K19",
+  "question": "Статус L на 2026-11-08T10:00:30?",
+  "context_v2": [],
+  "context_v3": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v2": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Какого дня это время (00:30)?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Форма или точность времени «2026-11-08t10:00:30» не поддерживается; укажите время как ЧЧ:ММ или ЧЧ:ММ:СС (например «10:00:30») и дату отдельно.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3",
+  "id": "K20",
+  "question": "Какой статус Моста сейчас?",
+  "context_v2": [],
+  "context_v3": [],
+  "gold": {
+   "kind": "parsed",
+   "asked_object": "Y",
+   "as_of": "2026-11-09T07:58:00+01:00"
+  },
+  "v2": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "M",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "M-works"
+   ],
+   "grounds_answer": "M: статус — работает",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v3": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "Y",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "Y-open"
+   ],
+   "grounds_answer": "Y: статус — открыт",
+   "category": "correct_parse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3",
+  "id": "K21",
+  "question": "Какой статус Мостами сейчас?",
+  "context_v2": [],
+  "context_v3": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v2": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "M",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "M-works"
+   ],
+   "grounds_answer": "M: статус — работает",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Название «Мостами» подходит к нескольким объектам: M, Y. Какой из них?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ }
+]

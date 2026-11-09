@@ -277,10 +277,15 @@ def write(results, version):
     if version != "v1":
         (OUT / f"before_after_{version}.json").write_text(
             json.dumps(before_after(results, version), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    if version == "v3":
+        perm = {"_note": "decision (kind, params, candidates, clarification/limitation text, mentioned_objects) for every "
+                         "permutation of the split's catalogue x {names as given, names reversed}; 'changed' lists items "
+                         "whose decision differs between catalogue orders",
+                "v2": [permutation_check(parser_v2_frozen, s) for s in V3_SPLITS],
+                "v3": [permutation_check(parser_current, s) for s in V3_SPLITS]}
+        (OUT / "permutation_invariance_v3.json").write_text(json.dumps(perm, ensure_ascii=False, indent=1) + "\n",
+                                                           encoding="utf-8")
 
-
-if __name__ == "__main__":
-    main()
 
 
 # ── catalogue-order invariance (stdlib itertools only) ─────────────────────
@@ -318,3 +323,7 @@ def permutation_check(parser, split, full=True):
         if len(seen) > 1:
             changed.append(it["id"])
     return {"split": split, "items": len(data["items"]), "variants": variants, "changed": changed}
+
+
+if __name__ == "__main__":
+    main()

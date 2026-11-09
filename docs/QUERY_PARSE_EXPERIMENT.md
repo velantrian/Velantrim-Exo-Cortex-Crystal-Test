@@ -1,11 +1,14 @@
-# Experiment: ordinary questions → explicit Crystal filter parameters (lab, v1 → v2)
+# Experiment: ordinary questions → explicit Crystal filter parameters (lab, v1 → v2 → v3)
 
 > The **v1 report** (sections “Pinned versions” … “Limitations”) is preserved as
 > written at `d550f3f`; its numbers are reproducible byte-identically from the
 > frozen snapshot `tests/query_parse_v1.py` (`python -m tests.query_parse_eval
 > --version v1 --write` → `docs/query_parse/eval_results_v1.json`,
-> `demo_v1.{md,json}`). The **v2** section at the end describes the fixes made
-> after review and the new results.
+> `demo_v1.{md,json}`). The **v2** section describes the fixes made after the
+> first review; it is preserved too (`eval_results_v2.json`, `demo_v2.*`,
+> `before_after_v2.json` regenerate byte-identically from the frozen
+> `tests/query_parse_v2.py` with `--version v2 --write`). The **v3** section at
+> the end follows the second review.
 
 Status: **lab experiment, draft**. Goal: learn whether a user can drive the
 existing object/time filter with ordinary Russian phrasing and which errors the
@@ -296,3 +299,145 @@ explicitly (same parameters, explanation now cites «по берлину»).
   bounded 3-turn structured context; turns built by other code without that
   field are treated as before.
 * All v1 limitations about #503 and author-markup correctness still apply.
+
+---
+
+# v3 — three more defect classes and general properties
+
+Second review: before extending the vocabulary, fix three defect classes and
+pin general properties. v2 is frozen as `tests/query_parse_v2.py`
+(byte-identical to `core/query_parse.py` at `eee4062`, sha256
+`d2cab8d08829217da46c69975bd8ff2deb0d86262d49f4035ad3416ee17d92d0`); the v2
+report regenerates byte-identically from it. `tests/test_query_parse_v2_defects.py`
+asserts the defective v2 behaviour on that snapshot (evidence, not spec).
+
+## Defects found in v2 and what v3 does
+
+1. **Zone-name case changed the decision.** v2 detected «по <City>» only with
+   a capital letter in the original text, and not at the start of a sentence
+   («По Лондону»): «по лондону», «По Лондону …», «ПО ЛОНДОНУ» were silently
+   ignored and the default Berlin zone was used (confident misparse). v3
+   detects «по <word>» on the casefolded text; the word is a possible
+   place/zone unless it is an object alias, a pronoun, or starts with a
+   non-place stem (`статус`, `состояни`, `данн`, `умолчани`, … — closed list in
+   `_PO_NOT_PLACE`). Supported zones (Москва/Берлин/UTC) were already
+   case-insensitive and stay so.
+2. **The clock was truncated.** v2 matched only `HH:MM`, so `10:00:30` →
+   `10:00:00`, `10:00:61` → `10:00`, «в 10 часов 30 минут» → 10:00, «10:30
+   вечера» → 10:30, «в половине десятого» → whole-day date. v3 parses the clock
+   whole: `HH:MM[:SS]` with seconds kept exactly; fractional seconds
+   (`10:00:30.5`, `10:00:30,25`), minute/second words, «половина», «четверть»,
+   «полдень», «полночь», «в 10.00» and ISO `…T10:00` → clarification, no query;
+   a day part after a clock is applied («10:30 вечера» → 22:30, «в 10 часов
+   вечера» → 22:00, «10 ночи» → 22:00); a combination that is not unambiguous
+   («15:00 утра», «в 11 дня») → clarification. Day patterns are searched
+   outside clock spans (so `30.5` is not read as a date).
+3. **Object choice depended on catalogue order.** v2 tried aliases in
+   catalogue order among equally long aliases and took the first match. With
+   M «Мост» and Y «Моста»: «Моста» → whichever came first. v3 collects all
+   aliases matching at a position, then resolves:
+   1. the **longest span** wins (covers more of the user's words: «Главного
+      моста» → «Главный мост», not «Мост»);
+   2. among equally long spans an **exact name beats a match via inflection**
+      («Моста» → Y exactly; M only via «Мост»+«а»);
+   3. all objects left at the top tier are kept; **more than one → clarification**
+      (same alias on two objects, «Пульсаром» → P1/P2; two inflection-only
+      matches, «Мостами» → M/Y).
+   The explanation states the match type («точное совпадение названия» / «через
+   склонение») and what was outranked. The v2 near-miss rule (4-letter prefix)
+   took only the first near miss found in catalogue order for the candidate
+   list; v3 uses the union of all near misses, so the candidates do not depend
+   on order. The heuristic itself is unchanged.
+
+## Counterexamples v3 and properties
+
+`tests/fixtures/query_parse/counterexamples_v3.json` — 23 items (zone case 9,
+clock precision 10, catalogue order 4), gold committed in `c5ff9e6` **before**
+the fixes; isolated extension object Y («Моста»), fact `Y-open`.
+
+`tests/test_query_parse_v3_props.py` (stdlib only):
+* zone case: 19 zone phrases × 6 case functions (`str`, `lower`, `upper`,
+  `title`, `swapcase`, `capitalize`) × 2 positions → one decision per phrase;
+* clock: grid of hours × minutes × seconds in three templates → `as_of` has
+  exactly those seconds; 15 other forms → clarification; every parsed fixture
+  item with an explicit `HH:MM[:SS]` shows the same digits in local `as_of`;
+* catalogue: `itertools.permutations` of the catalogue × {names as given,
+  reversed} for 8 object cases and a context follow-up; inputs not mutated;
+* permutation invariance over all fixture sets (below);
+* every clarification is checked with a spy: the query does not run.
+
+Permutation invariance (`docs/query_parse/permutation_invariance_v3.json`;
+all catalogue permutations × 2 alias orders; decision = kind, params,
+candidates, clarification/limitation text, mentioned objects):
+
+| Split | items | variants | v2: items whose decision changed | v3 |
+|---|---|---|---|---|
+| dev | 28 | 6720 | none | none |
+| held-out | 24 | 5760 | none | none |
+| probes | 10 | 2400 | none | none |
+| counterexamples v2 | 20 | 28800 | none | none |
+| counterexamples v3 | 23 | 33120 | **K20, K21** | none |
+
+## Results v3 (`docs/query_parse/eval_results_v3.json`, `python -m tests.query_parse_eval --write`)
+
+| Split | n | correct parse | **confident misparse** | correct clarif. | unnecessary clarif. | correct unsupported | wrong unsupported | answers differ from manual |
+|---|---|---|---|---|---|---|---|---|
+| dev | 28 | 14 | 0 | 8 | 0 | 6 | 0 | 0 |
+| held-out | 24 | 15 | 0 | 5 | 1 | 3 | 0 | 1 (H23) |
+| post-hoc probes | 10 | 3 | 0 | 4 | 2 | 0 | 1 | 3 (P02, P05, P10) |
+| counterexamples v2 | 20 | 8 | 0 | 12 | 0 | 0 | 0 | 0 |
+| counterexamples v3 | 23 | 11 | 0 | 12 | 0 | 0 | 0 | 0 |
+| *counterexamples v3 — v2 snapshot* | *23* | *6* | ***12*** | *5* | *0* | *0* | *0* | *8* |
+
+On dev / held-out / probes / counterexamples v2 the categories are the same as
+in v2. 16 items changed (category, parameters, grounds or message text) — all in
+`docs/query_parse/before_after_v3.json`; demonstration with a “Before (v2)” line
+in `docs/query_parse/demo_v3.md`.
+
+Note: in v2, K10/K13/K14 (seconds truncated) were confident misparses whose
+**answer happened to match** the manual one on this data (both instants fall
+into L-repair) — the same kind of coincidence that hid the zone bug in P01.
+
+## Before → after (v2 snapshot → v3)
+
+| Case | v2 (`eee4062`) | v3 |
+|---|---|---|
+| K01 «…13:00 по лондону?» / K02 «По Лондону …» / K03 «ПО ЛОНДОНУ» | Berlin `13:00+01:00`, query ran, «готов» | clarification, no query |
+| C07 «…по Лондону?» | clarification | clarification (same; phrase now quoted casefolded) |
+| K10 «…в 10:00:30?» | `10:00:00+01:00` | `10:00:30+01:00` |
+| K13 «…10:00:30 по Москве?» | `10:00:00+03:00` | `10:00:30+03:00` |
+| K14 «на 2026-11-08 10:00:30?» | `10:00:00+01:00` | `10:00:30+01:00` |
+| K15 «…10:00:61?» | `10:00:00`, query ran | clarification (not a time), no query |
+| K16 «…в 10 часов 30 минут?» | `10:00`, query ran | clarification, no query |
+| K17 «…в 10:30 вечера?» | `10:30` → «на ремонте» | `22:30` → «готов» (= manual) |
+| K18 «…в половине десятого?» | date-only `2026-11-08`, query ran | clarification, no query |
+| K11/K12/K19 `10:00:30.5`, «в 10.00», ISO `T` | clarification (for an unrelated reason) | clarification about the time form |
+| K20 «Какой статус Моста сейчас?» (M «Мост», Y «Моста») | M or Y depending on catalogue order (M in fixture order) | Y in every order (exact > inflection) |
+| K21 «…Мостами…» | M or Y depending on order | clarification M/Y in every order |
+
+## Reading the numbers carefully
+
+* Fixtures (dev, held-out, probes, counterexamples v2/v3) and fixes are by the
+  **same author**; counterexamples were written after the reviewer named the
+  defect classes. They show that these classes are closed on these items, not
+  general accuracy. Held-out was known to the rule author.
+* **Coverage ≠ correctness.** `core/query_parse.py` is again at 100 % lines and
+  branches; v2 was at 100 % too while truncating seconds and depending on order.
+* Permutation invariance is checked over these catalogues (≤ 6 objects) and
+  these questions only.
+* No claim of general “understanding”.
+
+## Still not fixed / limitations (v3)
+
+* Same open items as v2: H23 «позавчера», P02 «в прошлую пятницу», P10
+  non-adjacent negation, P05 «Был ли L готов…» (wrong unsupported).
+* «по <word>» is a possible place unless the word is an alias, a pronoun or in a
+  closed non-place stem list → unknown words after «по» ask for clarification
+  (safe, but may be unnecessary, e.g. a phrase like «по плану»).
+* Seconds are kept; sub-second precision, word forms of time and ISO `T` are
+  not parsed (clarification).
+* Day-part table is fixed (утра 0–11; дня 1–5 → +12, 12–17; вечера 5–11 → +12,
+  17–23; ночи 12 → 0, 0–4, 9–11 → +12, 21–23); anything else clarifies.
+* Ranking rule is longest span > exact > inflection. An exact short alias
+  inside a longer inflected phrase is still decided by the longest span.
+* The near-miss rule is still a 4-letter prefix heuristic.
