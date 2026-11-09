@@ -135,10 +135,11 @@ def test_multiple_unknown_colliding_or_missing_object_asks_and_names_candidates(
 
 def test_multiword_alias_and_inflection():
     objs = OBJ + [{"id": "B", "names": ["Главный мост", "!!!"]}, {"id": "", "names": ["x"]}, {"names": ["y"]}]
-    # KNOWN confident misparse (documented limitation): only single-word Cyrillic
-    # aliases are inflected, so inflected «Главного моста» misses alias B
-    # («Главный мост») and its last word hits M's alias «Мост».
-    assert p("Какой статус Главного моста сейчас?", objects=objs)["params"]["asked_object"] == "M"
+    # v1 (d550f3f) returned M here — a confident misparse. That assertion is kept
+    # verbatim, run against the frozen v1 snapshot, in
+    # tests/test_query_parse_v1_defects.py::test_v1_defect_2_compound_name_replaced_by_short_alias.
+    # v2: multi-word aliases are inflected word by word.
+    assert p("Какой статус Главного моста сейчас?", objects=objs)["params"]["asked_object"] == "B"
     assert p("Какой статус у Главный мост сейчас?", objects=objs)["params"]["asked_object"] == "B"
     assert p("Какое состояние Моста сейчас?")["params"]["asked_object"] == "M"
 
@@ -202,13 +203,15 @@ def test_now_without_clock_and_dates_without_clock_are_unsupported_not_guessed()
 
 # ── hard rule: only parsed reaches the filter, always with all filters on ──
 
-@pytest.mark.parametrize("split", ["dev", "heldout", "probes"])
+@pytest.mark.parametrize("split", ["dev", "heldout", "probes", "counterexamples_v2"])
 def test_non_parsed_never_queries_and_parsed_always_carries_full_filter(split):
-    items = json.loads((ev.FIX / f"{split}.json").read_text(encoding="utf-8"))["items"]
-    for it in items:
+    data = ev.load_split(split)
+    objects = ev.split_objects(data)
+    for it in data["items"]:
         tz = it["timezone"] if "timezone" in it else TZ
         calls = []
-        out = ask(it["question"], OBJ, it.get("context"), now=NOW, timezone=tz,
+        ctx = ev.build_context(ev.parser_v2, it, objects, tz)
+        out = ask(it["question"], objects, ctx, now=NOW, timezone=tz,
                   query_fn=lambda q, **kw: calls.append(kw) or {"answer": "x"})
         if out["parse"]["kind"] == "parsed":
             assert calls == [out["parse"]["params"]]
@@ -284,7 +287,19 @@ def test_eval_counts_are_reproducible():
         "correct_parse": 15, "confident_misparse": 0, "correct_clarification": 5,
         "unnecessary_clarification": 1, "correct_unsupported": 3, "wrong_unsupported": 0,
         "clarification_instead_of_unsupported": 0}
-    assert res["probes"]["counts"]["confident_misparse"] == 1
+    # v2: P01 (zone in text) and P09 (UTC) are now correct parses.
+    assert res["probes"]["counts"] == {
+        "correct_parse": 3, "confident_misparse": 0, "correct_clarification": 4,
+        "unnecessary_clarification": 2, "correct_unsupported": 0, "wrong_unsupported": 1,
+        "clarification_instead_of_unsupported": 0}
+    assert res["counterexamples_v2"]["n"] == 20
+    assert res["counterexamples_v2"]["counts"] == {
+        "correct_parse": 8, "confident_misparse": 0, "correct_clarification": 12,
+        "unnecessary_clarification": 0, "correct_unsupported": 0, "wrong_unsupported": 0,
+        "clarification_instead_of_unsupported": 0}
+    v1 = {r["split"]: r for r in ev.main(["--version", "v1"])}
+    assert set(v1) == {"dev", "heldout", "probes"} and v1["probes"]["counts"]["confident_misparse"] == 1
+    assert ev.evaluate("counterexamples_v2", ev.parser_v1)["counts"]["confident_misparse"] == 14
     assert ev.classify({"kind": "unsupported"}, {"kind": "needs_clarification"}) == "clarification_instead_of_unsupported"
     assert ev.classify({"kind": "needs_clarification"}, {"kind": "unsupported"}) == "wrong_unsupported"
     rows, md = ev.demo(list(res.values()))

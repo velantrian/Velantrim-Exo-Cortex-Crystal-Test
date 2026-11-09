@@ -27,6 +27,16 @@ historical-only. So "сейчас" -> as_of = the explicit now instant; a past m
 day ("сегодня", "8 ноября") -> a date-only as_of, i.e. the whole day must be
 covered. Periods, changes, comparisons, history, event times and future
 moments are not expressible as one point and are ``unsupported``.
+
+v2 (after review of d550f3f): explicitly expressed user constraints are never
+dropped. A time zone named in the question is used only from a closed list
+(Москва / Берлин / UTC); any other zone-like wording -> clarification. Several
+time expressions or alternatives ("в 10:00 или в 12:00", "7 или 8 ноября") ->
+clarification, never the first match. A short alias inside a near-matching
+longer multi-word alias -> clarification, and multi-word aliases are inflected
+word by word. Every result records ``mentioned_objects`` so a later pronoun
+cannot silently skip an object mentioned in an unsupported/clarified turn.
+The frozen v1 is kept at ``tests/query_parse_v1.py`` for evidence.
 """
 import re
 from datetime import date, datetime, time, timedelta, timezone as _utc_mod, tzinfo
@@ -43,6 +53,14 @@ SCOPE = "current"
 _TOKEN = re.compile(r"[A-Za-zА-Яа-яЁё0-9]+(?:[-_][A-Za-zА-Яа-яЁё0-9]+)*")
 _IDENT_LIKE = re.compile(r"^(?:[A-Z][A-Z0-9_-]{0,7}|[A-Z]+\d+[A-Z0-9]*)$")
 _INFLECTIONS = ("а", "у", "ом", "е", "ы", "ов", "ами", "ах", "и", "я", "ю", "ем")
+# Light per-word inflection of Cyrillic alias words (v2): (alias ending, endings
+# replacing it). Applied to every word of a multi-word alias («Главный мост» ->
+# «Главного моста»). Not a morphological analyser; unknown forms do not match.
+_ADJ_ENDINGS = ("ый", "ий", "ой", "ого", "его", "ому", "ему", "ым", "им", "ом", "ем", "ые", "ие", "ых", "их",
+                "ыми", "ими", "ая", "яя", "ую", "юю", "ей", "ое", "ее")
+_FEM_ENDINGS = ("а", "я", "ы", "и", "е", "у", "ю", "ой", "ей", "ою", "ам", "ами", "ах")
+_SOFT_ENDINGS = ("ь", "я", "ю", "ем", "е", "и", "ей", "ям", "ями", "ях")
+_NEAR_PREFIX = 4  # a neighbouring word sharing this many first letters with a longer alias word is a near miss
 _PRONOUNS = {"его", "него", "нему", "ним", "нём", "нем", "он"}
 _FOLLOW_UP_STARTS = {"а", "и"}
 
@@ -67,6 +85,25 @@ _PERIOD_PATTERNS = (
     (r"\bбудет\b|\bзавтра\b|\bпослезавтра\b", "вопрос о будущем (прогноз)"),
 )
 _VAGUE_PARTS = r"\b(?:утром|днём|днем|вечером|ночью)\b"
+
+# Closed list of time zones that may be named inside a question (v2).
+_NAMED_ZONES = (
+    (r"\bпо\s+московскому\s+времени\b|\bпо\s+москве\b|\bмск\b|\bmsk\b", "Europe/Moscow"),
+    (r"\bпо\s+берлинскому\s+времени\b|\bпо\s+берлину\b", "Europe/Berlin"),
+    (r"\bпо\s+utc\b|\butc\b", "UTC"),
+)
+# Anything zone-like that is not exactly one closed-list phrase -> clarification.
+_ZONE_LIKE = (
+    r"\bпо\s+[а-яё]+(?:ому|ему)\s+времени\b",
+    r"\bпо\s+времени\b",
+    r"\bпо\s+гринвичу\b",
+    r"\bчасов\w*\s+пояс\w*|\bпояс\w*",
+    r"\b(?:utc|gmt|мск|msk|cet|cest|eet|eest|wet|west|est|edt|cst|cdt|mst|mdt|pst|pdt|bst|jst)\b",
+    r"\b(?:utc|gmt|мск|msk)\s*[+\-−]\s*\d{1,2}(?::?\d{2})?",
+    r"\b\d{1,2}:\d{2}(?::\d{2})?\s*(?:[+\-−]\d{1,2}(?::?\d{2})?|z)\b",
+)
+_CITY_AFTER_PO = re.compile(r"\bпо\s+([А-ЯЁ][а-яё]+)")  # «по Лондону» (case-sensitive, original text)
+_TIME_ALTERNATIVE = r"\b\d{1,2}(?::\d{2})?\s+(?:или|либо|и)\s+(?:в\s+|на\s+)?\d{1,2}\b"
 _STATUS = r"\bстатус\w*|\bсостояни\w*"
 
 
@@ -98,14 +135,55 @@ def _alias_index(known_objects: Iterable[Dict[str, Any]]):
     return index
 
 
+def _stem_endings(alias_token: str):
+    if re.search(r"(?:ый|ий|ой|ая|яя|ое|ее)$", alias_token):
+        return alias_token[:-2], _ADJ_ENDINGS
+    if alias_token[-1] in "ая":
+        return alias_token[:-1], _FEM_ENDINGS
+    if alias_token[-1] == "ь":
+        return alias_token[:-1], _SOFT_ENDINGS
+    return alias_token, _INFLECTIONS
+
+
 def _token_matches(token: str, alias_token: str) -> bool:
     t = token.casefold()
     if t == alias_token:
         return True
-    # Light inflection only for Cyrillic word-like aliases (e.g. «Пульсара»).
+    # Light inflection only for Cyrillic word-like alias words (e.g. «Пульсара»,
+    # and, in v2, each word of «Главный мост» -> «Главного моста»).
     if len(alias_token) >= 4 and re.fullmatch(r"[а-яё]+", alias_token):
-        return any(t == alias_token + ending for ending in _INFLECTIONS)
+        stem, endings = _stem_endings(alias_token)
+        return any(t == stem + ending for ending in endings)
     return False
+
+
+def _near(token: str, alias_token: str) -> bool:
+    t = token.casefold()
+    n = min(_NEAR_PREFIX, len(alias_token))
+    return len(t) >= n and t[:n] == alias_token[:n]
+
+
+def _near_misses(tokens, index, mentions):
+    """Short alias found where a LONGER alias containing it nearly matches the
+    neighbouring words (e.g. «Главнейшего моста» vs «Главный мост» / «Мост")."""
+    out = []
+    for m in mentions:
+        key = m["key"]
+        for longer, ids in index.items():
+            if len(longer) <= len(key) or set(ids) == set(m["ids"]):
+                continue
+            for j in range(len(longer) - len(key) + 1):
+                if longer[j:j + len(key)] != key:
+                    continue
+                start = m["pos"] - j
+                end = start + len(longer)
+                if start < 0 or end > len(tokens):
+                    continue
+                others = [k for k in range(len(longer)) if not j <= k < j + len(key)]
+                if all(_near(tokens[start + k][0], longer[k]) for k in others):
+                    out.append({"short": m, "longer_ids": sorted(ids),
+                                "longer": " ".join(longer)})
+    return out
 
 
 def _mentions(tokens, index):
@@ -122,7 +200,7 @@ def _mentions(tokens, index):
         if hit:
             negated = i > 0 and tokens[i - 1][0].casefold() == "не"
             found.append({"ids": sorted(index[hit]), "alias": " ".join(t[0] for t in tokens[i:i + len(hit)]),
-                          "pos": i, "negated": negated})
+                          "pos": i, "negated": negated, "key": hit})
             i += len(hit)
         else:
             i += 1
@@ -137,6 +215,62 @@ def _resolve_tz(tz_value) -> Optional[tzinfo]:
             return ZoneInfo(tz_value.strip())
         except Exception:  # unknown/invalid zone name
             return None
+    return None
+
+
+def _zone_in_text(text: str, low: str, alias_words) -> Dict[str, Any]:
+    """Zone named in the question: {} (none), {'zone','tz','phrase','spans'} or {'clarify': result}."""
+    found, spans = {}, []
+    for pattern, name in _NAMED_ZONES:
+        for m in re.finditer(pattern, low):
+            found.setdefault(name, m.group(0))
+            spans.append(m.span())
+    unknown = []
+    for pattern in _ZONE_LIKE:
+        for m in re.finditer(pattern, low):
+            if not any(a <= m.start() and m.end() <= b for a, b in spans):
+                unknown.append(m.group(0))
+                spans.append(m.span())
+    for m in _CITY_AFTER_PO.finditer(text):
+        word = m.group(1).casefold()
+        if any(a <= m.start() and m.end() <= b for a, b in spans) or any(_token_matches(word, w) for w in alias_words):
+            continue
+        unknown.append(m.group(0))
+        spans.append(m.span())
+    if unknown:
+        return {"spans": spans, "clarify": _result_clarify(
+            "В вопросе указан часовой пояс или место («%s»), который первая версия не разбирает. "
+            "Уточните момент по Москве, по Берлину или в UTC." % unknown[0],
+            "часовой пояс назван в тексте, но не входит в закрытый список (Москва, Берлин, UTC)")}
+    if len(found) > 1:
+        return {"spans": spans, "clarify": _result_clarify(
+            "В вопросе названо несколько часовых поясов (%s). По какому считать?" % ", ".join(found.values()),
+            "несколько часовых поясов", sorted(found))}
+    if found:
+        name, phrase = next(iter(found.items()))
+        return {"zone": name, "tz": ZoneInfo(name) if ZoneInfo is not None else None, "phrase": phrase, "spans": spans}
+    return {"spans": spans}
+
+
+_CLOCK_PATTERNS = (r"\b(\d{1,2}):(\d{2})\b", r"\bв\s+(\d{1,2})\s+(час\w*|утра|дня|вечера|ночи)\b")
+_DAY_PATTERNS = (r"\b\d{4}-\d{2}-\d{2}\b", r"\b\d{1,2}\.\d{1,2}(?:\.\d{4})?\b",
+                 r"\b\d{1,2}\s+(?:%s)\b" % "|".join(_MONTHS), r"\b(?:сегодня|вчера|позавчера)\b")
+
+
+def _spans(patterns, low):
+    # The clock patterns (and the day patterns) cannot overlap each other.
+    return sorted((m.start(), m.end(), m.group(0)) for pattern in patterns for m in re.finditer(pattern, low))
+
+
+def _several_moments(low: str):
+    """v2: several clocks, several days, or a numeric alternative -> the list of expressions."""
+    clocks, days = _spans(_CLOCK_PATTERNS, low), _spans(_DAY_PATTERNS, low)
+    alt = re.search(_TIME_ALTERNATIVE, low)
+    if len(clocks) > 1 or len(days) > 1 or alt:
+        exprs = list(dict.fromkeys(t for _, _, t in sorted(clocks + days)))
+        if alt and len(clocks) < 2 and len(days) < 2:
+            exprs.append(alt.group(0))
+        return exprs
     return None
 
 
@@ -210,6 +344,7 @@ def _parse_day(low: str, now_local: Optional[datetime]):
 def _time_reference(low: str, now: Optional[datetime], tz: Optional[tzinfo]):
     """Return {'ref': 'now'|'absolute'|'date', 'as_of', 'why'} or a result dict, or None if no time words."""
     has_now = any(re.search(p, low) for p in _NOW_PATTERNS)
+    several = _several_moments(low)
     # Year/relative-day arithmetic uses the explicit zone; without a zone the
     # explicit now offset is used only to detect date words, then we clarify.
     now_local = (now.astimezone(tz) if tz is not None else now) if now is not None else None
@@ -219,6 +354,10 @@ def _time_reference(low: str, now: Optional[datetime], tz: Optional[tzinfo]):
     if has_now and (day or clock):
         return _result_clarify("Вы спрашиваете о статусе сейчас или на указанный момент?",
                                "в вопросе одновременно «сейчас» и конкретная дата/время")
+    if several:
+        return _result_clarify("В вопросе несколько моментов или вариантов (%s). На какой один момент ответить?"
+                               % ", ".join("«%s»" % e for e in several),
+                               "несколько выражений времени или альтернатива; первое совпадение не считается выбором пользователя")
     if has_now:
         if now is None:
             return _result_unsupported("нет явно заданного текущего момента: «сейчас» не берётся из часов сервера")
@@ -297,19 +436,31 @@ def parse_question(question: str, known_objects: Sequence[Dict[str, Any]],
         return _result_unsupported("часовой пояс «%s» не распознан" % (timezone,))
     text = question.strip()
     low = text.casefold()
+    tokens = _tokens(text)
+    index = _alias_index(known_objects)
+    mentions = _mentions(tokens, index)
+    # v2: record every positively mentioned known object, whatever the outcome.
+    mentioned = sorted({i for m in mentions if not m["negated"] for i in m["ids"]})
+    result = _parse(text, low, tokens, index, mentions, context, now, tz, timezone)
+    if mentioned:
+        result["mentioned_objects"] = mentioned
+    return result
 
+
+def _parse(text, low, tokens, index, mentions, context, now, tz, timezone_param):
     for pattern, label in _PERIOD_PATTERNS:
         if re.search(pattern, low):
             return _result_unsupported(
                 "Первая версия разбирает только статус одного объекта на один момент; %s не поддерживается." % label)
 
-    tokens = _tokens(text)
     words = [t[0].casefold() for t in tokens]
-    index = _alias_index(known_objects)
-    mentions = _mentions(tokens, index)
+    alias_words = {w for key in index for w in key}
+    zone = _zone_in_text(text, low, alias_words)
+    zone_spans = zone["spans"]
     positive = [m for m in mentions if not m["negated"]]
     covered = {m["pos"] for m in mentions}
-    unknown = [t[0] for i, t in enumerate(tokens) if i not in covered and _IDENT_LIKE.match(t[0])]
+    unknown = [t[0] for i, t in enumerate(tokens) if i not in covered and _IDENT_LIKE.match(t[0])
+               and not any(a <= t[1] and t[2] <= b for a, b in zone_spans)]  # «UTC» is a zone, not an object
     has_pronoun = any(w in _PRONOUNS for w in words)
     follow_up = bool(words) and words[0] in _FOLLOW_UP_STARTS
     status_words = bool(re.search(_STATUS, low))
@@ -327,6 +478,14 @@ def parse_question(question: str, known_objects: Sequence[Dict[str, Any]],
         if len(ids) > 1:
             return _result_clarify("Название «%s» подходит к нескольким объектам: %s. Какой из них?"
                                    % (positive[0]["alias"], ", ".join(ids)), "коллизия названий", ids)
+        near = _near_misses(tokens, index, positive)
+        if near:
+            n = near[0]
+            cands = sorted(set(ids) | set(n["longer_ids"]))
+            return _result_clarify("Вы имеете в виду «%s» (%s) или «%s» (%s)?"
+                                   % (n["longer"], ", ".join(n["longer_ids"]), n["short"]["alias"], ", ".join(ids)),
+                                   "короткое название внутри почти совпавшего составного названия; не подменяем одно другим",
+                                   cands)
         asked = ids[0]
         neg = [m["alias"] for m in mentions if m["negated"]]
         explanation["asked_object"] = ("название «%s» → объект %s" % (positive[0]["alias"], asked)
@@ -337,6 +496,7 @@ def parse_question(question: str, known_objects: Sequence[Dict[str, Any]],
                                "неизвестный объект", known_ids)
     elif has_pronoun or follow_up:
         decided = None
+        pending = set()  # v2: objects mentioned by later non-parsed turns (possible switch)
         turns = _bounded(context)
         for offset, turn in enumerate(reversed(turns), start=1):
             if turn.get("kind") == "parsed" and isinstance(turn.get("asked_object"), str):
@@ -345,6 +505,14 @@ def parse_question(question: str, known_objects: Sequence[Dict[str, Any]],
             if turn.get("candidates"):
                 decided = ("ambiguous", turn, offset)
                 break
+            pending |= {o for o in turn.get("mentioned_objects") or [] if isinstance(o, str)}
+        if pending and (decided is None or decided[0] == "ambiguous" or not pending <= {decided[1]["asked_object"]}):
+            prior = set(decided[1]["asked_object"] if decided[0] == "object" else decided[1]["candidates"]) if decided else set()
+            cands = sorted(pending | prior)
+            return _result_clarify("Уточните, о каком объекте: %s? После последнего разобранного вопроса упоминался другой объект."
+                                   % ", ".join(cands),
+                                   "возможная смена объекта: неразобранная реплика упоминала %s" % ", ".join(sorted(pending)),
+                                   cands)
         if decided is None:
             return _result_clarify("О каком объекте вы спрашиваете? Известные: %s." % ", ".join(known_ids),
                                    "в ограниченном контексте (последние %d реплики) нет однозначного объекта" % MAX_CONTEXT_TURNS,
@@ -357,7 +525,8 @@ def parse_question(question: str, known_objects: Sequence[Dict[str, Any]],
         asked = turn["asked_object"]
         from_context = turn
         explanation["asked_object"] = "из контекста: %d-я реплика с конца («%s») → объект %s" % (
-            offset, turn.get("question", ""), asked)
+            offset, turn.get("question", ""), asked) + (
+            "; промежуточные реплики упоминали только этот объект" if pending else "")
     else:
         return _result_clarify("О каком объекте вы спрашиваете? Известные: %s." % ", ".join(known_ids),
                                "объект не назван", known_ids)
@@ -366,9 +535,26 @@ def parse_question(question: str, known_objects: Sequence[Dict[str, Any]],
         return _result_unsupported("Первая версия разбирает только вопросы о статусе/состоянии объекта.")
 
     # ── time ──────────────────────────────────────────────────────────────
+    if "clarify" in zone:
+        return zone["clarify"]
+    zone_note = None
+    if zone.get("zone"):
+        if zone["tz"] is None:  # pragma: no cover - tz database absent
+            return _result_clarify("Часовой пояс «%s» недоступен; уточните смещение UTC." % zone["phrase"], "нет базы поясов")
+        default = tz
+        tz = zone["tz"]
+        zone_note = "часовой пояс назван в вопросе («%s») → %s" % (zone["phrase"], zone["zone"]) + (
+            "; заданный по умолчанию пояс %s не используется" % default
+            if default is not None and str(default) != zone["zone"] else "")
     ref = _time_reference(low, now, tz)
     if isinstance(ref, dict) and ref.get("kind"):
         return ref
+    if ref is None and zone_note:
+        prior = from_context if from_context is not None else (
+            _bounded(context)[-1] if follow_up and _bounded(context) else None)
+        if prior and prior.get("time_ref") in ("absolute", "date"):
+            return _result_clarify("Пересчитать прежний момент в поясе «%s» или вы имеете в виду другой момент?" % zone["phrase"],
+                                   "пояс назван без момента; прежний момент был в другом поясе")
     if ref is None:
         prior = from_context if from_context is not None else (
             _bounded(context)[-1] if follow_up and _bounded(context) else None)
@@ -386,7 +572,7 @@ def parse_question(question: str, known_objects: Sequence[Dict[str, Any]],
             return _result_clarify("На какой момент: сейчас или на конкретную дату и время?",
                                    "время не указано; без него фильтр времени не включается, а молча его не выключаем")
     params = {"asked_object": asked, "as_of": ref["as_of"], "temporal_scope": SCOPE}
-    explanation["as_of"] = ref["why"]
+    explanation["as_of"] = ref["why"] + ("; " + zone_note if zone_note else "")
     explanation["temporal_scope"] = ("'current' = состояние на момент as_of по контракту #503 "
                                      "(допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)")
     return {"kind": "parsed", "params": params, "time_ref": ref["ref"], "explanation": explanation}
@@ -400,6 +586,8 @@ def context_turn(question: str, result: Dict[str, Any]) -> Dict[str, Any]:
                     as_of=result["params"]["as_of"])
     elif result.get("candidates"):
         turn["candidates"] = list(result["candidates"])
+    if result.get("kind") != "parsed" and result.get("mentioned_objects"):
+        turn["mentioned_objects"] = list(result["mentioned_objects"])  # v2: possible object switch
     return turn
 
 
