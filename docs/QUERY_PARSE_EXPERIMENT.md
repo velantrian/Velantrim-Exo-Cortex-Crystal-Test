@@ -441,3 +441,105 @@ into L-repair) — the same kind of coincidence that hid the zone bug in P01.
 * Ranking rule is longest span > exact > inflection. An exact short alias
   inside a longer inflected phrase is still decided by the longest span.
 * The near-miss rule is still a 4-letter prefix heuristic.
+
+---
+
+# v4 — user rule change (2026-11-09), explicit identifiers, confirmed choice
+
+## Gold change (a rule change, not a parser result)
+
+On 2026-11-09 the user changed the contract: **if one word form matches two
+objects — one directly, one through inflection — both stay candidates and the
+parser asks, unless context resolves it.** v3 encoded the opposite rule
+("exact > inflection").
+
+* `counterexamples_v3.json` is **not edited**. A new gold file
+  `tests/fixtures/query_parse/counterexamples_v3_gold_v2.json` holds the same
+  23 questions; only **K20** «Какой статус Моста сейчас?» (M «Мост», Y «Моста»)
+  changes: old gold `parsed Y` → new gold `needs_clarification [M, Y]`. Each
+  change records `old_gold`, `new_gold`, `reason` (= the user's rule change,
+  explicitly *not* a consequence of any parser result). K21–K23 were reviewed and
+  unchanged.
+* **The v3 report's "0 confident misparse on counterexamples_v3" refers to the
+  old gold.** On the new gold the frozen v3 parser has **1 confident misparse
+  (K20: picks Y and runs the query)** — see the table below and
+  `tests/test_query_parse_v3_gold_change.py`.
+* New items `counterexamples_v4.json` (22): E01–E09 explicit identifiers
+  («объекта M», «Моста (объект M)», conflicting ids), F01–F13 confirmed choice
+  via structured context (answer to a clarification, reuse later, conflict with a
+  newer mention, outside the 3-turn window).
+* Gold commit `4f9f230` precedes the code commit `dfd854e`.
+* v3 was frozen as `tests/query_parse_v3.py`
+  (sha256 `bd5e8f7a5f8b5f5e5a46a10c6814b3fd476ac5cf7dfae0553eb865a7ac822897`);
+  v1/v2/v3 report files regenerate byte-identically.
+
+## v4 rules
+
+* **Collision:** several objects from one form (direct + inflection, or two
+  inflections) → `needs_clarification` with the match type of each candidate,
+  e.g. «M (через склонение «мост»), Y (точное название «моста»)». Ranking is now
+  by span length only.
+* **Explicit identifier:** a token equal to an object id written exactly, after
+  «объект*» or in «( )», selects that object if every other mention is
+  compatible with it, there is exactly one such id and no «и/или/либо» between
+  mentions; otherwise clarification with the union of candidates (E05–E07).
+* **Confirmed choice:** right after an object clarification, a bare answer
+  («M», «Да, Y», «объект M») naming exactly one offered candidate is a confirmed
+  choice. The time comes from the structured `pending_time` stored in the
+  context turn (never from re-parsing old text; «сейчас» re-anchors on the
+  explicit current `now`). If the clarified question had no time, the parser asks
+  for the time and keeps `confirmed_object`. A choice not among the candidates →
+  clarification. Later the same collision is resolved by the confirmed choice
+  only inside the bounded context (3 turns) and only if no newer turn mentions
+  another candidate; a conflict → clarification.
+* All other v3 properties kept (zone case invariance, whole clock, order
+  independence). Parser never writes facts or memory; `ask()` runs the query
+  only for `parsed`.
+
+## Results v4 (`docs/query_parse/eval_results_v4.json`, `python -m tests.query_parse_eval --version v4 --write`)
+
+Columns: correct parse / confident misparse / correct clarification /
+unnecessary clarification / correct unsupported / wrong unsupported /
+clarification instead of unsupported / answers differ from manual.
+
+| Split | n | parse ✓ | misparse | clarif ✓ | clarif unnecessary | unsup ✓ | unsup wrong | clarif-for-unsup | answers differ |
+|---|---|---|---|---|---|---|---|---|---|
+| dev | 28 | 14 | 0 | 8 | 0 | 6 | 0 | 0 | 0 |
+| heldout | 24 | 15 | 0 | 5 | 1 | 3 | 0 | 0 | 1 (H23) |
+| probes | 10 | 3 | 0 | 4 | 2 | 0 | 1 | 0 | 3 (P02, P05, P10) |
+| counterexamples_v2 | 20 | 8 | 0 | 12 | 0 | 0 | 0 | 0 | 0 |
+| counterexamples_v3_gold_v2 | 23 | 10 | 0 | 13 | 0 | 0 | 0 | 0 | 0 |
+| counterexamples_v4 | 22 | 14 | 0 | 8 | 0 | 0 | 0 | 0 | 0 |
+| *v3 snapshot on cv3_gold_v2* | 23 | 10 | **1 (K20)** | 12 | 0 | 0 | 0 | 0 | 1 |
+| *v3 snapshot on cv4* | 22 | 5 | 4 | 3 | 5 | 0 | 5 | 0 | 12 |
+
+v3 on cv4: misparse E06, F04, F05, F13; unnecessary clarification E03, E08,
+F02, F11, F12; wrong unsupported F01, F07, F08, F09, F10. dev/heldout/probes/cv2
+are identical for v3 and v4. Before→after per item:
+`docs/query_parse/before_after_v4.json` (20 items with changed text or
+category); demo: `docs/query_parse/demo_v4.md`.
+
+**Permutation invariance** (`permutation_invariance_v4.json`): every
+permutation of each split's catalogue × names as given/reversed, context rebuilt
+by the parser under test — 108 480 variants over the six v4 sets, `changed = []`
+for v4 (and for v3).
+
+## Reading the numbers carefully (v4)
+
+* Same author for the rule, gold and fix; the new items were written knowing the
+  rule. They show the stated rules hold on these items, not general accuracy.
+* 100 % statement and branch coverage of `core/query_parse.py` again; coverage ≠
+  correctness.
+* No claim of general “understanding”.
+
+## Still not fixed / limitations (v4)
+
+* Same open items: H23 «позавчера», P02 «в прошлую пятницу», P10 non-adjacent
+  negation, P05 «Был ли L готов…» (wrong unsupported; the user will decide
+  separately).
+* Explicit id must be written exactly as in the catalogue (case-sensitive);
+  «объекта m» is a name match, not an explicit id.
+* A confirmed choice is used only inside the 3-turn window and only for the same
+  candidate set it was confirmed for.
+* «по <word>», day-part table and the 4-letter near-miss heuristic unchanged
+  from v3.

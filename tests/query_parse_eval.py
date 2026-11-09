@@ -277,6 +277,15 @@ def write(results, version):
                    "extra_setup": {s: {k: load_split(s).get(k, []) for k in ("extra_known_objects", "extra_facts")}
                                    for s in SPLITS[version] if "extra_known_objects" in load_split(s)},
                    "results": results}
+    if version == "v4":
+        prev = [evaluate(s, PARSERS["v3"]) for s in SPLITS["v4"]]
+        payload["v3_snapshot_on_v4_sets"] = {
+            "_note": "frozen v3 parser (tests/query_parse_v3.py) scored on the v4 sets. counterexamples_v3_gold_v2 is "
+                     "the same 23 questions as counterexamples_v3 with K20 relabelled by the user's rule change "
+                     "(2026-11-09); the v3 report's 0 confident misparse on counterexamples_v3 refers to the old gold.",
+            "results": [{"split": r["split"], "n": r["n"], "counts": r["counts"], "answers_differ": r["answers_differ"],
+                         "not_correct": [x["id"] for x in r["rows"] if not x["category"].startswith("correct")]}
+                        for r in prev]}
     (OUT / f"eval_results_{version}.json").write_text(json.dumps(payload, ensure_ascii=False, indent=1) + "\n",
                                                      encoding="utf-8")
     rows, md = demo(results, DEMO_IDS_BY[version], version)
