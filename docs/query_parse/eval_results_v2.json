@@ -1,0 +1,3701 @@
+{
+ "version": "v2",
+ "parser": "core/query_parse.py",
+ "setup": {
+  "_note": "Isolated synthetic setup for the query-parse experiment. Not user data, not E-pilot/AC data.",
+  "now": "2026-11-09T07:58:00+01:00",
+  "timezone": "Europe/Berlin",
+  "known_objects": [
+   {
+    "id": "L",
+    "names": [
+     "L",
+     "Л"
+    ]
+   },
+   {
+    "id": "L2",
+    "names": [
+     "L2",
+     "Л2"
+    ]
+   },
+   {
+    "id": "M",
+    "names": [
+     "M",
+     "Мост"
+    ]
+   },
+   {
+    "id": "P1",
+    "names": [
+     "P1",
+     "Пульсар"
+    ]
+   },
+   {
+    "id": "P2",
+    "names": [
+     "P2",
+     "Пульсар"
+    ]
+   }
+  ],
+  "facts": [
+   {
+    "fact_id": "L-ready",
+    "claim": "L: статус — готов",
+    "applicability": {
+     "primary_object": "L",
+     "valid_from": "2026-11-08T12:00:00+01:00"
+    }
+   },
+   {
+    "fact_id": "L-repair",
+    "claim": "L: статус — на ремонте",
+    "applicability": {
+     "primary_object": "L",
+     "valid_from": "2026-11-01",
+     "valid_until": "2026-11-08T11:59:59+01:00"
+    }
+   },
+   {
+    "fact_id": "L-dev",
+    "claim": "L: статус — в разработке",
+    "applicability": {
+     "primary_object": "L",
+     "observed_at": "2026-10-08"
+    }
+   },
+   {
+    "fact_id": "L2-off",
+    "claim": "L2: статус — отключён (связан с L)",
+    "applicability": {
+     "primary_object": "L2",
+     "linked_objects": [
+      "L"
+     ],
+     "valid_from": "2026-11-05"
+    }
+   },
+   {
+    "fact_id": "M-works",
+    "claim": "M: статус — работает",
+    "applicability": {
+     "primary_object": "M",
+     "valid_from": "2026-11-01",
+     "valid_until": "2026-11-30"
+    }
+   },
+   {
+    "fact_id": "P1-test",
+    "claim": "P1: статус — на испытаниях",
+    "applicability": {
+     "primary_object": "P1",
+     "valid_from": "2026-11-01"
+    }
+   },
+   {
+    "fact_id": "P2-idle",
+    "claim": "P2: статус — простаивает",
+    "applicability": {
+     "primary_object": "P2",
+     "valid_from": "2026-11-01"
+    }
+   }
+  ]
+ },
+ "extra_setup": {
+  "counterexamples_v2": {
+   "extra_known_objects": [
+    {
+     "id": "B",
+     "names": [
+      "B",
+      "Главный мост"
+     ]
+    }
+   ],
+   "extra_facts": [
+    {
+     "fact_id": "B-closed",
+     "claim": "B: статус — закрыт на ремонт",
+     "applicability": {
+      "primary_object": "B",
+      "valid_from": "2026-11-01"
+     }
+    }
+   ]
+  }
+ },
+ "results": [
+  {
+   "split": "dev",
+   "n": 28,
+   "counts": {
+    "correct_parse": 14,
+    "confident_misparse": 0,
+    "correct_clarification": 8,
+    "unnecessary_clarification": 0,
+    "correct_unsupported": 6,
+    "wrong_unsupported": 0,
+    "clarification_instead_of_unsupported": 0
+   },
+   "answers_differ": [],
+   "rows": [
+    {
+     "id": "D01",
+     "question": "Какой статус L сейчас?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D02",
+     "question": "Не L2, а L — какой у него статус сейчас?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L; исключено по отрицанию: L2; местоимение относится к нему же в этой реплике",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D03",
+     "question": "Какой статус L был 8 ноября в 10:00?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-08T10:00:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«8 ноября» + «10:00» в явно заданном поясе Europe/Berlin → as_of 2026-11-08T10:00:00+01:00 (год взят из явно заданного текущего момента (2026))",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D04",
+     "question": "А его статус?",
+     "context": [
+      {
+       "question": "Какой статус L2 сейчас?",
+       "kind": "parsed",
+       "asked_object": "L2",
+       "time_ref": "now"
+      }
+     ],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L2",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L2",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "из контекста: 1-я реплика с конца («Какой статус L2 сейчас?») → объект L2",
+       "as_of": "время не названо; предыдущая реплика спрашивала «сейчас» → заново привязано к явно заданному текущему моменту 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L2-off"
+      ],
+      "grounds_answer": "L2: статус — отключён (связан с L)",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L2",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L2-off"
+      ],
+      "grounds_answer": "L2: статус — отключён (связан с L)",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D05",
+     "question": "А его статус?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "О каком объекте вы спрашиваете? Известные: L, L2, M, P1, P2.",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D06",
+     "question": "А его статус?",
+     "context": [
+      {
+       "question": "Какой статус Пульсара сейчас?",
+       "kind": "needs_clarification",
+       "candidates": [
+        "P1",
+        "P2"
+       ]
+      }
+     ],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "Уточните, о каком объекте: P1, P2?",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D07",
+     "question": "Какой статус L сегодня?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "день «сегодня» без времени → date-only as_of 2026-11-09 (весь день в поясе Europe/Berlin; относительно явно заданного текущего момента)",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of (whole-day coverage required); historical observation does not cover as_of; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of (whole-day coverage required); historical observation does not cover as_of; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D08",
+     "question": "Какой статус L за вчера?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "unsupported"
+     },
+     "category": "correct_unsupported",
+     "parser": {
+      "kind": "unsupported",
+      "params": null,
+      "explanation": null,
+      "clarification": null,
+      "limitation": "Первая версия разбирает только статус одного объекта на один момент; вопрос о периоде («за …») не поддерживается.",
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D09",
+     "question": "Что менялось у L за неделю?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "unsupported"
+     },
+     "category": "correct_unsupported",
+     "parser": {
+      "kind": "unsupported",
+      "params": null,
+      "explanation": null,
+      "clarification": null,
+      "limitation": "Первая версия разбирает только статус одного объекта на один момент; вопрос о периоде («за …») не поддерживается.",
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D10",
+     "question": "Сравни статус L и L2",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "unsupported"
+     },
+     "category": "correct_unsupported",
+     "parser": {
+      "kind": "unsupported",
+      "params": null,
+      "explanation": null,
+      "clarification": null,
+      "limitation": "Первая версия разбирает только статус одного объекта на один момент; сравнение не поддерживается.",
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D11",
+     "question": "Какой статус L и L2 сейчас?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "О каком объекте вопрос: L, L2? Первая версия отвечает про один объект.",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D12",
+     "question": "Какой статус Z сейчас?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "Объект «Z» неизвестен. О каком объекте вопрос? Известные: L, L2, M, P1, P2.",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D13",
+     "question": "Какой статус Пульсара сейчас?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "Название «Пульсара» подходит к нескольким объектам: P1, P2. Какой из них?",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D14",
+     "question": "Какой статус L?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "На какой момент: сейчас или на конкретную дату и время?",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D15",
+     "question": "Какой статус L был 8 ноября?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-08"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "день «8 ноября» без времени → date-only as_of 2026-11-08 (весь день в поясе Europe/Berlin; год взят из явно заданного текущего момента (2026))",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [],
+      "grounds_answer": null,
+      "grounds_error": "insufficient grounding: current status is not established: validity starts after as_of (whole-day coverage required); validity expired before as_of (whole-day coverage required); historical observation does not cover as_of; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке",
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "current status is not established: validity starts after as_of (whole-day coverage required); validity expired before as_of (whole-day coverage required); historical observation does not cover as_of; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [],
+      "grounds_answer": null,
+      "grounds_error": "insufficient grounding: current status is not established: validity starts after as_of (whole-day coverage required); validity expired before as_of (whole-day coverage required); historical observation does not cover as_of; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке",
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "current status is not established: validity starts after as_of (whole-day coverage required); validity expired before as_of (whole-day coverage required); historical observation does not cover as_of; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D16",
+     "question": "Какой статус L был 8 ноября в 10:00?",
+     "context": [],
+     "timezone": null,
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "В каком часовом поясе считать «8 ноября 10:00»?",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D17",
+     "question": "Какой статус L был с 1 по 5 ноября?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "unsupported"
+     },
+     "category": "correct_unsupported",
+     "parser": {
+      "kind": "unsupported",
+      "params": null,
+      "explanation": null,
+      "clarification": null,
+      "limitation": "Первая версия разбирает только статус одного объекта на один момент; вопрос о периоде («с … по …») не поддерживается.",
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D18",
+     "question": "Какой статус у Л сейчас?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «Л» → объект L",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D19",
+     "question": "Какой статус L2 сейчас?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L2",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L2",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L2» → объект L2",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L2-off"
+      ],
+      "grounds_answer": "L2: статус — отключён (связан с L)",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L2",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L2-off"
+      ],
+      "grounds_answer": "L2: статус — отключён (связан с L)",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D20",
+     "question": "Какое сейчас состояние M?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "M",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "M",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «M» → объект M",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "M-works"
+      ],
+      "grounds_answer": "M: статус — работает",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "M",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "M-works"
+      ],
+      "grounds_answer": "M: статус — работает",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D21",
+     "question": "Статус M на 2026-11-08 10:00?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "M",
+      "as_of": "2026-11-08T10:00:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "M",
+       "as_of": "2026-11-08T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «M» → объект M",
+       "as_of": "«2026-11-08» + «10:00» в явно заданном поясе Europe/Berlin → as_of 2026-11-08T10:00:00+01:00 (указан в вопросе)",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "M-works"
+      ],
+      "grounds_answer": "M: статус — работает",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "M",
+       "as_of": "2026-11-08T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "M-works"
+      ],
+      "grounds_answer": "M: статус — работает",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D22",
+     "question": "Какой статус L был вчера в 10:00?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-08T10:00:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«вчера» + «10:00» в явно заданном поясе Europe/Berlin → as_of 2026-11-08T10:00:00+01:00 (относительно явно заданного текущего момента)",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D23",
+     "question": "Какой статус L был 20 декабря в 10:00?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "Какой год вы имеете в виду для «20 декабря»?",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D24",
+     "question": "А сейчас?",
+     "context": [
+      {
+       "question": "Какой статус L был 8 ноября в 10:00?",
+       "kind": "parsed",
+       "asked_object": "L",
+       "time_ref": "absolute",
+       "as_of": "2026-11-08T10:00:00+01:00"
+      }
+     ],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "из контекста: 1-я реплика с конца («Какой статус L был 8 ноября в 10:00?») → объект L",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D25",
+     "question": "А 8 ноября в 10:00?",
+     "context": [
+      {
+       "question": "Какой статус L сейчас?",
+       "kind": "parsed",
+       "asked_object": "L",
+       "time_ref": "now"
+      }
+     ],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-08T10:00:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "из контекста: 1-я реплика с конца («Какой статус L сейчас?») → объект L",
+       "as_of": "«8 ноября» + «10:00» в явно заданном поясе Europe/Berlin → as_of 2026-11-08T10:00:00+01:00 (год взят из явно заданного текущего момента (2026))",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D26",
+     "question": "Когда L стал готов?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "unsupported"
+     },
+     "category": "correct_unsupported",
+     "parser": {
+      "kind": "unsupported",
+      "params": null,
+      "explanation": null,
+      "clarification": null,
+      "limitation": "Первая версия разбирает только статус одного объекта на один момент; вопрос о времени события («когда …») не поддерживается.",
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D27",
+     "question": "Какой статус L, а не L2, сейчас?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L; исключено по отрицанию: L2",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "D28",
+     "question": "Какой статус L будет завтра?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "unsupported"
+     },
+     "category": "correct_unsupported",
+     "parser": {
+      "kind": "unsupported",
+      "params": null,
+      "explanation": null,
+      "clarification": null,
+      "limitation": "Первая версия разбирает только статус одного объекта на один момент; вопрос о будущем (прогноз) не поддерживается.",
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    }
+   ]
+  },
+  {
+   "split": "heldout",
+   "n": 24,
+   "counts": {
+    "correct_parse": 15,
+    "confident_misparse": 0,
+    "correct_clarification": 5,
+    "unnecessary_clarification": 1,
+    "correct_unsupported": 3,
+    "wrong_unsupported": 0,
+    "clarification_instead_of_unsupported": 0
+   },
+   "answers_differ": [
+    "H23"
+   ],
+   "rows": [
+    {
+     "id": "H01",
+     "question": "Скажи, в каком состоянии сейчас L?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H02",
+     "question": "L сейчас в каком статусе?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H03",
+     "question": "Какой у L статус на данный момент?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H04",
+     "question": "Меня интересует не L2, а именно L: что у него со статусом сейчас?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L; исключено по отрицанию: L2; местоимение относится к нему же в этой реплике",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H05",
+     "question": "Каким был статус L 8 ноября в 10 утра?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-08T10:00:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«8 ноября» + «в 10 утра» в явно заданном поясе Europe/Berlin → as_of 2026-11-08T10:00:00+01:00 (год взят из явно заданного текущего момента (2026))",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H06",
+     "question": "Статус L на 08.11 в 10:00?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-08T10:00:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«08.11» + «10:00» в явно заданном поясе Europe/Berlin → as_of 2026-11-08T10:00:00+01:00 (год взят из явно заданного текущего момента (2026))",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H07",
+     "question": "А у него какой статус?",
+     "context": [
+      {
+       "question": "Какой статус L сейчас?",
+       "kind": "parsed",
+       "asked_object": "L",
+       "time_ref": "now"
+      }
+     ],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "из контекста: 1-я реплика с конца («Какой статус L сейчас?») → объект L",
+       "as_of": "время не названо; предыдущая реплика спрашивала «сейчас» → заново привязано к явно заданному текущему моменту 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H08",
+     "question": "А у него?",
+     "context": [
+      {
+       "question": "Какой статус L и M сейчас?",
+       "kind": "needs_clarification",
+       "candidates": [
+        "L",
+        "M"
+       ]
+      }
+     ],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "Уточните, о каком объекте: L, M?",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H09",
+     "question": "Какой статус L на текущий момент?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H10",
+     "question": "Как изменился статус L с прошлой недели?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "unsupported"
+     },
+     "category": "correct_unsupported",
+     "parser": {
+      "kind": "unsupported",
+      "params": null,
+      "explanation": null,
+      "clarification": null,
+      "limitation": "Первая версия разбирает только статус одного объекта на один момент; вопрос о периоде (неделя/месяц) не поддерживается.",
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H11",
+     "question": "Какой статус был у L в течение вчерашнего дня?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "unsupported"
+     },
+     "category": "correct_unsupported",
+     "parser": {
+      "kind": "unsupported",
+      "params": null,
+      "explanation": null,
+      "clarification": null,
+      "limitation": "Первая версия разбирает только статус одного объекта на один момент; вопрос о периоде («в течение …») не поддерживается.",
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H12",
+     "question": "Что с L сегодня по статусу?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "день «сегодня» без времени → date-only as_of 2026-11-09 (весь день в поясе Europe/Berlin; относительно явно заданного текущего момента)",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of (whole-day coverage required); historical observation does not cover as_of; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of (whole-day coverage required); historical observation does not cover as_of; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H13",
+     "question": "Какой статус у M и у L сейчас?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "О каком объекте вопрос: L, M? Первая версия отвечает про один объект.",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H14",
+     "question": "Статус Q сейчас?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "Объект «Q» неизвестен. О каком объекте вопрос? Известные: L, L2, M, P1, P2.",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H15",
+     "question": "Какой статус L2 был вчера утром?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "На какое время вчера? Укажите час, например «в 10:00».",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H16",
+     "question": "Подскажи текущий статус Л2",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L2",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L2",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «Л2» → объект L2",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L2-off"
+      ],
+      "grounds_answer": "L2: статус — отключён (связан с L)",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L2",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L2-off"
+      ],
+      "grounds_answer": "L2: статус — отключён (связан с L)",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H17",
+     "question": "Какой статус L был 8 ноября 2026 года в 10:00 по Берлину?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-08T10:00:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«8 ноября 2026 года» + «10:00» в явно заданном поясе Europe/Berlin → as_of 2026-11-08T10:00:00+01:00 (указан в вопросе); часовой пояс назван в вопросе («по берлину») → Europe/Berlin",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H18",
+     "question": "Какой статус L прямо сейчас?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H19",
+     "question": "Какой статус был у L в 10:00 8 ноября?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-08T10:00:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«8 ноября» + «10:00» в явно заданном поясе Europe/Berlin → as_of 2026-11-08T10:00:00+01:00 (год взят из явно заданного текущего момента (2026))",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H20",
+     "question": "Что сейчас со статусом Пульсара?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "Название «Пульсара» подходит к нескольким объектам: P1, P2. Какой из них?",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H21",
+     "question": "Какой статус L2, но не L, сейчас?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L2",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L2",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L2» → объект L2; исключено по отрицанию: L",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L2-off"
+      ],
+      "grounds_answer": "L2: статус — отключён (связан с L)",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L2",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L2-off"
+      ],
+      "grounds_answer": "L2: статус — отключён (связан с L)",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H22",
+     "question": "Покажи историю статусов L",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "unsupported"
+     },
+     "category": "correct_unsupported",
+     "parser": {
+      "kind": "unsupported",
+      "params": null,
+      "explanation": null,
+      "clarification": null,
+      "limitation": "Первая версия разбирает только статус одного объекта на один момент; история статусов не поддерживается.",
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "H23",
+     "question": "Какой статус был у L позавчера в 12:00?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-07T12:00:00+01:00"
+     },
+     "category": "unnecessary_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "Какого дня это время (12:00)?",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-07T12:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": true
+    },
+    {
+     "id": "H24",
+     "question": "А теперь какой у него статус?",
+     "context": [
+      {
+       "question": "Какой статус L был 8 ноября в 10:00?",
+       "kind": "parsed",
+       "asked_object": "L",
+       "time_ref": "absolute",
+       "as_of": "2026-11-08T10:00:00+01:00"
+      }
+     ],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "из контекста: 1-я реплика с конца («Какой статус L был 8 ноября в 10:00?») → объект L",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    }
+   ]
+  },
+  {
+   "split": "probes",
+   "n": 10,
+   "counts": {
+    "correct_parse": 3,
+    "confident_misparse": 0,
+    "correct_clarification": 4,
+    "unnecessary_clarification": 2,
+    "correct_unsupported": 0,
+    "wrong_unsupported": 1,
+    "clarification_instead_of_unsupported": 0
+   },
+   "answers_differ": [
+    "P02",
+    "P05",
+    "P10"
+   ],
+   "rows": [
+    {
+     "id": "P01",
+     "question": "Какой статус L был 8 ноября в 10:00 по московскому времени?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-08T10:00:00+03:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+03:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«8 ноября» + «10:00» в явно заданном поясе Europe/Moscow → as_of 2026-11-08T10:00:00+03:00 (год взят из явно заданного текущего момента (2026)); часовой пояс назван в вопросе («по московскому времени») → Europe/Moscow; заданный по умолчанию пояс Europe/Berlin не используется",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+03:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "P02",
+     "question": "Какой статус L был в прошлую пятницу в 10:00?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-06T10:00:00+01:00"
+     },
+     "category": "unnecessary_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "Какого дня это время (10:00)?",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-06T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": true
+    },
+    {
+     "id": "P03",
+     "question": "Статус L — сейчас или вчера в 10:00?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "Вы спрашиваете о статусе сейчас или на указанный момент?",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "P04",
+     "question": "Какой статус не L?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "О каком объекте вы спрашиваете? Известные: L, L2, M, P1, P2.",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "P05",
+     "question": "Был ли L готов вчера в 10:00?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-08T10:00:00+01:00"
+     },
+     "category": "wrong_unsupported",
+     "parser": {
+      "kind": "unsupported",
+      "params": null,
+      "explanation": null,
+      "clarification": null,
+      "limitation": "Первая версия разбирает только вопросы о статусе/состоянии объекта.",
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": true
+    },
+    {
+     "id": "P06",
+     "question": "Какой статус L был 8 ноября в 10 вечера?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-08T22:00:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T22:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«8 ноября» + «в 10 вечера» в явно заданном поясе Europe/Berlin → as_of 2026-11-08T22:00:00+01:00 (год взят из явно заданного текущего момента (2026))",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T22:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "P07",
+     "question": "Какой статус L был 31 ноября в 10:00?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "Уточните дату: некорректная дата «31 ноября».",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "P08",
+     "question": "Какой статус L в 10:00?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "Какого дня это время (10:00)?",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "P09",
+     "question": "Какой статус L был 8 ноября в 10:00 UTC?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-08T10:00:00+00:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+00:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«8 ноября» + «10:00» в явно заданном поясе UTC → as_of 2026-11-08T10:00:00+00:00 (год взят из явно заданного текущего момента (2026)); часовой пояс назван в вопросе («utc») → UTC; заданный по умолчанию пояс Europe/Berlin не используется",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T10:00:00+00:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false
+    },
+    {
+     "id": "P10",
+     "question": "Каков статус L сейчас, если не считать L2?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "unnecessary_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "О каком объекте вопрос: L, L2? Первая версия отвечает про один объект.",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": true
+    }
+   ]
+  },
+  {
+   "split": "counterexamples_v2",
+   "n": 20,
+   "counts": {
+    "correct_parse": 8,
+    "confident_misparse": 0,
+    "correct_clarification": 12,
+    "unnecessary_clarification": 0,
+    "correct_unsupported": 0,
+    "wrong_unsupported": 0,
+    "clarification_instead_of_unsupported": 0
+   },
+   "answers_differ": [],
+   "rows": [
+    {
+     "id": "C01",
+     "question": "Какой статус L был 8 ноября в 13:00 по московскому времени?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-08T13:00:00+03:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T13:00:00+03:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«8 ноября» + «13:00» в явно заданном поясе Europe/Moscow → as_of 2026-11-08T13:00:00+03:00 (год взят из явно заданного текущего момента (2026)); часовой пояс назван в вопросе («по московскому времени») → Europe/Moscow; заданный по умолчанию пояс Europe/Berlin не используется",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T13:00:00+03:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-repair"
+      ],
+      "grounds_answer": "L: статус — на ремонте",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity starts after as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false,
+     "group": "timezone"
+    },
+    {
+     "id": "C02",
+     "question": "Какой статус L был 8 ноября в 13:00 по Берлину?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-08T13:00:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T13:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«8 ноября» + «13:00» в явно заданном поясе Europe/Berlin → as_of 2026-11-08T13:00:00+01:00 (год взят из явно заданного текущего момента (2026)); часовой пояс назван в вопросе («по берлину») → Europe/Berlin",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T13:00:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false,
+     "group": "timezone"
+    },
+    {
+     "id": "C03",
+     "question": "Какой статус L был 8 ноября в 11:30 UTC?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-08T11:30:00+00:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T11:30:00+00:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«8 ноября» + «11:30» в явно заданном поясе UTC → as_of 2026-11-08T11:30:00+00:00 (год взят из явно заданного текущего момента (2026)); часовой пояс назван в вопросе («utc») → UTC; заданный по умолчанию пояс Europe/Berlin не используется",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-08T11:30:00+00:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false,
+     "group": "timezone"
+    },
+    {
+     "id": "C04",
+     "question": "Какой статус L был 8 ноября в 13:00 по местному времени?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "В вопросе указан часовой пояс или место («по местному времени»), который первая версия не разбирает. Уточните момент по Москве, по Берлину или в UTC.",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false,
+     "group": "timezone"
+    },
+    {
+     "id": "C05",
+     "question": "Какой статус L был 8 ноября в 13:00 по киевскому времени?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "В вопросе указан часовой пояс или место («по киевскому времени»), который первая версия не разбирает. Уточните момент по Москве, по Берлину или в UTC.",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false,
+     "group": "timezone"
+    },
+    {
+     "id": "C06",
+     "question": "Какой статус L был 8 ноября в 13:00 GMT+3?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "В вопросе указан часовой пояс или место («gmt»), который первая версия не разбирает. Уточните момент по Москве, по Берлину или в UTC.",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false,
+     "group": "timezone"
+    },
+    {
+     "id": "C07",
+     "question": "Какой статус L был 8 ноября в 13:00 по Лондону?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "В вопросе указан часовой пояс или место («по Лондону»), который первая версия не разбирает. Уточните момент по Москве, по Берлину или в UTC.",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false,
+     "group": "timezone"
+    },
+    {
+     "id": "C08",
+     "question": "Какой статус L сейчас по московскому времени?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09T09:58:00+03:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T09:58:00+03:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «L» → объект L",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T09:58:00+03:00; часовой пояс назван в вопросе («по московскому времени») → Europe/Moscow; заданный по умолчанию пояс Europe/Berlin не используется",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T09:58:00+03:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false,
+     "group": "timezone"
+    },
+    {
+     "id": "C09",
+     "question": "Какой статус Главного моста сейчас?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "B",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "B",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «Главного моста» → объект B",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "B-closed"
+      ],
+      "grounds_answer": "B: статус — закрыт на ремонт",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "B",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "B-closed"
+      ],
+      "grounds_answer": "B: статус — закрыт на ремонт",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "answers_differ": false,
+     "group": "compound_name"
+    },
+    {
+     "id": "C10",
+     "question": "Какое сейчас состояние у Главного моста?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "B",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "B",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «Главного моста» → объект B",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "B-closed"
+      ],
+      "grounds_answer": "B: статус — закрыт на ремонт",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "B",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "B-closed"
+      ],
+      "grounds_answer": "B: статус — закрыт на ремонт",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "answers_differ": false,
+     "group": "compound_name"
+    },
+    {
+     "id": "C11",
+     "question": "Какой статус Моста сейчас?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "M",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "M",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "название «Моста» → объект M",
+       "as_of": "«сейчас»-форма в вопросе → as_of = явно заданный текущий момент 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "M-works"
+      ],
+      "grounds_answer": "M: статус — работает",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "M",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "M-works"
+      ],
+      "grounds_answer": "M: статус — работает",
+      "grounds_error": null,
+      "grounds_historical_only": [],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): primary object differs; linked_objects does not transfer status"
+     },
+     "answers_differ": false,
+     "group": "compound_name"
+    },
+    {
+     "id": "C12",
+     "question": "Какой статус Главнейшего моста сейчас?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "Вы имеете в виду «главный мост» (B) или «моста» (M)?",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false,
+     "group": "compound_name"
+    },
+    {
+     "id": "C13",
+     "question": "Какой статус L был 8 ноября в 10:00 или в 12:00?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "В вопросе несколько моментов или вариантов («8 ноября», «10:00», «12:00»). На какой один момент ответить?",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false,
+     "group": "time_alternatives"
+    },
+    {
+     "id": "C14",
+     "question": "Какой статус L был 7 или 8 ноября?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "В вопросе несколько моментов или вариантов («8 ноября», «7 или 8»). На какой один момент ответить?",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false,
+     "group": "time_alternatives"
+    },
+    {
+     "id": "C15",
+     "question": "Какой статус L был 8 ноября в 10:00 и 9 ноября в 10:00?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "В вопросе несколько моментов или вариантов («8 ноября», «10:00», «9 ноября»). На какой один момент ответить?",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false,
+     "group": "time_alternatives"
+    },
+    {
+     "id": "C16",
+     "question": "Какой статус L был вчера или 7 ноября в 10:00?",
+     "context": [],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "В вопросе несколько моментов или вариантов («вчера», «7 ноября», «10:00»). На какой один момент ответить?",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false,
+     "group": "time_alternatives"
+    },
+    {
+     "id": "C17",
+     "question": "А его статус?",
+     "context": [
+      {
+       "question": "Какой статус L сейчас?",
+       "kind": "parsed",
+       "asked_object": "L",
+       "time_ref": "now",
+       "as_of": "2026-11-09T07:58:00+01:00"
+      },
+      {
+       "question": "Был ли L2 готов вчера в 10:00?",
+       "kind": "unsupported",
+       "mentioned_objects": [
+        "L2"
+       ]
+      }
+     ],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "Уточните, о каком объекте: L, L2? После последнего разобранного вопроса упоминался другой объект.",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false,
+     "context_questions": [
+      "Какой статус L сейчас?",
+      "Был ли L2 готов вчера в 10:00?"
+     ],
+     "group": "context_switch"
+    },
+    {
+     "id": "C18",
+     "question": "А его статус?",
+     "context": [
+      {
+       "question": "Какой статус L сейчас?",
+       "kind": "parsed",
+       "asked_object": "L",
+       "time_ref": "now",
+       "as_of": "2026-11-09T07:58:00+01:00"
+      },
+      {
+       "question": "Что менялось у L2 за неделю?",
+       "kind": "unsupported",
+       "mentioned_objects": [
+        "L2"
+       ]
+      }
+     ],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "Уточните, о каком объекте: L, L2? После последнего разобранного вопроса упоминался другой объект.",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false,
+     "context_questions": [
+      "Какой статус L сейчас?",
+      "Что менялось у L2 за неделю?"
+     ],
+     "group": "context_switch"
+    },
+    {
+     "id": "C19",
+     "question": "А его статус?",
+     "context": [
+      {
+       "question": "Какой статус L сейчас?",
+       "kind": "parsed",
+       "asked_object": "L",
+       "time_ref": "now",
+       "as_of": "2026-11-09T07:58:00+01:00"
+      },
+      {
+       "question": "Какой статус L2 был вчера утром?",
+       "kind": "needs_clarification",
+       "mentioned_objects": [
+        "L2"
+       ]
+      }
+     ],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "needs_clarification"
+     },
+     "category": "correct_clarification",
+     "parser": {
+      "kind": "needs_clarification",
+      "params": null,
+      "explanation": null,
+      "clarification": "Уточните, о каком объекте: L, L2? После последнего разобранного вопроса упоминался другой объект.",
+      "limitation": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "manual": {
+      "params": null,
+      "grounds_query_called": false,
+      "grounds_admitted": [],
+      "grounds_answer": null
+     },
+     "answers_differ": false,
+     "context_questions": [
+      "Какой статус L сейчас?",
+      "Какой статус L2 был вчера утром?"
+     ],
+     "group": "context_switch"
+    },
+    {
+     "id": "C20",
+     "question": "А его статус?",
+     "context": [
+      {
+       "question": "Какой статус L сейчас?",
+       "kind": "parsed",
+       "asked_object": "L",
+       "time_ref": "now",
+       "as_of": "2026-11-09T07:58:00+01:00"
+      },
+      {
+       "question": "Расскажи про L сейчас",
+       "kind": "unsupported",
+       "mentioned_objects": [
+        "L"
+       ]
+      }
+     ],
+     "timezone": "Europe/Berlin",
+     "gold": {
+      "kind": "parsed",
+      "asked_object": "L",
+      "as_of": "2026-11-09T07:58:00+01:00"
+     },
+     "category": "correct_parse",
+     "parser": {
+      "kind": "parsed",
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "explanation": {
+       "asked_object": "из контекста: 2-я реплика с конца («Какой статус L сейчас?») → объект L; промежуточные реплики упоминали только этот объект",
+       "as_of": "время не названо; предыдущая реплика спрашивала «сейчас» → заново привязано к явно заданному текущему моменту 2026-11-09T07:58:00+01:00",
+       "temporal_scope": "'current' = состояние на момент as_of по контракту #503 (допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)"
+      },
+      "clarification": null,
+      "limitation": null,
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "manual": {
+      "params": {
+       "asked_object": "L",
+       "as_of": "2026-11-09T07:58:00+01:00",
+       "temporal_scope": "current"
+      },
+      "grounds_query_called": true,
+      "grounds_admitted": [
+       "L-ready"
+      ],
+      "grounds_answer": "L: статус — готов",
+      "grounds_error": null,
+      "grounds_historical_only": [
+       "L-dev"
+      ],
+      "grounds_uncertainty": "Excluded evidence (not a denial of the admitted facts): validity expired before as_of; date-only observation cannot establish state at a timestamp; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+     },
+     "answers_differ": false,
+     "context_questions": [
+      "Какой статус L сейчас?",
+      "Расскажи про L сейчас"
+     ],
+     "group": "context_switch"
+    }
+   ]
+  }
+ ]
+}

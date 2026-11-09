@@ -1,0 +1,230 @@
+{
+ "_note": "V6 COUNTEREXAMPLES for the final contract C1–C6 (user decision 2026-11-09). Written and committed BEFORE the v6 code change; same author as the fixes, not independent. Shared isolated setup only.",
+ "rule_change": {
+  "date": "2026-11-09",
+  "by": "user (final contract decision v6)",
+  "rules": {
+   "C1": "«сегодня», «вчера» и календарная дата без времени → уточнение (спросить время). Меняет прежнее поведение «сегодня»/«вчера» (весь день).",
+   "C2": "Дата с часами («сегодня в 08:00», «вчера в 10:00», «8 ноября в 10:00») → конкретный момент в установленном поясе (пояс из текста, если поддержан, иначе заданный по умолчанию); неизвестный пояс → уточнение.",
+   "C3": "Явно запрошенный весь день («весь день 7 ноября», «весь день сегодня», «за весь день», «в течение дня») → unsupported: проверка за весь день разборщиком пока не поддерживается.",
+   "C4": "Будущее состояние → unsupported (по разрешённому времени относительно явного now).",
+   "C5": "«будет» с прошедшим моментом → уточнение.",
+   "C6": "Отсутствие времени → уточнение; «сейчас» — явный текущий момент."
+  }
+ },
+ "items": [
+  {
+   "id": "G01",
+   "group": "day_no_time",
+   "question": "Какой статус L сегодня?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "G02",
+   "group": "day_no_time",
+   "question": "Какой статус L был вчера?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "G03",
+   "group": "day_no_time",
+   "question": "Какой статус L был 7 ноября?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "G04",
+   "group": "day_with_clock",
+   "question": "Какой статус L вчера в 10:00?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   }
+  },
+  {
+   "id": "G05",
+   "group": "day_with_clock",
+   "question": "Какой статус L сегодня в 07:00?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:00:00+01:00"
+   }
+  },
+  {
+   "id": "G06",
+   "group": "day_with_clock",
+   "question": "Какой статус L был 8 ноября в 10:00 по Москве?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+03:00"
+   }
+  },
+  {
+   "id": "G07",
+   "group": "day_with_clock",
+   "question": "Какой статус L был 8 ноября в 10:00?",
+   "timezone": null,
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "G08",
+   "group": "whole_day",
+   "question": "Какой статус L был весь день 7 ноября?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "G09",
+   "group": "whole_day",
+   "question": "Какой статус L весь день сегодня?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "G10",
+   "group": "whole_day",
+   "question": "Какой статус L был за весь день вчера?",
+   "gold": {
+    "kind": "unsupported"
+   },
+   "note": "«за весь день» is caught by the «весь день» marker."
+  },
+  {
+   "id": "G11",
+   "group": "whole_day",
+   "question": "Какой статус L был в течение дня 8 ноября?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "G12",
+   "group": "future_word_past",
+   "question": "Какой статус L будет 8 ноября в 10:00?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "G13",
+   "group": "future",
+   "question": "Какой статус L будет?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "G14",
+   "group": "future",
+   "question": "Какой статус L 12 ноября в 10:00?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "G15",
+   "group": "no_time",
+   "question": "Какой статус L?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "G16",
+   "group": "now",
+   "question": "Какой статус L сейчас?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "G17",
+   "group": "context",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L был 8 ноября в 10:00?"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   },
+   "note": "documented v1 follow-up rule: time inherited from the previous parsed turn (moment only; explained in the output) — kept, see docs v6."
+  },
+  {
+   "id": "G18",
+   "group": "context",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L сегодня?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "note": "the previous turn is now a clarification (C1): nothing to inherit → clarification."
+  },
+  {
+   "id": "G19",
+   "group": "context",
+   "question": "А сегодня?",
+   "context_questions": [
+    "Какой статус L сейчас?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "G20",
+   "group": "context",
+   "question": "А вчера в 10:00?",
+   "context_questions": [
+    "Какой статус L сейчас?"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   }
+  },
+  {
+   "id": "G21",
+   "group": "confirmed_choice",
+   "question": "P1",
+   "context_questions": [
+    "Какой статус Пульсара сегодня?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "note": "the clarified question had no usable moment (C1) → the confirmed choice asks for the time."
+  },
+  {
+   "id": "G22",
+   "group": "confirmed_choice",
+   "question": "P1",
+   "context_questions": [
+    "Какой статус Пульсара вчера в 10:00?"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "P1",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   }
+  }
+ ]
+}

@@ -1,0 +1,261 @@
+{
+ "_note": "GOLD VERSION 2 of heldout (same 24 questions; heldout.json unchanged). Written and committed BEFORE the v6 code change.",
+ "gold_version": 2,
+ "supersedes": "tests/fixtures/query_parse/heldout.json",
+ "rule_change": {
+  "date": "2026-11-09",
+  "by": "user (final contract decision v6)",
+  "rules": {
+   "C1": "«сегодня», «вчера» и календарная дата без времени → уточнение (спросить время). Меняет прежнее поведение «сегодня»/«вчера» (весь день).",
+   "C2": "Дата с часами («сегодня в 08:00», «вчера в 10:00», «8 ноября в 10:00») → конкретный момент в установленном поясе (пояс из текста, если поддержан, иначе заданный по умолчанию); неизвестный пояс → уточнение.",
+   "C3": "Явно запрошенный весь день («весь день 7 ноября», «весь день сегодня», «за весь день», «в течение дня») → unsupported: проверка за весь день разборщиком пока не поддерживается.",
+   "C4": "Будущее состояние → unsupported (по разрешённому времени относительно явного now).",
+   "C5": "«будет» с прошедшим моментом → уточнение.",
+   "C6": "Отсутствие времени → уточнение; «сейчас» — явный текущий момент."
+  }
+ },
+ "gold_changes": [
+  {
+   "id": "H12",
+   "question": "Что с L сегодня по статусу?",
+   "old_gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09"
+   },
+   "new_gold": {
+    "kind": "needs_clarification"
+   },
+   "rule": "C1",
+   "reason": "User's final contract decision on 2026-11-09, rule C1: «сегодня», «вчера» и календарная дата без времени → уточнение (спросить время). Меняет прежнее поведение «сегодня»/«вчера» (весь день). «сегодня» without a time; old gold = whole-day date-only. NOT a consequence of any parser result."
+  }
+ ],
+ "unchanged_review": "H11 «в течение вчерашнего дня» stays unsupported (C3 now names it whole-day instead of a period; outcome kind unchanged); H15 «вчера утром» stays clarification; H05/H06/H17/H19/H23 have a clock; H07/H24 follow-ups inherit a moment (documented rule).",
+ "items": [
+  {
+   "id": "H01",
+   "question": "Скажи, в каком состоянии сейчас L?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "H02",
+   "question": "L сейчас в каком статусе?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "H03",
+   "question": "Какой у L статус на данный момент?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "H04",
+   "question": "Меня интересует не L2, а именно L: что у него со статусом сейчас?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "H05",
+   "question": "Каким был статус L 8 ноября в 10 утра?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   }
+  },
+  {
+   "id": "H06",
+   "question": "Статус L на 08.11 в 10:00?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   }
+  },
+  {
+   "id": "H07",
+   "question": "А у него какой статус?",
+   "context": [
+    {
+     "question": "Какой статус L сейчас?",
+     "kind": "parsed",
+     "asked_object": "L",
+     "time_ref": "now"
+    }
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "H08",
+   "question": "А у него?",
+   "context": [
+    {
+     "question": "Какой статус L и M сейчас?",
+     "kind": "needs_clarification",
+     "candidates": [
+      "L",
+      "M"
+     ]
+    }
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "H09",
+   "question": "Какой статус L на текущий момент?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "H10",
+   "question": "Как изменился статус L с прошлой недели?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "H11",
+   "question": "Какой статус был у L в течение вчерашнего дня?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "H12",
+   "question": "Что с L сегодня по статусу?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "H13",
+   "question": "Какой статус у M и у L сейчас?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "H14",
+   "question": "Статус Q сейчас?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "H15",
+   "question": "Какой статус L2 был вчера утром?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "H16",
+   "question": "Подскажи текущий статус Л2",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L2",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "H17",
+   "question": "Какой статус L был 8 ноября 2026 года в 10:00 по Берлину?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   }
+  },
+  {
+   "id": "H18",
+   "question": "Какой статус L прямо сейчас?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "H19",
+   "question": "Какой статус был у L в 10:00 8 ноября?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   }
+  },
+  {
+   "id": "H20",
+   "question": "Что сейчас со статусом Пульсара?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "H21",
+   "question": "Какой статус L2, но не L, сейчас?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L2",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "H22",
+   "question": "Покажи историю статусов L",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "H23",
+   "question": "Какой статус был у L позавчера в 12:00?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-07T12:00:00+01:00"
+   }
+  },
+  {
+   "id": "H24",
+   "question": "А теперь какой у него статус?",
+   "context": [
+    {
+     "question": "Какой статус L был 8 ноября в 10:00?",
+     "kind": "parsed",
+     "asked_object": "L",
+     "time_ref": "absolute",
+     "as_of": "2026-11-08T10:00:00+01:00"
+    }
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  }
+ ]
+}

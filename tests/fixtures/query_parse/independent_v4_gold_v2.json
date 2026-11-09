@@ -1,0 +1,501 @@
+{
+ "_note": "REGRESSION SET — gold version 2 of independent_v4.json. The 30 questions were opened (read, scored, discussed) after the v4 run, so from v5 on they are a regression set, NOT an independent check. independent_v4.json (original gold) is unchanged and is also scored. Written and committed BEFORE the v5 code change.",
+ "status": "regression (no longer independent)",
+ "gold_version": 2,
+ "supersedes": "tests/fixtures/query_parse/independent_v4.json (original gold, sha256 4bd2d804b726eaac97120daa175eddd2a42dc67afcb91d3411f858298b0f4cb6)",
+ "rule_change": {
+  "date": "2026-11-09",
+  "by": "user / Astra (owner message, rules v5)",
+  "rules": {
+   "R1": "«В десять утра 8 ноября» (время словами) → уточнение, пока время словами не поддерживается. Время нельзя отбрасывать и выполнять запрос за весь день. Обобщение: любое обнаруженное, но не разобранное выражение времени блокирует запрос (уточнение).",
+   "R2": "«Сегодня в 08:00» → конкретный момент: сегодняшняя дата (от явного now) и 08:00 в явно установленном поясе; пояс неизвестен → уточнение.",
+   "R3": "«Был 7 ноября» без времени → спросить, на какое время нужен статус (вместо всего дня).",
+   "R4": "«Весь день 7 ноября» → проверка покрытия всего дня, только если формулировка явно поддержана (в v4 не поддержана → не добавляется).",
+   "R5": "Вопрос о состоянии на будущий момент → unsupported; определяется по разрешённому времени относительно явного now, а не только по слову «будет».",
+   "R6": "«Лучше, чем у L2» → неподдерживаемое сравнение."
+  }
+ },
+ "gold_changes": [
+  {
+   "id": "I15",
+   "question": "Какой статус L будет 12 ноября в 10:00?",
+   "old_gold": {
+    "gold_outcome": "needs_clarification",
+    "gold_parameters": null
+   },
+   "new_gold": {
+    "gold_outcome": "unsupported",
+    "gold_parameters": null
+   },
+   "rule": "R5",
+   "reason": "Decision by the user/Astra on 2026-11-09, rule R5: Вопрос о состоянии на будущий момент → unsupported; определяется по разрешённому времени относительно явного now, а не только по слову «будет». «будет 12 ноября в 10:00» is after the explicit now; the original gold asked for clarification. This is a change of the contract, NOT a consequence of any parser result."
+  },
+  {
+   "id": "I19",
+   "question": "Какой статус у котельной сегодня в 08:00?",
+   "old_gold": {
+    "gold_outcome": "needs_clarification",
+    "gold_parameters": null
+   },
+   "new_gold": {
+    "gold_outcome": "parsed",
+    "gold_parameters": {
+     "object_id": "K",
+     "as_of": "2026-11-09T08:00:00+01:00",
+     "temporal_scope": "current"
+    }
+   },
+   "rule": "R2",
+   "reason": "Decision by the user/Astra on 2026-11-09, rule R2: «Сегодня в 08:00» → конкретный момент: сегодняшняя дата (от явного now) и 08:00 в явно установленном поясе; пояс неизвестен → уточнение. «сегодня в 08:00» with explicit now 2026-11-09T10:00+01:00 and default zone Europe/Berlin; the original cautious gold (contract_gap) was clarification. This is a change of the contract, NOT a consequence of any parser result."
+  }
+ ],
+ "unchanged_review": "I13 (word time) original gold was already needs_clarification = R1; I20 (comparison) was already unsupported = R6; I30 («был 7 ноября» without time) was already needs_clarification = R3 (its contract_gap is now decided by R3). I21, I28, I29 (contract_gap) are not covered by R1–R6 and keep the original gold; I29 «Готов ли …» is explicitly out of scope for v5.",
+ "catalogue": [
+  {
+   "id": "L",
+   "aliases": [
+    "L",
+    "линия L"
+   ]
+  },
+  {
+   "id": "L2",
+   "aliases": [
+    "L2",
+    "линия L2"
+   ]
+  },
+  {
+   "id": "M",
+   "aliases": [
+    "Мост"
+   ]
+  },
+  {
+   "id": "Y",
+   "aliases": [
+    "Моста"
+   ]
+  },
+  {
+   "id": "B",
+   "aliases": [
+    "Главный мост"
+   ]
+  },
+  {
+   "id": "K",
+   "aliases": [
+    "Котельная"
+   ]
+  },
+  {
+   "id": "Q1",
+   "aliases": [
+    "Q1",
+    "щит"
+   ]
+  },
+  {
+   "id": "Q2",
+   "aliases": [
+    "Q2",
+    "щит"
+   ]
+  }
+ ],
+ "now": "2026-11-09T10:00:00+01:00",
+ "default_tz": "Europe/Berlin",
+ "author_note": "Набор написан Grok Bot (ассистентом) без доступа к коду, тестам, фикстурам, документации и PR #14 разборщика; разборщик, память и фильтр не запускались. Автор знает контракт и предшествующую переписку (включая классы ошибок v1–v3), поэтому набор не полностью независим от автора правил контракта. Эталоны выведены только из контракта; где контракт неясен, выбран осторожный эталон и стоит флаг contract_gap. Для parsed с поясом сравнивать as_of как момент времени, а не как строку.",
+ "items": [
+  {
+   "id": "I01",
+   "turns": [
+    "какой статус лини L сейчас"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "parsed",
+   "gold_parameters": {
+    "object_id": "L",
+    "as_of": "2026-11-09T10:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "rationale": "Опечатка «лини», нижний регистр, нет знака вопроса; прямой псевдоним 'L' + 'сейчас' = момент now.",
+   "contract_gap": false
+  },
+  {
+   "id": "I02",
+   "turns": [
+    "Сейчас какой статус у линии L2?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "parsed",
+   "gold_parameters": {
+    "object_id": "L2",
+    "as_of": "2026-11-09T10:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "rationale": "Порядок слов изменён; 'линии L2' — склонение псевдонима 'линия L2' того же объекта, самое длинное совпадение; L не подходит (L2 длиннее). 'сейчас' = now.",
+   "contract_gap": false
+  },
+  {
+   "id": "I03",
+   "turns": [
+    "Статус котельной сегодня?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "parsed",
+   "gold_parameters": {
+    "object_id": "K",
+    "date": "2026-11-09",
+    "temporal_scope": "current"
+   },
+   "rationale": "Склонение 'Котельная'; 'сегодня' = весь день, а не момент.",
+   "contract_gap": false
+  },
+  {
+   "id": "I04",
+   "turns": [
+    "Какой был статус L 7 ноября в 15:45 по берлину"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "parsed",
+   "gold_parameters": {
+    "object_id": "L",
+    "as_of": "2026-11-07T15:45:00+01:00",
+    "temporal_scope": "current"
+   },
+   "rationale": "Явная дата+время; пояс Берлин поддержан, регистр слова пояса не важен; год из now.",
+   "contract_gap": false
+  },
+  {
+   "id": "I05",
+   "turns": [
+    "Какой статус L2 был 8 ноября в 09:15:30?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "parsed",
+   "gold_parameters": {
+    "object_id": "L2",
+    "as_of": "2026-11-08T09:15:30+01:00",
+    "temporal_scope": "current"
+   },
+   "rationale": "Время разбирается целиком, секунды сохраняются; пояс по умолчанию Europe/Berlin (UTC+1 в ноябре).",
+   "contract_gap": false
+  },
+  {
+   "id": "I06",
+   "turns": [
+    "Какой статус был у линии L 8 ноября в 12:00 по московскому времени?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "parsed",
+   "gold_parameters": {
+    "object_id": "L",
+    "as_of": "2026-11-08T12:00:00+03:00",
+    "temporal_scope": "current"
+   },
+   "rationale": "Москва поддержана. Момент = 2026-11-08T12:00+03:00 = 10:00+01:00 по Берлину; сравнивать как момент (instant), не как строку.",
+   "contract_gap": false
+  },
+  {
+   "id": "I07",
+   "turns": [
+    "КАКОЙ СТАТУС L БЫЛ 8 НОЯБРЯ В 09:00 ПО UTC?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "parsed",
+   "gold_parameters": {
+    "object_id": "L",
+    "as_of": "2026-11-08T09:00:00+00:00",
+    "temporal_scope": "current"
+   },
+   "rationale": "Весь текст заглавными; UTC поддержан; регистр не должен менять решение.",
+   "contract_gap": false
+  },
+  {
+   "id": "I08",
+   "turns": [
+    "Какой статус L был 8 ноября в 10:00 по парижу?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "needs_clarification",
+   "gold_parameters": null,
+   "rationale": "Другой названный пояс (Париж, нижний регистр) → уточнение; запрос к памяти не выполняется.",
+   "contract_gap": false
+  },
+  {
+   "id": "I09",
+   "turns": [
+    "Какой сейчас статус щита?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "needs_clarification",
+   "gold_parameters": null,
+   "rationale": "Псевдоним 'щит' одинаково (через склонение) подходит Q1 и Q2 — равные совпадения разных объектов → уточнение.",
+   "contract_gap": false
+  },
+  {
+   "id": "I10",
+   "turns": [
+    "Статус L2 на 8 ноября, 10:00 UTC+1 — какой?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "needs_clarification",
+   "gold_parameters": null,
+   "rationale": "Смещение (UTC+1) вместо поддержанного имени пояса → уточнение, даже если смещение совпадает с поясом по умолчанию.",
+   "contract_gap": false
+  },
+  {
+   "id": "I11",
+   "turns": [
+    "Какой статус L был 8 ноября в 10:00:30.5?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "needs_clarification",
+   "gold_parameters": null,
+   "rationale": "Доли секунды → уточнение; обрезать нельзя.",
+   "contract_gap": false
+  },
+  {
+   "id": "I12",
+   "turns": [
+    "Не мост, а Главный мост — статус у него сейчас какой?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "parsed",
+   "gold_parameters": {
+    "object_id": "B",
+    "as_of": "2026-11-09T10:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "rationale": "Отрицание 'не X, а Y' выбирает Y; 'Главный мост' — самое длинное совпадение.",
+   "contract_gap": false
+  },
+  {
+   "id": "I13",
+   "turns": [
+    "Какой статус L был в десять утра 8 ноября?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "needs_clarification",
+   "gold_parameters": null,
+   "rationale": "Время словами → уточнение.",
+   "contract_gap": false
+  },
+  {
+   "id": "I14",
+   "turns": [
+    "Статус L на 2026-11-08T10:00?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "needs_clarification",
+   "gold_parameters": null,
+   "rationale": "Формат ISO с 'T' → уточнение.",
+   "contract_gap": false
+  },
+  {
+   "id": "I15",
+   "turns": [
+    "Какой статус L будет 12 ноября в 10:00?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "unsupported",
+   "gold_parameters": null,
+   "rationale": "Будущая дата в текущем году (12.11.2026 > now) → уточнение.",
+   "contract_gap": false
+  },
+  {
+   "id": "I16",
+   "turns": [
+    "Какой статус L2 был 6-го или 7-го ноября в 10:00?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "needs_clarification",
+   "gold_parameters": null,
+   "rationale": "Альтернатива дат → уточнение; первое совпадение не считается выбранным.",
+   "contract_gap": false
+  },
+  {
+   "id": "I17",
+   "turns": [
+    "Статус L 8 ноября в 9:00 и в 11:00?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "needs_clarification",
+   "gold_parameters": null,
+   "rationale": "Несколько моментов → уточнение.",
+   "contract_gap": false
+  },
+  {
+   "id": "I18",
+   "turns": [
+    "Какой статус был у L за прошлую неделю?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "unsupported",
+   "gold_parameters": null,
+   "rationale": "Период ('за прошлую неделю') → unsupported.",
+   "contract_gap": false
+  },
+  {
+   "id": "I19",
+   "turns": [
+    "Какой статус у котельной сегодня в 08:00?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "parsed",
+   "gold_parameters": {
+    "object_id": "K",
+    "as_of": "2026-11-09T08:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "rationale": "Контракт не определяет сочетание 'сегодня' (весь день) с явным временем; осторожный эталон — уточнение. Возможная альтернатива: момент 2026-11-09T08:00:00+01:00.",
+   "contract_gap": true
+  },
+  {
+   "id": "I20",
+   "turns": [
+    "У L статус сейчас лучше, чем у L2?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "unsupported",
+   "gold_parameters": null,
+   "rationale": "Сравнение → unsupported.",
+   "contract_gap": false
+  },
+  {
+   "id": "I21",
+   "turns": [
+    "Какой статус сейчас у L, а не у L2?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "needs_clarification",
+   "gold_parameters": null,
+   "rationale": "Контракт описывает только форму 'не L2, а L'; обратный порядок 'X, а не Y' не определён. Осторожный эталон — уточнение (вероятный смысл — L).",
+   "contract_gap": true
+  },
+  {
+   "id": "I22",
+   "turns": [
+    "Какой статус Главного моста сейчас?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "parsed",
+   "gold_parameters": {
+    "object_id": "B",
+    "as_of": "2026-11-09T10:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "rationale": "Самое длинное совпадение 'Главного моста' (B) побеждает более короткие 'моста' (Y напрямую / M через склонение).",
+   "contract_gap": false
+  },
+  {
+   "id": "I23",
+   "turns": [
+    "Статус моста сейчас?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "needs_clarification",
+   "gold_parameters": null,
+   "rationale": "Новое правило: 'моста' подходит Y напрямую и M через склонение → уточнение с обоими кандидатами (нижний регистр не снимает неоднозначность).",
+   "contract_gap": false
+  },
+  {
+   "id": "I24",
+   "turns": [
+    "Какой статус объекта Y сейчас?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "parsed",
+   "gold_parameters": {
+    "object_id": "Y",
+    "as_of": "2026-11-09T10:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "rationale": "Явный идентификатор 'объекта Y' выбирает Y.",
+   "contract_gap": false
+  },
+  {
+   "id": "I25",
+   "turns": [
+    "Какой статус Моста сейчас?",
+    "Я про объект M.",
+    "А его статус 8 ноября в 10:00?"
+   ],
+   "context_assumptions": "Ход 1 → needs_clarification (кандидаты M, Y); ход 2 записан в структурированном контексте как подтверждённый выбор пользователя M в ответ на это уточнение.",
+   "gold_outcome": "parsed",
+   "gold_parameters": {
+    "object_id": "M",
+    "as_of": "2026-11-08T10:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "rationale": "Подтверждённый выбор пользователя может использоваться в последующем контексте; 'его' → M; явная дата+время в поясе по умолчанию.",
+   "contract_gap": false
+  },
+  {
+   "id": "I26",
+   "turns": [
+    "Какой статус L2 сейчас?",
+    "А его статус сегодня?"
+   ],
+   "context_assumptions": "Ход 1 → parsed L2 (now).",
+   "gold_outcome": "parsed",
+   "gold_parameters": {
+    "object_id": "L2",
+    "date": "2026-11-09",
+    "temporal_scope": "current"
+   },
+   "rationale": "'его' однозначно из структурированного контекста (L2); 'сегодня' = весь день.",
+   "contract_gap": false
+  },
+  {
+   "id": "I27",
+   "turns": [
+    "Какой статус L сейчас?",
+    "А L2 по сравнению с ним за вчера?",
+    "Какой его статус сейчас?"
+   ],
+   "context_assumptions": "Ход 1 → parsed L; ход 2 → unsupported (сравнение/период), упоминает L2.",
+   "gold_outcome": "needs_clarification",
+   "gold_parameters": null,
+   "rationale": "Недавний unsupported-ход упомянул другой объект (L2) → 'его' неоднозначно → уточнение, запрос не выполняется.",
+   "contract_gap": false
+  },
+  {
+   "id": "I28",
+   "turns": [
+    "Статус котельной сегодня?",
+    "Какой статус Мостика сейчас?",
+    "А его статус сейчас?"
+   ],
+   "context_assumptions": "Ход 1 → parsed K; ход 2 → needs_clarification (неизвестный объект 'Мостик').",
+   "gold_outcome": "needs_clarification",
+   "gold_parameters": null,
+   "rationale": "Ход-уточнение упомянул объект вне справочника; контракт говорит о 'другом объекте', не уточняя неизвестный. Осторожный эталон — уточнение, а не возврат к K.",
+   "contract_gap": true
+  },
+  {
+   "id": "I29",
+   "turns": [
+    "Готов ли L2 сейчас?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "unsupported",
+   "gold_parameters": null,
+   "rationale": "Вопрос без слова 'статус' по текущему контракту вне области → unsupported; помечено contract_gap для отдельного анализа.",
+   "contract_gap": true
+  },
+  {
+   "id": "I30",
+   "turns": [
+    "Какой статус L2 был 7 ноября?"
+   ],
+   "context_assumptions": "Нет контекста.",
+   "gold_outcome": "needs_clarification",
+   "gold_parameters": null,
+   "rationale": "Прошедшая дата без времени: контракт определяет весь день только для 'сегодня'. Осторожный эталон — уточнение (альтернатива: date 2026-11-07).",
+   "contract_gap": true
+  }
+ ]
+}

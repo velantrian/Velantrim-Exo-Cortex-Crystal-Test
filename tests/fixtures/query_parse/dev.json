@@ -1,0 +1,33 @@
+{
+  "_note": "DEV set: wordings used while writing the parser rules. Gold = expected parse outcome, written before running the parser.",
+  "items": [
+    {"id": "D01", "question": "Какой статус L сейчас?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-09T07:58:00+01:00"}},
+    {"id": "D02", "question": "Не L2, а L — какой у него статус сейчас?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-09T07:58:00+01:00"}},
+    {"id": "D03", "question": "Какой статус L был 8 ноября в 10:00?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-08T10:00:00+01:00"}},
+    {"id": "D04", "question": "А его статус?", "context": [{"question": "Какой статус L2 сейчас?", "kind": "parsed", "asked_object": "L2", "time_ref": "now"}], "gold": {"kind": "parsed", "asked_object": "L2", "as_of": "2026-11-09T07:58:00+01:00"}},
+    {"id": "D05", "question": "А его статус?", "gold": {"kind": "needs_clarification"}},
+    {"id": "D06", "question": "А его статус?", "context": [{"question": "Какой статус Пульсара сейчас?", "kind": "needs_clarification", "candidates": ["P1", "P2"]}], "gold": {"kind": "needs_clarification"}},
+    {"id": "D07", "question": "Какой статус L сегодня?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-09"}},
+    {"id": "D08", "question": "Какой статус L за вчера?", "gold": {"kind": "unsupported"}},
+    {"id": "D09", "question": "Что менялось у L за неделю?", "gold": {"kind": "unsupported"}},
+    {"id": "D10", "question": "Сравни статус L и L2", "gold": {"kind": "unsupported"}},
+    {"id": "D11", "question": "Какой статус L и L2 сейчас?", "gold": {"kind": "needs_clarification"}},
+    {"id": "D12", "question": "Какой статус Z сейчас?", "gold": {"kind": "needs_clarification"}},
+    {"id": "D13", "question": "Какой статус Пульсара сейчас?", "gold": {"kind": "needs_clarification"}},
+    {"id": "D14", "question": "Какой статус L?", "gold": {"kind": "needs_clarification"}},
+    {"id": "D15", "question": "Какой статус L был 8 ноября?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-08"}},
+    {"id": "D16", "question": "Какой статус L был 8 ноября в 10:00?", "timezone": null, "gold": {"kind": "needs_clarification"}},
+    {"id": "D17", "question": "Какой статус L был с 1 по 5 ноября?", "gold": {"kind": "unsupported"}},
+    {"id": "D18", "question": "Какой статус у Л сейчас?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-09T07:58:00+01:00"}},
+    {"id": "D19", "question": "Какой статус L2 сейчас?", "gold": {"kind": "parsed", "asked_object": "L2", "as_of": "2026-11-09T07:58:00+01:00"}},
+    {"id": "D20", "question": "Какое сейчас состояние M?", "gold": {"kind": "parsed", "asked_object": "M", "as_of": "2026-11-09T07:58:00+01:00"}},
+    {"id": "D21", "question": "Статус M на 2026-11-08 10:00?", "gold": {"kind": "parsed", "asked_object": "M", "as_of": "2026-11-08T10:00:00+01:00"}},
+    {"id": "D22", "question": "Какой статус L был вчера в 10:00?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-08T10:00:00+01:00"}},
+    {"id": "D23", "question": "Какой статус L был 20 декабря в 10:00?", "gold": {"kind": "needs_clarification"}},
+    {"id": "D24", "question": "А сейчас?", "context": [{"question": "Какой статус L был 8 ноября в 10:00?", "kind": "parsed", "asked_object": "L", "time_ref": "absolute", "as_of": "2026-11-08T10:00:00+01:00"}], "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-09T07:58:00+01:00"}},
+    {"id": "D25", "question": "А 8 ноября в 10:00?", "context": [{"question": "Какой статус L сейчас?", "kind": "parsed", "asked_object": "L", "time_ref": "now"}], "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-08T10:00:00+01:00"}},
+    {"id": "D26", "question": "Когда L стал готов?", "gold": {"kind": "unsupported"}},
+    {"id": "D27", "question": "Какой статус L, а не L2, сейчас?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-09T07:58:00+01:00"}},
+    {"id": "D28", "question": "Какой статус L будет завтра?", "gold": {"kind": "unsupported"}}
+  ]
+}

@@ -1,0 +1,128 @@
+{
+ "_note": "Setup facts: L «на ремонте» valid until 2026-11-08T11:59:59+01:00, L «готов» from 2026-11-08T12:00:00+01:00. Manual rows use hand-set parameters with the same filter.",
+ "manual": [
+  {
+   "as_of": "2026-11-08T09:00:00+01:00",
+   "grounds_admitted": [
+    "L-repair"
+   ],
+   "answer": "L: статус — на ремонте",
+   "error": null
+  },
+  {
+   "as_of": "2026-11-08T10:00:00+01:00",
+   "grounds_admitted": [
+    "L-repair"
+   ],
+   "answer": "L: статус — на ремонте",
+   "error": null
+  },
+  {
+   "as_of": "2026-11-08T18:00:00+01:00",
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "answer": "L: статус — готов",
+   "error": null
+  },
+  {
+   "as_of": "2026-11-08T21:00:00+01:00",
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "answer": "L: статус — готов",
+   "error": null
+  }
+ ],
+ "items": [
+  {
+   "id": "V01",
+   "question": "Какой статус L был в десять утра 8 ноября?",
+   "intended_time": "10:00",
+   "v4": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "L",
+     "as_of": "2026-11-08",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "limitation": null,
+    "query_called": true,
+    "grounds_admitted": [],
+    "answer": null,
+    "error": "insufficient grounding: current status is not established: validity starts after as_of (whole-day coverage required); validity expired before as_of (whole-day coverage required); historical observation does not cover as_of; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+   },
+   "v5": {
+    "kind": "needs_clarification",
+    "params": null,
+    "clarification": "Время «в десять утра» в такой форме не разобрано (время словами или неполное время пока не поддерживается), поэтому запрос не выполняется. Укажите время как ЧЧ:ММ, например «8 ноября в 10:00».",
+    "limitation": null,
+    "query_called": false,
+    "grounds_admitted": [],
+    "answer": null,
+    "error": null
+   }
+  },
+  {
+   "id": "V05",
+   "question": "Какой статус L был 8 ноября в 9:00 вечером?",
+   "intended_time": "09:00 or 21:00",
+   "v4": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "L",
+     "as_of": "2026-11-08T09:00:00+01:00",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "limitation": null,
+    "query_called": true,
+    "grounds_admitted": [
+     "L-repair"
+    ],
+    "answer": "L: статус — на ремонте",
+    "error": null
+   },
+   "v5": {
+    "kind": "needs_clarification",
+    "params": null,
+    "clarification": "Время «вечером» в такой форме не разобрано (время словами или неполное время пока не поддерживается), поэтому запрос не выполняется. Укажите время как ЧЧ:ММ, например «8 ноября в 10:00».",
+    "limitation": null,
+    "query_called": false,
+    "grounds_admitted": [],
+    "answer": null,
+    "error": null
+   }
+  },
+  {
+   "id": "V06",
+   "question": "Какой статус L был 8 ноября в шесть вечера?",
+   "intended_time": "18:00",
+   "v4": {
+    "kind": "parsed",
+    "params": {
+     "asked_object": "L",
+     "as_of": "2026-11-08",
+     "temporal_scope": "current"
+    },
+    "clarification": null,
+    "limitation": null,
+    "query_called": true,
+    "grounds_admitted": [],
+    "answer": null,
+    "error": "insufficient grounding: current status is not established: validity starts after as_of (whole-day coverage required); validity expired before as_of (whole-day coverage required); historical observation does not cover as_of; primary object differs; linked_objects does not transfer status; Historical evidence only: 2026-10-08: L: статус — в разработке"
+   },
+   "v5": {
+    "kind": "needs_clarification",
+    "params": null,
+    "clarification": "Время «в шесть вечера» в такой форме не разобрано (время словами или неполное время пока не поддерживается), поэтому запрос не выполняется. Укажите время как ЧЧ:ММ, например «8 ноября в 10:00».",
+    "limitation": null,
+    "query_called": false,
+    "grounds_admitted": [],
+    "answer": null,
+    "error": null
+   }
+  }
+ ]
+}

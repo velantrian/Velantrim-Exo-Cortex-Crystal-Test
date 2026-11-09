@@ -1,0 +1,28 @@
+{
+  "_note": "Isolated synthetic setup for the query-parse experiment. Not user data, not E-pilot/AC data.",
+  "now": "2026-11-09T07:58:00+01:00",
+  "timezone": "Europe/Berlin",
+  "known_objects": [
+    {"id": "L",  "names": ["L", "Л"]},
+    {"id": "L2", "names": ["L2", "Л2"]},
+    {"id": "M",  "names": ["M", "Мост"]},
+    {"id": "P1", "names": ["P1", "Пульсар"]},
+    {"id": "P2", "names": ["P2", "Пульсар"]}
+  ],
+  "facts": [
+    {"fact_id": "L-ready",   "claim": "L: статус — готов",
+     "applicability": {"primary_object": "L", "valid_from": "2026-11-08T12:00:00+01:00"}},
+    {"fact_id": "L-repair",  "claim": "L: статус — на ремонте",
+     "applicability": {"primary_object": "L", "valid_from": "2026-11-01", "valid_until": "2026-11-08T11:59:59+01:00"}},
+    {"fact_id": "L-dev",     "claim": "L: статус — в разработке",
+     "applicability": {"primary_object": "L", "observed_at": "2026-10-08"}},
+    {"fact_id": "L2-off",    "claim": "L2: статус — отключён (связан с L)",
+     "applicability": {"primary_object": "L2", "linked_objects": ["L"], "valid_from": "2026-11-05"}},
+    {"fact_id": "M-works",   "claim": "M: статус — работает",
+     "applicability": {"primary_object": "M", "valid_from": "2026-11-01", "valid_until": "2026-11-30"}},
+    {"fact_id": "P1-test",   "claim": "P1: статус — на испытаниях",
+     "applicability": {"primary_object": "P1", "valid_from": "2026-11-01"}},
+    {"fact_id": "P2-idle",   "claim": "P2: статус — простаивает",
+     "applicability": {"primary_object": "P2", "valid_from": "2026-11-01"}}
+  ]
+}

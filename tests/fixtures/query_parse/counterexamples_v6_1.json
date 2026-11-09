@@ -1,0 +1,295 @@
+{
+ "_note": "V6.1 COUNTEREXAMPLES: blocking of time inheritance by a later unresolved or differently timed turn (user decision 2026-11-09). Written and committed BEFORE the v6.1 code change; same author as the fix, not independent. Context is built by running the parser under test on context_questions. Shared isolated setup.",
+ "rule_change": {
+  "date": "2026-11-09",
+  "by": "user (decision v6.1)",
+  "text": "Перенос точного времени из однозначного контекста оставляем. Более поздняя реплика с неразрешённым временем или незавершённым уточнением, или промежуточный неподдерживаемый вопрос с другим временем, блокирует наследование времени из старой разобранной реплики."
+ },
+ "items": [
+  {
+   "id": "S01",
+   "group": "blocked_unresolved",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L сейчас?",
+    "А L вчера?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "note": "later turn: day without hours (clarification) blocks inheriting «сейчас»"
+  },
+  {
+   "id": "S02",
+   "group": "blocked_unresolved",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L сейчас?",
+    "Какой статус L вчера?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "S03",
+   "group": "blocked_unsupported_time",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L сейчас?",
+    "Какой статус L будет 12 ноября в 10:00?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "note": "intermediate unsupported future moment carries a different time"
+  },
+  {
+   "id": "S04",
+   "group": "blocked_unsupported_time",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L сейчас?",
+    "Какой статус L был весь день вчера?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "note": "intermediate unsupported whole day"
+  },
+  {
+   "id": "S05",
+   "group": "blocked_unsupported_time",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L сейчас?",
+    "Что менялось у L за неделю?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "note": "intermediate unsupported period «за неделю»"
+  },
+  {
+   "id": "S06",
+   "group": "blocked_unresolved",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L сейчас?",
+    "Какой статус L был в десять утра 8 ноября?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "note": "word time"
+  },
+  {
+   "id": "S07",
+   "group": "blocked_unresolved",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L сейчас?",
+    "Какой статус L был 8 ноября в 13:00 по Лондону?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "note": "unknown zone"
+  },
+  {
+   "id": "S08",
+   "group": "blocked_unresolved",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L сейчас?",
+    "Какой статус L был 8 ноября в 10:00 или в 12:00?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "note": "alternatives"
+  },
+  {
+   "id": "S09",
+   "group": "blocked_unresolved",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L сейчас?",
+    "Какой статус L?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "note": "unfinished time clarification"
+  },
+  {
+   "id": "S10",
+   "group": "blocked_unresolved",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L был 8 ноября в 10:00?",
+    "Какой статус L сегодня?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "note": "blocks inheriting an absolute moment too"
+  },
+  {
+   "id": "S11",
+   "group": "new_explicit_time",
+   "question": "А его статус вчера в 10:00?",
+   "context_questions": [
+    "Какой статус L сейчас?",
+    "А L вчера?"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   },
+   "note": "new explicit time in the latest turn is used"
+  },
+  {
+   "id": "S12",
+   "group": "resolved",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L сейчас?",
+    "А L вчера?",
+    "А его статус вчера в 10:00?"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   },
+   "note": "the clarification was answered with a time → that moment is the latest parsed one"
+  },
+  {
+   "id": "S13",
+   "group": "new_explicit_time",
+   "question": "А вчера в 10:00?",
+   "context_questions": [
+    "Какой статус L сейчас?",
+    "А L вчера?"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   }
+  },
+  {
+   "id": "S14",
+   "group": "positive_control",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L был 8 ноября в 10:00?"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   },
+   "note": "direct continuation inherits the moment"
+  },
+  {
+   "id": "S15",
+   "group": "positive_control",
+   "question": "А L2?",
+   "context_questions": [
+    "Какой статус L был 8 ноября в 10:00?"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L2",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   }
+  },
+  {
+   "id": "S16",
+   "group": "positive_control",
+   "question": "А его?",
+   "context_questions": [
+    "Какой статус L сейчас?"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "S17",
+   "group": "unsupported_without_time",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L был 8 ноября в 10:00?",
+    "Что менялось у L?"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   },
+   "note": "intermediate unsupported turn without any time expression does not block (decision v6.1)"
+  },
+  {
+   "id": "S18",
+   "group": "unsupported_without_time",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L сейчас?",
+    "У L статус лучше?"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   "note": "comparison without time does not block"
+  },
+  {
+   "id": "S19",
+   "group": "unsupported_same_time",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L сейчас?",
+    "Расскажи про L сейчас"
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   "note": "intermediate unsupported turn with the SAME time («сейчас») does not block (as C20)"
+  },
+  {
+   "id": "S20",
+   "group": "blocked_unsupported_time",
+   "question": "А его статус?",
+   "context_questions": [
+    "Какой статус L был 8 ноября в 10:00?",
+    "Расскажи про L сейчас"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "note": "intermediate unsupported turn with a DIFFERENT time («сейчас» vs 8 Nov 10:00) blocks"
+  },
+  {
+   "id": "S21",
+   "group": "unchanged_control",
+   "question": "А L2?",
+   "context_questions": [
+    "Какой статус L сейчас?",
+    "А L вчера?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "note": "named-object follow-up only looks at the last turn (unchanged since v1)"
+  }
+ ]
+}

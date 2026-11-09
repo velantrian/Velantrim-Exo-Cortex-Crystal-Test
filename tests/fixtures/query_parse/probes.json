@@ -1,0 +1,15 @@
+{
+  "_note": "POST-HOC PROBES, written AFTER seeing dev/held-out results to look for error modes. Not held-out, not used to tune rules; reported separately.",
+  "items": [
+    {"id": "P01", "question": "Какой статус L был 8 ноября в 10:00 по московскому времени?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-08T10:00:00+03:00"}},
+    {"id": "P02", "question": "Какой статус L был в прошлую пятницу в 10:00?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-06T10:00:00+01:00"}},
+    {"id": "P03", "question": "Статус L — сейчас или вчера в 10:00?", "gold": {"kind": "needs_clarification"}},
+    {"id": "P04", "question": "Какой статус не L?", "gold": {"kind": "needs_clarification"}},
+    {"id": "P05", "question": "Был ли L готов вчера в 10:00?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-08T10:00:00+01:00"}},
+    {"id": "P06", "question": "Какой статус L был 8 ноября в 10 вечера?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-08T22:00:00+01:00"}},
+    {"id": "P07", "question": "Какой статус L был 31 ноября в 10:00?", "gold": {"kind": "needs_clarification"}},
+    {"id": "P08", "question": "Какой статус L в 10:00?", "gold": {"kind": "needs_clarification"}},
+    {"id": "P09", "question": "Какой статус L был 8 ноября в 10:00 UTC?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-08T10:00:00+00:00"}},
+    {"id": "P10", "question": "Каков статус L сейчас, если не считать L2?", "gold": {"kind": "parsed", "asked_object": "L", "as_of": "2026-11-09T07:58:00+01:00"}}
+  ]
+}

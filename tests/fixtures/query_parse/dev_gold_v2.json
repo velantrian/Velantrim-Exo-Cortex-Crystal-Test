@@ -1,0 +1,306 @@
+{
+ "_note": "GOLD VERSION 2 of dev (same 28 questions). dev.json (gold v1) is unchanged and remains the gold of the v1–v4 reports. Written and committed BEFORE the v5 code change.",
+ "gold_version": 2,
+ "supersedes": "tests/fixtures/query_parse/dev.json (gold v1)",
+ "rule_change": {
+  "date": "2026-11-09",
+  "by": "user / Astra (owner message, rules v5)",
+  "rules": {
+   "R1": "«В десять утра 8 ноября» (время словами) → уточнение, пока время словами не поддерживается. Время нельзя отбрасывать и выполнять запрос за весь день. Обобщение: любое обнаруженное, но не разобранное выражение времени блокирует запрос (уточнение).",
+   "R2": "«Сегодня в 08:00» → конкретный момент: сегодняшняя дата (от явного now) и 08:00 в явно установленном поясе; пояс неизвестен → уточнение.",
+   "R3": "«Был 7 ноября» без времени → спросить, на какое время нужен статус (вместо всего дня).",
+   "R4": "«Весь день 7 ноября» → проверка покрытия всего дня, только если формулировка явно поддержана (в v4 не поддержана → не добавляется).",
+   "R5": "Вопрос о состоянии на будущий момент → unsupported; определяется по разрешённому времени относительно явного now, а не только по слову «будет».",
+   "R6": "«Лучше, чем у L2» → неподдерживаемое сравнение."
+  }
+ },
+ "gold_changes": [
+  {
+   "id": "D15",
+   "question": "Какой статус L был 8 ноября?",
+   "old_gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08"
+   },
+   "new_gold": {
+    "kind": "needs_clarification"
+   },
+   "rule": "R3",
+   "reason": "Decision by the user/Astra on 2026-11-09, rule R3: «Был 7 ноября» без времени → спросить, на какое время нужен статус (вместо всего дня). Bare past calendar date without a time: the old gold encoded the v1 design «8 ноября» → date-only whole day. This is a change of the contract, NOT a consequence of any parser result."
+  },
+  {
+   "id": "D23",
+   "question": "Какой статус L был 20 декабря в 10:00?",
+   "old_gold": {
+    "kind": "needs_clarification"
+   },
+   "new_gold": {
+    "kind": "unsupported"
+   },
+   "rule": "R5",
+   "reason": "Decision by the user/Astra on 2026-11-09, rule R5: Вопрос о состоянии на будущий момент → unsupported; определяется по разрешённому времени относительно явного now, а не только по слову «будет». 20 декабря 10:00 lies after the explicit now (2026-11-09); the old gold encoded the v2 design «future date in the current year → year clarification». This is a change of the contract, NOT a consequence of any parser result."
+  }
+ ],
+ "unchanged_review": "Every other dev item was checked against R1–R6: D07 «сегодня» keeps the documented whole-day date-only (R4 note: «сегодня» alone is not changed); D03/D21/D22/D25 have a clock; D08/D17 are periods; D28 «будет завтра» was already unsupported; D16 (no timezone) stays a clarification; no dev item has a word time or a comparison marker.",
+ "items": [
+  {
+   "id": "D01",
+   "question": "Какой статус L сейчас?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "D02",
+   "question": "Не L2, а L — какой у него статус сейчас?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "D03",
+   "question": "Какой статус L был 8 ноября в 10:00?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   }
+  },
+  {
+   "id": "D04",
+   "question": "А его статус?",
+   "context": [
+    {
+     "question": "Какой статус L2 сейчас?",
+     "kind": "parsed",
+     "asked_object": "L2",
+     "time_ref": "now"
+    }
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L2",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "D05",
+   "question": "А его статус?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "D06",
+   "question": "А его статус?",
+   "context": [
+    {
+     "question": "Какой статус Пульсара сейчас?",
+     "kind": "needs_clarification",
+     "candidates": [
+      "P1",
+      "P2"
+     ]
+    }
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "D07",
+   "question": "Какой статус L сегодня?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09"
+   }
+  },
+  {
+   "id": "D08",
+   "question": "Какой статус L за вчера?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "D09",
+   "question": "Что менялось у L за неделю?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "D10",
+   "question": "Сравни статус L и L2",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "D11",
+   "question": "Какой статус L и L2 сейчас?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "D12",
+   "question": "Какой статус Z сейчас?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "D13",
+   "question": "Какой статус Пульсара сейчас?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "D14",
+   "question": "Какой статус L?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "D15",
+   "question": "Какой статус L был 8 ноября?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "D16",
+   "question": "Какой статус L был 8 ноября в 10:00?",
+   "timezone": null,
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "D17",
+   "question": "Какой статус L был с 1 по 5 ноября?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "D18",
+   "question": "Какой статус у Л сейчас?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "D19",
+   "question": "Какой статус L2 сейчас?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L2",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "D20",
+   "question": "Какое сейчас состояние M?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "M",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "D21",
+   "question": "Статус M на 2026-11-08 10:00?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "M",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   }
+  },
+  {
+   "id": "D22",
+   "question": "Какой статус L был вчера в 10:00?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   }
+  },
+  {
+   "id": "D23",
+   "question": "Какой статус L был 20 декабря в 10:00?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "D24",
+   "question": "А сейчас?",
+   "context": [
+    {
+     "question": "Какой статус L был 8 ноября в 10:00?",
+     "kind": "parsed",
+     "asked_object": "L",
+     "time_ref": "absolute",
+     "as_of": "2026-11-08T10:00:00+01:00"
+    }
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "D25",
+   "question": "А 8 ноября в 10:00?",
+   "context": [
+    {
+     "question": "Какой статус L сейчас?",
+     "kind": "parsed",
+     "asked_object": "L",
+     "time_ref": "now"
+    }
+   ],
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   }
+  },
+  {
+   "id": "D26",
+   "question": "Когда L стал готов?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "D27",
+   "question": "Какой статус L, а не L2, сейчас?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  },
+  {
+   "id": "D28",
+   "question": "Какой статус L будет завтра?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  }
+ ]
+}

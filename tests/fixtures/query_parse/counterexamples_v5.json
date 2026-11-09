@@ -1,0 +1,344 @@
+{
+ "_note": "V5 COUNTEREXAMPLES for rules R1–R6 (user/Astra decision 2026-11-09). Written and committed BEFORE the v5 code change; same author as the fixes, not independent. Uses only the shared isolated setup (L: «на ремонте» until 2026-11-08T11:59:59+01:00, «готов» from 2026-11-08T12:00:00+01:00). Items with context_questions build their context by running the parser under test.",
+ "rule_change": {
+  "date": "2026-11-09",
+  "by": "user / Astra (owner message, rules v5)",
+  "rules": {
+   "R1": "«В десять утра 8 ноября» (время словами) → уточнение, пока время словами не поддерживается. Время нельзя отбрасывать и выполнять запрос за весь день. Обобщение: любое обнаруженное, но не разобранное выражение времени блокирует запрос (уточнение).",
+   "R2": "«Сегодня в 08:00» → конкретный момент: сегодняшняя дата (от явного now) и 08:00 в явно установленном поясе; пояс неизвестен → уточнение.",
+   "R3": "«Был 7 ноября» без времени → спросить, на какое время нужен статус (вместо всего дня).",
+   "R4": "«Весь день 7 ноября» → проверка покрытия всего дня, только если формулировка явно поддержана (в v4 не поддержана → не добавляется).",
+   "R5": "Вопрос о состоянии на будущий момент → unsupported; определяется по разрешённому времени относительно явного now, а не только по слову «будет».",
+   "R6": "«Лучше, чем у L2» → неподдерживаемое сравнение."
+  }
+ },
+ "items": [
+  {
+   "id": "V01",
+   "group": "word_time",
+   "question": "Какой статус L был в десять утра 8 ноября?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "V02",
+   "group": "word_time",
+   "question": "Какой статус L был 8 ноября в десять?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "V03",
+   "group": "word_time",
+   "question": "Какой статус L был 8 ноября в 10?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "V04",
+   "group": "word_time",
+   "question": "Какой статус L был 8 ноября в час дня?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "V05",
+   "group": "word_time",
+   "question": "Какой статус L был 8 ноября в 9:00 вечером?",
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "note": "«9:00» is parsed but «вечером» is a time word left unparsed (09:00 or 21:00?) → R1 generalisation: block, ask."
+  },
+  {
+   "id": "V06",
+   "group": "word_time",
+   "question": "Какой статус L был 8 ноября в шесть вечера?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "V07",
+   "group": "word_time_control",
+   "question": "Какой статус L был 8 ноября в 9 вечера?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T21:00:00+01:00"
+   },
+   "note": "control: «в 9 вечера» is an already supported clock form (v3 day-part table) → kept, not a new phrasing."
+  },
+  {
+   "id": "V08",
+   "group": "today_clock",
+   "question": "Какой статус L сегодня в 07:00?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:00:00+01:00"
+   }
+  },
+  {
+   "id": "V09",
+   "group": "today_clock",
+   "question": "Какой статус L сегодня в 07:00?",
+   "timezone": null,
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "note": "timezone=None: no explicitly set zone → R2 clarification."
+  },
+  {
+   "id": "V10",
+   "group": "today_clock",
+   "question": "Какой статус L сегодня в 06:00 по UTC?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09T06:00:00+00:00"
+   }
+  },
+  {
+   "id": "V11",
+   "group": "today_clock",
+   "question": "Какой статус L сегодня в 08:00?",
+   "gold": {
+    "kind": "unsupported"
+   },
+   "note": "08:00 today is after the explicit now 07:58 → R5 (future moment) takes precedence over R2."
+  },
+  {
+   "id": "V12",
+   "group": "date_no_time",
+   "question": "Какой статус L был 7 ноября?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "V13",
+   "group": "date_no_time",
+   "question": "Статус L на 2026-11-07?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "V14",
+   "group": "date_no_time",
+   "question": "Статус L на 07.11?",
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "V15",
+   "group": "date_no_time",
+   "question": "А 7 ноября?",
+   "context_questions": [
+    "Какой статус L сейчас?"
+   ],
+   "gold": {
+    "kind": "needs_clarification"
+   }
+  },
+  {
+   "id": "V16",
+   "group": "today_alone",
+   "question": "Какой статус L сегодня?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09"
+   },
+   "note": "R4 note: «сегодня» alone keeps its documented v1–v4 behaviour (date-only, whole day). Inconsistent with R3 for explicit dates; reported, not decided."
+  },
+  {
+   "id": "V17",
+   "group": "yesterday_alone",
+   "question": "Какой статус L был вчера?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08"
+   },
+   "note": "«вчера» alone is not named by R3 (which names an explicit date «7 ноября»); kept as documented in v1–v4 (date-only, whole day). Same inconsistency as V16; reported, not decided."
+  },
+  {
+   "id": "V18",
+   "group": "whole_day",
+   "question": "Какой статус L был весь день 7 ноября?",
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "note": "R4: «весь день» is NOT an explicitly supported phrasing in v4 (no rule, not documented; v4 ignored the words and applied the bare-date rule). Not added in v5 → the bare-date rule R3 applies → clarification; must not become a moment or another day."
+  },
+  {
+   "id": "V19",
+   "group": "whole_day",
+   "question": "Какой статус L весь день сегодня?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-09"
+   },
+   "note": "«весь день» is not parsed; «сегодня» alone already means whole day (V16) → same day, whole day; no moment, no other day."
+  },
+  {
+   "id": "V20",
+   "group": "future",
+   "question": "Какой статус L 12 ноября в 10:00?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "V21",
+   "group": "future",
+   "question": "Какой статус L был 12 ноября?",
+   "gold": {
+    "kind": "unsupported"
+   },
+   "note": "future day without time → R5 unsupported (checked before R3)."
+  },
+  {
+   "id": "V22",
+   "group": "future",
+   "question": "Какой статус L будет 12 ноября в 10:00?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "V23",
+   "group": "future",
+   "question": "Какой статус L будет?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "V24",
+   "group": "future_word_past_time",
+   "question": "Какой статус L будет 8 ноября в 10:00?",
+   "gold": {
+    "kind": "needs_clarification"
+   },
+   "note": "«будет» with a past moment: future tense and a resolved past time contradict each other. Decision documented in docs v5: clarification (neither forecast nor a silent past query)."
+  },
+  {
+   "id": "V25",
+   "group": "future",
+   "question": "Статус L на 2027-01-05 10:00?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "V26",
+   "group": "future",
+   "question": "А 12 ноября в 10:00?",
+   "context_questions": [
+    "Какой статус L сейчас?"
+   ],
+   "gold": {
+    "kind": "unsupported"
+   },
+   "note": "follow-up with a future moment → R5."
+  },
+  {
+   "id": "V27",
+   "group": "future",
+   "question": "Какой статус Пульсара 12 ноября в 10:00?",
+   "gold": {
+    "kind": "unsupported"
+   },
+   "note": "future moment is decided before the object (as v4 did for «будет»): unsupported, not the P1/P2 clarification."
+  },
+  {
+   "id": "V28",
+   "group": "comparison",
+   "question": "У L статус сейчас лучше, чем у L2?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "V29",
+   "group": "comparison",
+   "question": "Статус L хуже, чем у L2?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "V30",
+   "group": "comparison",
+   "question": "Отличается ли статус L от L2 сейчас?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "V31",
+   "group": "comparison",
+   "question": "Есть ли разница в статусе L и L2 сейчас?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "V32",
+   "group": "comparison",
+   "question": "У L и L2 одинаковый статус сейчас?",
+   "gold": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "id": "V33",
+   "group": "comparison",
+   "question": "Какой статус L сейчас по сравнению с L2?",
+   "gold": {
+    "kind": "unsupported"
+   },
+   "note": "already unsupported in v4 («сравн…»)."
+  },
+  {
+   "id": "V34",
+   "group": "morning_evening",
+   "question": "Какой статус L был 8 ноября в 09:00?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T09:00:00+01:00"
+   },
+   "note": "setup facts: L «на ремонте» until 2026-11-08T11:59:59+01:00, «готов» from 2026-11-08T12:00:00+01:00 → morning and evening differ."
+  },
+  {
+   "id": "V35",
+   "group": "morning_evening",
+   "question": "Какой статус L был 8 ноября в 18:00?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T18:00:00+01:00"
+   }
+  },
+  {
+   "id": "V36",
+   "group": "morning_evening",
+   "question": "Какой статус L был 8 ноября в 21:00?",
+   "gold": {
+    "kind": "parsed",
+    "asked_object": "L",
+    "as_of": "2026-11-08T21:00:00+01:00"
+   }
+  }
+ ]
+}
