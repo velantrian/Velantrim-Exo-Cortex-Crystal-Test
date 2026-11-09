@@ -48,6 +48,19 @@ v3 (after review of eee4062; frozen v2 at ``tests/query_parse_v2.py``):
 * object choice does not depend on catalogue order: all aliases matching at a
   position are collected, then ranked (1) longest span, (2) exact name over
   match via inflection; a tie between different objects -> clarification.
+
+v4 (user rule change 2026-11-09; frozen v3 at ``tests/query_parse_v3.py``):
+* step (2) is removed: if one word form matches two objects — one directly and
+  one via inflection — BOTH stay candidates and the user is asked, unless the
+  bounded context holds a confirmed choice among them with no later conflicting
+  mention (then that choice is used, explained); conflicting context -> ask;
+* an explicit identifier («объект M», «объекта Y», «(объект M)») selects that
+  object when every other mention in the question is compatible with it and
+  the mentions are not joined by «и/или/либо»; otherwise ask;
+* a bare answer to an object clarification («M», «объект M») is a confirmed
+  choice: it answers the clarified question when that question had a usable
+  time (stored structurally as ``pending_time``), otherwise asks for the time;
+  ``confirmed_object`` is kept in the structured context.
 """
 import re
 from datetime import date, datetime, time, timedelta, timezone as _utc_mod, tzinfo
@@ -224,7 +237,7 @@ def _match_rank(tokens, i, key) -> int:
     return rank
 
 
-def _mentions(tokens, index):
+def _mentions(tokens, index, text=""):
     """Object mentions, independent of catalogue order (v3).
 
     At each position ALL matching aliases are collected first, then resolved:
@@ -232,22 +245,33 @@ def _mentions(tokens, index):
     (2) among equally long spans an exact name beats a match via inflection;
     (3) every object left at the top tier is kept in ``ids`` -> more than one
         id is an unresolvable collision (the caller asks for clarification).
-    Returns [{'ids','alias','pos','negated','keys','match','outranked'}].
+    v4: step (2) removed — see module docstring; per-id match type in ``how``.
+    Returns [{'ids','alias','pos','len','negated','keys','how','explicit_id','match'}].
     """
     found, i = [], 0
     while i < len(tokens):
         hits = [(len(key), _match_rank(tokens, i, key), key) for key in index]
         hits = [h for h in hits if h[1]]
         if hits:
-            best = max((n, r) for n, r, _ in hits)
-            top = sorted(key for n, r, key in hits if (n, r) == best)
-            ids = sorted({oid for key in top for oid in index[key]})
-            outranked = sorted({oid for n, r, key in hits if n == best[0] and r < best[1] for oid in index[key]} - set(ids))
-            n = best[0]
+            # v4: only the span length ranks; exact vs inflection no longer decides
+            n = max(h[0] for h in hits)
+            top = sorted(key for k, r, key in hits if k == n)
+            how = {}
+            for k, r, key in sorted(hits, key=lambda h: (h[1], h[2])):  # exact (2) after inflection (1): exact wins per id
+                if k == n:
+                    for oid in index[key]:
+                        how[oid] = ("exact" if r == _EXACT else "inflection", " ".join(key))
+            ids = sorted(how)
             negated = i > 0 and tokens[i - 1][0].casefold() == "не"
+            explicit = None
+            if n == 1 and tokens[i][0] in ids:  # identifier written exactly as the object id
+                prev_word = tokens[i - 1][0].casefold() if i > 0 else ""
+                before = text[:tokens[i][1]].rstrip()
+                if prev_word.startswith("объект") or before.endswith("("):
+                    explicit = tokens[i][0]
             found.append({"ids": ids, "alias": " ".join(t[0] for t in tokens[i:i + n]), "pos": i, "len": n,
-                          "negated": negated, "keys": top,
-                          "match": "exact" if best[1] == _EXACT else "inflection", "outranked": outranked})
+                          "negated": negated, "keys": top, "how": how, "explicit_id": explicit,
+                          "match": "exact" if all(v[0] == "exact" for v in how.values()) else "inflection"})
             i += n
         else:
             i += 1
@@ -511,6 +535,32 @@ def _bounded(context) -> List[Dict[str, Any]]:
     return turns[-MAX_CONTEXT_TURNS:]
 
 
+_CHOICE_FILLERS = {"объект", "объекта", "это", "да", "вот", "конечно", "я", "имею", "в", "виду", "про", "нужен", "нужна"}
+_JOINERS = {"и", "или", "либо"}
+
+
+def _confirmed_in_context(context, cands):
+    """v4: newest confirmed choice among ``cands`` in the bounded context.
+
+    Returns ('ok', obj, turn, offset), ('conflict', objs) when a newer turn asked
+    about / mentioned another candidate, or None."""
+    seen = set()
+    for offset, turn in enumerate(reversed(_bounded(context)), start=1):
+        c = turn.get("confirmed_object")
+        if isinstance(c, str) and c in cands:
+            return ("ok", c, turn, offset) if seen <= {c} else ("conflict", sorted(seen | {c}))
+        objs = {o for o in turn.get("mentioned_objects") or [] if isinstance(o, str)}
+        if turn.get("kind") == "parsed" and isinstance(turn.get("asked_object"), str):
+            objs.add(turn["asked_object"])
+        seen |= objs & set(cands)
+    return None
+
+
+def _describe(m):
+    return ", ".join("%s (%s «%s»)" % (oid, "точное название" if m["how"][oid][0] == "exact" else "через склонение",
+                                       m["how"][oid][1]) for oid in m["ids"])
+
+
 def parse_question(question: str, known_objects: Sequence[Dict[str, Any]],
                    context: Optional[Sequence[Dict[str, Any]]] = None, *,
                    now: Optional[datetime] = None, timezone: Any = None) -> Dict[str, Any]:
@@ -534,7 +584,7 @@ def parse_question(question: str, known_objects: Sequence[Dict[str, Any]],
     low = text.casefold()
     tokens = _tokens(text)
     index = _alias_index(known_objects)
-    mentions = _mentions(tokens, index)
+    mentions = _mentions(tokens, index, text)
     # v2: record every positively mentioned known object, whatever the outcome.
     mentioned = sorted({i for m in mentions if not m["negated"] for i in m["ids"]})
     result = _parse(text, low, tokens, index, mentions, context, now, tz, timezone)
@@ -564,16 +614,103 @@ def _parse(text, low, tokens, index, mentions, context, now, tz, timezone_param)
     explanation: Dict[str, str] = {}
     from_context = None
 
+    def time_part(fc):
+        return _parse_time_part(low, now, tz, zone, context, follow_up, fc)
+
+    def finish(asked, fc):
+        tp = time_part(fc)
+        if tp[0] == "result":
+            return tp[1]
+        _, ref, zone_note, _zone_name = tp
+        params = {"asked_object": asked, "as_of": ref["as_of"], "temporal_scope": SCOPE}
+        explanation["as_of"] = ref["why"] + ("; " + zone_note if zone_note else "")
+        explanation["temporal_scope"] = ("'current' = состояние на момент as_of по контракту #503 "
+                                         "(допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)")
+        return {"kind": "parsed", "params": params, "time_ref": ref["ref"], "explanation": explanation}
+
+    # ── v4: bare answer to an object clarification = confirmed choice ──────
+    turns_ctx = _bounded(context)
+    last = turns_ctx[-1] if turns_ctx else None
+    if (last and last.get("kind") == "needs_clarification" and last.get("candidates") and len(positive) == 1
+            and not [m for m in mentions if m["negated"]] and not unknown
+            and all(i in covered or words[i] in _CHOICE_FILLERS for i in range(len(tokens)))):
+        offered = [c for c in last["candidates"] if isinstance(c, str)]
+        chosen = sorted(set(positive[0]["ids"]) & set(offered))
+        if len(chosen) != 1:
+            cands = chosen or offered
+            return _result_clarify("«%s» %s. Выберите один из вариантов: %s." % (
+                positive[0]["alias"], "не среди предложенных вариантов" if not chosen else "подходит нескольким вариантам",
+                ", ".join(cands)), "ответ на уточнение не выбирает ровно один из предложенных объектов", cands)
+        x = chosen[0]
+        pend = last.get("pending_time") if isinstance(last.get("pending_time"), dict) else None
+        expl = {"asked_object": "подтверждённый выбор пользователя: ответ «%s» на уточнение к «%s» (варианты %s) → объект %s"
+                                % (text, last.get("question", ""), ", ".join(offered), x)}
+        if pend and pend.get("time_ref") == "now":
+            if now is None:
+                return _result_unsupported("нет явно заданного текущего момента")
+            ptz = _resolve_tz(pend.get("tz")) or tz
+            as_of = (now.astimezone(ptz) if ptz is not None else now).isoformat()
+            why = "уточнённая реплика спрашивала «сейчас» → заново привязано к явно заданному текущему моменту %s" % as_of
+        elif pend and pend.get("time_ref") in ("absolute", "date") and isinstance(pend.get("as_of"), str):
+            as_of, why = pend["as_of"], "момент из уточнённой реплики: as_of %s" % pend["as_of"]
+        else:
+            r = _result_clarify("Выбран объект %s. На какой момент: сейчас или на конкретную дату и время?" % x,
+                                "в уточнённой реплике не было пригодного момента")
+            r["confirmed_object"] = x
+            return r
+        expl["as_of"] = why
+        expl["temporal_scope"] = ("'current' = состояние на момент as_of по контракту #503 "
+                                  "(допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)")
+        return {"kind": "parsed", "params": {"asked_object": x, "as_of": as_of, "temporal_scope": SCOPE},
+                "time_ref": pend["time_ref"], "explanation": expl, "confirmed_object": x}
+
     # ── object ────────────────────────────────────────────────────────────
-    if positive:
+    explicit = sorted({m["explicit_id"] for m in positive if m.get("explicit_id")})
+    if positive and explicit:
+        ids = sorted({i for m in positive for i in m["ids"]})
+        first = min(m["pos"] for m in positive)
+        end = max(m["pos"] + m["len"] for m in positive)
+        joined = any(words[k] in _JOINERS for k in range(first, end))
+        if len(explicit) > 1 or unknown or joined or any(explicit[0] not in m["ids"] for m in positive):
+            cands = sorted(set(ids) | set(explicit)) + unknown
+            return _result_clarify("О каком объекте вопрос: %s? Явный идентификатор не согласуется с остальными упоминаниями."
+                                   % ", ".join(cands), "явный идентификатор и другие упоминания расходятся", cands)
+        asked = explicit[0]
+        others = [m["alias"] for m in positive if m.get("explicit_id") != asked]
+        neg = [m["alias"] for m in mentions if m["negated"]]
+        explanation["asked_object"] = ("явный идентификатор «объект %s» → объект %s" % (asked, asked)
+                                       + ("; согласуется с названием «%s»" % "», «".join(others) if others else "")
+                                       + ("; исключено по отрицанию: %s" % ", ".join(neg) if neg else ""))
+    elif positive:
         ids = sorted({i for m in positive for i in m["ids"]})
         if len(positive) > 1 and len(ids) > 1 or unknown:
             cands = ids + unknown
             return _result_clarify("О каком объекте вопрос: %s? Первая версия отвечает про один объект." % ", ".join(cands),
                                    "упомянуто несколько объектов", cands)
+        resolved = None
         if len(ids) > 1:
-            return _result_clarify("Название «%s» подходит к нескольким объектам: %s. Какой из них?"
-                                   % (positive[0]["alias"], ", ".join(ids)), "коллизия названий", ids)
+            ctx_choice = _confirmed_in_context(context, ids)
+            if ctx_choice and ctx_choice[0] == "ok":
+                resolved = ctx_choice
+            else:
+                if ctx_choice:  # conflict
+                    r = _result_clarify("Форма «%s» подходит к нескольким объектам: %s. Ранее был подтверждён выбор, но затем "
+                                        "упоминался другой из них (%s). Какой из них?"
+                                        % (positive[0]["alias"], _describe(positive[0]), ", ".join(ctx_choice[1])),
+                                        "контекст противоречив: подтверждённый выбор и более позднее упоминание", ids)
+                else:
+                    r = _result_clarify("Форма «%s» подходит к нескольким объектам: %s. Какой из них?"
+                                        % (positive[0]["alias"], _describe(positive[0])), "коллизия названий", ids)
+                pend = time_part(None)
+                if pend[0] == "ref":
+                    r["pending_time"] = {"time_ref": pend[1]["ref"], "as_of": pend[1]["as_of"], "tz": pend[3]}
+                return r
+        if resolved:
+            _, asked, turn, offset = resolved
+            explanation["asked_object"] = ("форма «%s» подходит к нескольким объектам: %s; выбор %s подтверждён пользователем "
+                                           "(%d-я реплика с конца, «%s»), противоречащих упоминаний после него нет"
+                                           % (positive[0]["alias"], _describe(positive[0]), asked, offset, turn.get("question", "")))
+            return finish(asked, None)
         near = _near_misses(tokens, index, positive)
         if near:
             n = near[0]
@@ -586,10 +723,8 @@ def _parse(text, low, tokens, index, mentions, context, now, tz, timezone_param)
         neg = [m["alias"] for m in mentions if m["negated"]]
         how = [m for m in positive if asked in m["ids"]][0]
         explanation["asked_object"] = ("название «%s» → объект %s" % (positive[0]["alias"], asked)
-                                       + (" (точное совпадение названия)" if how["match"] == "exact"
+                                       + (" (точное совпадение названия)" if how["how"][asked][0] == "exact"
                                           else " (совпадение через склонение)")
-                                       + ("; точное совпадение важнее склонения, отклонено: %s" % ", ".join(how["outranked"])
-                                          if how["outranked"] else "")
                                        + ("; исключено по отрицанию: %s" % ", ".join(neg) if neg else "")
                                        + ("; местоимение относится к нему же в этой реплике" if has_pronoun else ""))
     elif unknown:
@@ -602,6 +737,9 @@ def _parse(text, low, tokens, index, mentions, context, now, tz, timezone_param)
         for offset, turn in enumerate(reversed(turns), start=1):
             if turn.get("kind") == "parsed" and isinstance(turn.get("asked_object"), str):
                 decided = ("object", turn, offset)
+                break
+            if isinstance(turn.get("confirmed_object"), str):  # v4: confirmed choice without a time
+                decided = ("object", dict(turn, asked_object=turn["confirmed_object"]), offset)
                 break
             if turn.get("candidates"):
                 decided = ("ambiguous", turn, offset)
@@ -634,14 +772,18 @@ def _parse(text, low, tokens, index, mentions, context, now, tz, timezone_param)
 
     if not status_words and from_context is None and not follow_up:
         return _result_unsupported("Первая версия разбирает только вопросы о статусе/состоянии объекта.")
+    return finish(asked, from_context)
 
-    # ── time ──────────────────────────────────────────────────────────────
+
+def _parse_time_part(low, now, tz, zone, context, follow_up, from_context):
+    """Time section. Returns ('result', dict) or ('ref', ref, zone_note, zone_name)."""
     if "clarify" in zone:
-        return zone["clarify"]
+        return ("result", zone["clarify"])
     zone_note = None
     if zone.get("zone"):
         if zone["tz"] is None:  # pragma: no cover - tz database absent
-            return _result_clarify("Часовой пояс «%s» недоступен; уточните смещение UTC." % zone["phrase"], "нет базы поясов")
+            return ("result", _result_clarify("Часовой пояс «%s» недоступен; уточните смещение UTC." % zone["phrase"],
+                                              "нет базы поясов"))
         default = tz
         tz = zone["tz"]
         zone_note = "часовой пояс назван в вопросе («%s») → %s" % (zone["phrase"], zone["zone"]) + (
@@ -649,20 +791,19 @@ def _parse(text, low, tokens, index, mentions, context, now, tz, timezone_param)
             if default is not None and str(default) != zone["zone"] else "")
     ref = _time_reference(low, now, tz)
     if isinstance(ref, dict) and ref.get("kind"):
-        return ref
+        return ("result", ref)
+    prior = from_context if from_context is not None else (
+        _bounded(context)[-1] if follow_up and _bounded(context) else None)
     if ref is None and zone_note:
-        prior = from_context if from_context is not None else (
-            _bounded(context)[-1] if follow_up and _bounded(context) else None)
         if prior and prior.get("time_ref") in ("absolute", "date"):
-            return _result_clarify("Пересчитать прежний момент в поясе «%s» или вы имеете в виду другой момент?" % zone["phrase"],
-                                   "пояс назван без момента; прежний момент был в другом поясе")
+            return ("result", _result_clarify(
+                "Пересчитать прежний момент в поясе «%s» или вы имеете в виду другой момент?" % zone["phrase"],
+                "пояс назван без момента; прежний момент был в другом поясе"))
     if ref is None:
-        prior = from_context if from_context is not None else (
-            _bounded(context)[-1] if follow_up and _bounded(context) else None)
         prior_ref = prior.get("time_ref") if prior and prior.get("kind") == "parsed" else None
         if prior_ref == "now":
             if now is None:
-                return _result_unsupported("нет явно заданного текущего момента")
+                return ("result", _result_unsupported("нет явно заданного текущего момента"))
             as_of = (now.astimezone(tz) if tz is not None else now).isoformat()
             ref = {"ref": "now", "as_of": as_of,
                    "why": "время не названо; предыдущая реплика спрашивала «сейчас» → заново привязано к явно заданному текущему моменту %s" % as_of}
@@ -670,13 +811,9 @@ def _parse(text, low, tokens, index, mentions, context, now, tz, timezone_param)
             ref = {"ref": prior_ref, "as_of": prior["as_of"],
                    "why": "время не названо; унаследовано из предыдущей реплики: as_of %s" % prior["as_of"]}
         else:
-            return _result_clarify("На какой момент: сейчас или на конкретную дату и время?",
-                                   "время не указано; без него фильтр времени не включается, а молча его не выключаем")
-    params = {"asked_object": asked, "as_of": ref["as_of"], "temporal_scope": SCOPE}
-    explanation["as_of"] = ref["why"] + ("; " + zone_note if zone_note else "")
-    explanation["temporal_scope"] = ("'current' = состояние на момент as_of по контракту #503 "
-                                     "(допускаются факты, чей интервал покрывает as_of или наблюдение ровно в as_of)")
-    return {"kind": "parsed", "params": params, "time_ref": ref["ref"], "explanation": explanation}
+            return ("result", _result_clarify("На какой момент: сейчас или на конкретную дату и время?",
+                                              "время не указано; без него фильтр времени не включается, а молча его не выключаем"))
+    return ("ref", ref, zone_note, zone.get("zone"))
 
 
 def context_turn(question: str, result: Dict[str, Any]) -> Dict[str, Any]:
@@ -687,6 +824,10 @@ def context_turn(question: str, result: Dict[str, Any]) -> Dict[str, Any]:
                     as_of=result["params"]["as_of"])
     elif result.get("candidates"):
         turn["candidates"] = list(result["candidates"])
+        if isinstance(result.get("pending_time"), dict):  # v4: time of the clarified question, structured
+            turn["pending_time"] = dict(result["pending_time"])
+    if result.get("confirmed_object"):  # v4: user's confirmed choice
+        turn["confirmed_object"] = result["confirmed_object"]
     if result.get("kind") != "parsed" and result.get("mentioned_objects"):
         turn["mentioned_objects"] = list(result["mentioned_objects"])  # v2: possible object switch
     return turn

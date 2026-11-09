@@ -161,7 +161,10 @@ def all_orders(catalogue):
 
 
 @pytest.mark.parametrize("q,catalogue,kind,obj_or_cands", [
-    ("Какой статус Моста сейчас?", [M, Y, L], "parsed", "Y"),           # exact beats inflection
+    # v4 (user rule change 2026-11-09): direct «Моста» (Y) and inflected «Мост»+а (M) -> ask.
+    # v3 expected ("parsed", "Y") here; that expectation is kept against the frozen v3 snapshot
+    # in tests/test_query_parse_v3_gold_change.py.
+    ("Какой статус Моста сейчас?", [M, Y, L], "needs_clarification", ["M", "Y"]),
     ("Какой статус Мост сейчас?", [M, Y, L], "parsed", "M"),
     ("Какой статус Мостами сейчас?", [M, Y, L], "needs_clarification", ["M", "Y"]),  # inflection tie
     ("Какой статус Пульсаром сейчас?", [P1, P2, L], "needs_clarification", ["P1", "P2"]),  # same alias
@@ -186,10 +189,13 @@ def test_object_choice_invariant_under_every_catalogue_and_alias_order(q, catalo
 
 
 def test_match_type_is_reported():
-    p = gated("Какой статус Моста сейчас?", [M, Y])
-    assert "точное совпадение" in p["explanation"]["asked_object"] and "отклонено: M" in p["explanation"]["asked_object"]
+    p = gated("Какой статус Моста сейчас?", [Y, L])
+    assert "точное совпадение" in p["explanation"]["asked_object"]
     p = gated("Какой статус Мостом сейчас?", [M, Y])
     assert p["params"]["asked_object"] == "M" and "через склонение" in p["explanation"]["asked_object"]
+    p = gated("Какой статус Моста сейчас?", [M, Y])  # v4: both kept, match types named
+    assert p["kind"] == "needs_clarification" and "M (через склонение «мост»)" in p["question"]
+    assert "Y (точное название «моста»)" in p["question"]
 
 
 def test_context_follow_up_invariant_under_catalogue_order():
@@ -199,7 +205,8 @@ def test_context_follow_up_invariant_under_catalogue_order():
         for q in ("Какой статус L сейчас?", "Что менялось у Моста за неделю?"):
             ctx.append(context_turn(q, parse_question(q, objs, ctx, now=NOW, timezone=TZ)))
         p = gated("А его статус?", objs, ctx)
-        assert p["kind"] == "needs_clarification" and p["candidates"] == ["L", "Y"]
+        # v4: «Моста» mentions both M and Y (v3: only Y)
+        assert p["kind"] == "needs_clarification" and p["candidates"] == ["L", "M", "Y"]
 
 
 @pytest.mark.parametrize("split", ev.V3_SPLITS)

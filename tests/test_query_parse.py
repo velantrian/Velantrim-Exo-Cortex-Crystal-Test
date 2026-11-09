@@ -297,9 +297,19 @@ def test_eval_counts_are_reproducible():
         "correct_parse": 8, "confident_misparse": 0, "correct_clarification": 12,
         "unnecessary_clarification": 0, "correct_unsupported": 0, "wrong_unsupported": 0,
         "clarification_instead_of_unsupported": 0}
-    assert ev.evaluate("counterexamples_v3")["n"] == 23
-    assert ev.evaluate("counterexamples_v3")["counts"] == {
-        "correct_parse": 11, "confident_misparse": 0, "correct_clarification": 12,
+    # v4: cv3 is scored against gold v2 (user rule change 2026-11-09); against the
+    # OLD gold the current parser now differs on K20 by design.
+    assert res["counterexamples_v3_gold_v2"]["n"] == 23
+    assert res["counterexamples_v3_gold_v2"]["counts"] == {
+        "correct_parse": 10, "confident_misparse": 0, "correct_clarification": 13,
+        "unnecessary_clarification": 0, "correct_unsupported": 0, "wrong_unsupported": 0,
+        "clarification_instead_of_unsupported": 0}
+    old_gold = ev.evaluate("counterexamples_v3")
+    assert [(r["id"], r["category"]) for r in old_gold["rows"] if not r["category"].startswith("correct")] == [
+        ("K20", "unnecessary_clarification")]
+    assert res["counterexamples_v4"]["n"] == 22
+    assert res["counterexamples_v4"]["counts"] == {
+        "correct_parse": 14, "confident_misparse": 0, "correct_clarification": 8,
         "unnecessary_clarification": 0, "correct_unsupported": 0, "wrong_unsupported": 0,
         "clarification_instead_of_unsupported": 0}
     assert ev.evaluate("counterexamples_v3", ev.parser_v2_frozen)["counts"]["confident_misparse"] == 12
