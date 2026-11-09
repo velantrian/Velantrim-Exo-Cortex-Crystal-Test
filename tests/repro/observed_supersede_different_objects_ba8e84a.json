@@ -1,0 +1,116 @@
+{
+  "crystal_root": "/workspace/velantrim-exocortex-crystal",
+  "crystal_head": "ba8e84a4f8f24bdb816ea8fb89485f1dedccd0a3",
+  "expected_head_prefix": "ba8e84a",
+  "temp_db": "/tmp/crystal-supersede-repro-9ymj93mr/test.db",
+  "functions": {
+    "supersede": {
+      "qualname": "core.reconcile.supersede",
+      "start_line": 287,
+      "end_line": 334,
+      "file": "/workspace/velantrim-exocortex-crystal/core/reconcile.py"
+    },
+    "store_fact": {
+      "qualname": "core.memory.store_fact",
+      "start_line": 740,
+      "file": "/workspace/velantrim-exocortex-crystal/core/memory.py"
+    },
+    "get_fact": {
+      "qualname": "core.memory.get_fact",
+      "start_line": 934,
+      "file": "/workspace/velantrim-exocortex-crystal/core/memory.py"
+    },
+    "transition_esm": {
+      "qualname": "core.memory.transition_esm",
+      "start_line": 1149,
+      "file": "/workspace/velantrim-exocortex-crystal/core/memory.py"
+    }
+  },
+  "supersede_source_mentions_object_or_period": [],
+  "supersede_checks_object_match": false,
+  "allowed_scenario_checks_in_supersede": [
+    "store_fact(new) with epistemic_state=Observed",
+    "if enforce_gate=True: core.pipeline.guardian then core.pipeline.truth_gate",
+    "transition_esm(new_id, Validated)",
+    "if old is Validated: transition_esm(old, Contradicted) then Deprecated",
+    "l3_graph.add_edge(old_id, SUPERSEDED_BY, new_id)"
+  ],
+  "facts_table_columns": [
+    "fact_id",
+    "claim",
+    "source",
+    "confidence",
+    "epistemic_state",
+    "claim_type",
+    "source_status",
+    "significance",
+    "created_at",
+    "updated_at",
+    "metadata",
+    "restricted",
+    "revision"
+  ],
+  "store_fact_record_fields_hardcoded": [
+    "fact_id",
+    "claim",
+    "source",
+    "confidence",
+    "epistemic_state",
+    "claim_type",
+    "source_status",
+    "significance",
+    "created_at",
+    "updated_at",
+    "metadata"
+  ],
+  "input_old_object_fields": {
+    "primary_object": "M",
+    "object": "M"
+  },
+  "input_new_object_fields": {
+    "primary_object": "L",
+    "object": "L"
+  },
+  "stored_old_before_keys": [
+    "claim",
+    "claim_type",
+    "confidence",
+    "created_at",
+    "epistemic_state",
+    "fact_id",
+    "metadata",
+    "restricted",
+    "revision",
+    "significance",
+    "source",
+    "source_status",
+    "updated_at"
+  ],
+  "stored_old_before_top_level_primary_object": null,
+  "stored_old_before_top_level_object": null,
+  "stored_old_before_metadata": {
+    "primary_object": "M",
+    "note": "old-about-M"
+  },
+  "stored_old_before_esm": "Validated",
+  "stored_new_before": null,
+  "supersede_error": null,
+  "supersede_returned": "obj-l",
+  "stored_old_after_esm": "Deprecated",
+  "stored_new_after_esm": "Validated",
+  "stored_old_after_top_level_primary_object": null,
+  "stored_new_after_top_level_primary_object": null,
+  "stored_old_after_metadata": {
+    "primary_object": "M",
+    "note": "old-about-M"
+  },
+  "stored_new_after_metadata": {
+    "primary_object": "L",
+    "note": "new-about-L"
+  },
+  "superseded_by_neighbors": [
+    "obj-l"
+  ],
+  "deprecated_m_record": true,
+  "note": "store_fact does not persist top-level primary_object/object as columns; extra keys survive only if copied into metadata."
+}

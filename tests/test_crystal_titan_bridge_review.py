@@ -368,15 +368,13 @@ QUESTION_M_NOV9_PAST = "Какой статус был у M 9 ноября 2026 
 
 
 def test_past_as_of_against_deprecated_same_moment_correction():
-    """Deprecated same-moment record: models a correction, not a closed interval.
+    """Deprecated record asked about the same past timestamp it was observed at.
 
-    OLD_OPEN and NEW_CLOSED share observed_at=2026-11-09T12:00:00+01:00.
-    That is the 'correction of an error' shape: two claims about the same
-    moment. Crystal's supersede() does not distinguish this from 'end of a
-    previously true fact'; both become Validated → Contradicted → Deprecated.
-    Historical-read rules are unchanged here: CanonicalView.STRICT still
-    drops Deprecated regardless of as_of, so a past question about that
-    same timestamp does not recover the old record.
+    OLD_OPEN has observed_at=2026-11-09T12:00:00+01:00 and no validity
+    interval. CanonicalView.STRICT drops Deprecated regardless of as_of, so
+    a past question about that timestamp does not recover the record;
+    select() alone would keep it. This is not a test of ended validity
+    periods.
     """
     result = _run(QUESTION_M_NOV9_PAST, [OLD_OPEN])
     assert result["parsed"]["kind"] == "parsed"
@@ -393,12 +391,17 @@ def test_past_as_of_against_deprecated_same_moment_correction():
     assert [f["fact_id"] for f in kept_by_select] == ["g-m-open-old"]
 
 
-def test_past_as_of_against_deprecated_earlier_observation():
-    """Deprecated earlier observation: 'end of a previously true fact' shape.
+def test_strict_canonical_view_excludes_deprecated_on_past_as_of():
+    """STRICT CanonicalView excludes a Deprecated record for a past as_of.
 
-    Crystal still does not keep the old record for historical as_of: STRICT
-    projection removes Deprecated before select() runs. select() alone would
-    admit the covering past record.
+    The fixture has only observed_at (2026-10-01T10:00:00+02:00). It has no
+    valid_from/valid_until and no terminating event. The test shows that
+    STRICT projection removes Deprecated before select() runs; select()
+    alone would admit this covering record.
+
+    OPEN: how Crystal reads a fact that was true for a period and then
+    stopped being true remains unresolved until a separate example with
+    an explicit validity interval exists. That example is not added here.
     """
     deprecated_past = _canon({
         "fact_id": "g-m-past-deprecated",
