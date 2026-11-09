@@ -1,8 +1,14 @@
 {
+  "mode": "reproduction",
+  "reproduction_of_expected_head": true,
   "crystal_root": "/workspace/velantrim-exocortex-crystal",
+  "expected_head": "ba8e84a4f8f24bdb816ea8fb89485f1dedccd0a3",
   "crystal_head": "ba8e84a4f8f24bdb816ea8fb89485f1dedccd0a3",
+  "head_matches_expected": true,
+  "checkout_clean": true,
+  "dirty_status": [],
   "expected_head_prefix": "ba8e84a",
-  "temp_db": "/tmp/crystal-supersede-repro-9ymj93mr/test.db",
+  "temp_db": "/tmp/crystal-supersede-repro-cy4_ofvs/test.db",
   "functions": {
     "supersede": {
       "qualname": "core.reconcile.supersede",

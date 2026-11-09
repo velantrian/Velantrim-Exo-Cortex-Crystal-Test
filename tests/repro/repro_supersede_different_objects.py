@@ -75,39 +75,64 @@ def checkout_identity(crystal: Path, expected_head: str) -> dict:
     }
 
 
-def main(argv: list[str] | None = None) -> int:
-    args = parse_args(argv)
-    diagnostic = args.diagnostic or (
-        (os.environ.get("CRYSTAL_REPRO_DIAGNOSTIC") or "").strip() in
-        ("1", "true", "yes", "on")
+def diagnostic_requested(args: argparse.Namespace) -> bool:
+    return bool(args.diagnostic) or (
+        (os.environ.get("CRYSTAL_REPRO_DIAGNOSTIC") or "").strip().lower()
+        in ("1", "true", "yes", "on")
     )
-    expected_head = (
-        (os.environ.get("CRYSTAL_REPRO_EXPECTED_HEAD") or "").strip()
-        or DEFAULT_EXPECTED_HEAD
+
+
+def requested_override() -> str:
+    return (os.environ.get("CRYSTAL_REPRO_EXPECTED_HEAD") or "").strip()
+
+
+def resolve_expected_head(*, diagnostic: bool, override: str) -> tuple[str | None, dict | None]:
+    """Pinned SHA in normal mode; override is diagnostic-only."""
+    if override and not diagnostic:
+        return None, {
+            "error": "expected_head_override_not_allowed",
+            "message": (
+                "CRYSTAL_REPRO_EXPECTED_HEAD is only allowed in diagnostic "
+                "mode (--diagnostic or CRYSTAL_REPRO_DIAGNOSTIC=1). "
+                "Normal mode always checks the pinned commit "
+                f"{DEFAULT_EXPECTED_HEAD} and will not treat another clean "
+                "commit as a reproduction."
+            ),
+            "mode": "error",
+            "reproduction_of_expected_head": False,
+            "expected_head": DEFAULT_EXPECTED_HEAD,
+            "requested_override": override,
+        }
+    if diagnostic and override:
+        return override, None
+    return DEFAULT_EXPECTED_HEAD, None
+
+
+def preflight(
+    crystal: Path | None,
+    *,
+    diagnostic: bool,
+    override: str,
+) -> tuple[int, dict, bool]:
+    """Return (exit_code, payload, proceed_to_observation)."""
+    expected_head, override_error = resolve_expected_head(
+        diagnostic=diagnostic, override=override
     )
-    raw = (os.environ.get("CRYSTAL_MAIN_ROOT") or "").strip()
-    if not raw:
-        dump({
+    if override_error is not None:
+        return 1, override_error, False
+    assert expected_head is not None
+    if crystal is None:
+        return 2, {
             "error": "missing_crystal_main_root",
             "message": "CRYSTAL_MAIN_ROOT is required (path to a main Crystal checkout)",
             "mode": "error",
             "reproduction_of_expected_head": False,
-        })
-        return 2
-    crystal = Path(raw).resolve()
-    if not (crystal / "core" / "reconcile.py").is_file():
-        dump({
-            "error": "invalid_crystal_main_root",
-            "message": f"CRYSTAL_MAIN_ROOT does not look like Crystal: {crystal}",
-            "mode": "error",
-            "reproduction_of_expected_head": False,
-            "crystal_root": str(crystal),
-        })
-        return 2
-
+            "expected_head": expected_head,
+        }, False
     identity = checkout_identity(crystal, expected_head)
+    payload = {"crystal_root": str(crystal), **identity}
     if not identity["matches_reproduction_checkout"] and not diagnostic:
-        dump({
+        return 1, {
             "error": "checkout_not_reproducible",
             "message": (
                 "CRYSTAL_MAIN_ROOT is not a clean checkout of the expected "
@@ -116,11 +141,37 @@ def main(argv: list[str] | None = None) -> int:
             ),
             "mode": "error",
             "reproduction_of_expected_head": False,
-            "crystal_root": str(crystal),
-            **identity,
-        })
-        return 1
+            **payload,
+        }, False
+    return 0, payload, True
 
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+    diagnostic = diagnostic_requested(args)
+    override = requested_override()
+    raw = (os.environ.get("CRYSTAL_MAIN_ROOT") or "").strip()
+    crystal = Path(raw).resolve() if raw else None
+    code, payload, proceed = preflight(
+        crystal, diagnostic=diagnostic, override=override
+    )
+    if not proceed:
+        dump(payload)
+        return code
+    assert crystal is not None
+    if not (crystal / "core" / "reconcile.py").is_file():
+        dump({
+            "error": "invalid_crystal_main_root",
+            "message": f"CRYSTAL_MAIN_ROOT does not look like Crystal: {crystal}",
+            "mode": "error",
+            "reproduction_of_expected_head": False,
+            **payload,
+        })
+        return 2
+    return run_observation(crystal, payload, diagnostic)
+
+
+def run_observation(crystal: Path, identity: dict, diagnostic: bool) -> int:
     work = Path(tempfile.mkdtemp(prefix="crystal-supersede-repro-"))
     os.environ["VELANTRIM_L3_BACKEND"] = "mock"
     os.environ["VELANTRIM_EMBEDDER"] = "hashing"

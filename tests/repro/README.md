@@ -25,6 +25,13 @@ error (`mode: error`, `reproduction_of_expected_head: false`) and exits
 non-zero. It does not run `supersede()` and it does not clean the
 checkout.
 
+`CRYSTAL_REPRO_EXPECTED_HEAD` is not accepted in normal mode. If it is
+set, the script prints a JSON error
+(`error: expected_head_override_not_allowed`, `mode: error`,
+`reproduction_of_expected_head: false`, `expected_head` still the pinned
+SHA) and exits 1 without calling `supersede()`. An arbitrary clean commit
+cannot be labeled a reproduction this way.
+
 On a matching clean tree it runs the observation and prints JSON with
 `mode: reproduction` and `reproduction_of_expected_head: true`.
 
@@ -63,19 +70,25 @@ not match. The JSON then has `mode: diagnostic`,
 `reproduction_of_expected_head: false`, plus `crystal_head`,
 `expected_head`, `checkout_clean`, and `dirty_status`.
 
-Optional override of the expected commit (for probing the mismatch path,
-not for claiming a new baseline):
+`CRYSTAL_REPRO_EXPECTED_HEAD` is honored only in diagnostic mode. It
+changes which commit `expected_head` is compared against; it does not
+turn the run into `mode: reproduction`.
 
 ```bash
-CRYSTAL_REPRO_EXPECTED_HEAD=ffffffffffffffffffffffffffffffffffffffff
+CRYSTAL_MAIN_ROOT=/path/to/checkout CRYSTAL_REPRO_EXPECTED_HEAD=ffffffffffffffffffffffffffffffffffffffff   python tests/repro/repro_supersede_different_objects.py --diagnostic
 ```
+
+Checkout guards (head mismatch, dirty tree, and override in normal mode)
+are covered by `tests/test_repro_supersede_checkout.py`. Those tests use
+temporary git repositories and do not need a Crystal checkout.
 
 ## Observed output on main Crystal `ba8e84a`
 
-Recorded file: `observed_supersede_different_objects_ba8e84a.json`.
-That file is the earlier observation; later script versions also emit
-`mode`, `reproduction_of_expected_head`, `expected_head`,
-`head_matches_expected`, `checkout_clean`, and `dirty_status`.
+Recorded file: `observed_supersede_different_objects_ba8e84a.json`
+(normal-mode observation on a clean `ba8e84a` tree). It includes
+`mode: reproduction`, `reproduction_of_expected_head: true`, the full
+`expected_head`, `head_matches_expected`, `checkout_clean`, and
+`dirty_status`.
 
 That run used checkout `/workspace/velantrim-exocortex-crystal` at
 `ba8e84a4f8f24bdb816ea8fb89485f1dedccd0a3`. These fields follow the
@@ -83,7 +96,7 @@ machine and must not be treated as a stable contract:
 
 - `crystal_root` — the `CRYSTAL_MAIN_ROOT` you passed
 - `temp_db` — a fresh directory each run (recorded value was
-  `/tmp/crystal-supersede-repro-9ymj93mr/test.db`)
+  `/tmp/crystal-supersede-repro-cy4_ofvs/test.db`)
 - `functions.*.file` — `$CRYSTAL_MAIN_ROOT/core/reconcile.py` or
   `$CRYSTAL_MAIN_ROOT/core/memory.py`
 
