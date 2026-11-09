@@ -163,30 +163,27 @@ def test_matching_ground_is_present_in_final_messages():
     assert result["titan"]["titan_commit"].startswith("6b45854")
     assert result["titan"]["memory_auto_status"] == "off"
     assert result["titan"]["memory_saved"] == []
+    assert result["handoff"]["provider_called"] is True
+    assert result["handoff"]["prepared_messages"] == result["final_messages"]
+    assert result["handoff"]["provider_received"] == result["final_messages"]
+    assert result["handoff"]["provider_response"] == result["reply"]
+    assert result["handoff"]["admitted_records_passed_to_titan"][0]["fact_id"] == "g-m-current"
 
 
 def test_foreign_or_stale_ground_is_absent_from_final_messages():
     result = _run(QUESTION_M_NOW, [FOREIGN, STALE])
-    assert result["kind"] == "answer_request"
-    assert result["titan_invoked"] is True
-    assert result["provider_calls"] == 1
+    assert result["kind"] == "no_matching_information"
+    assert result["titan_invoked"] is False
+    assert result["provider_calls"] == 0
     assert result["kept"] == []
+    assert result["final_messages"] is None
+    assert result["handoff"]["provider_called"] is False
+    assert result["handoff"]["prepared_messages"] is None
+    assert result["handoff"]["provider_received"] is None
+    assert result["handoff"]["provider_response"] is None
+    assert "Подходящих сведений нет" in result["reply"]
     excluded_ids = {item["fact_id"] for item in result["excluded"]}
     assert excluded_ids == {"g-l-foreign", "g-m-stale"}
-    blob = flatten_messages(result["final_messages"])
-    assert "FOREIGN-OBJECT-MARKER" not in blob
-    assert "STALE-GROUND-MARKER" not in blob
-    assert FOREIGN["claim"] not in blob
-    assert STALE["claim"] not in blob
-    assert "PROV-L-FOREIGN" not in blob
-    assert "PROV-M-STALE" not in blob
-    assert "g-l-foreign" not in blob
-    assert "g-m-stale" not in blob
-    report = result["context_report"]
-    assert report["memory_records_sent"] == 0
-    assert report["memory_records_total"] == 0
-    user_msg = result["final_messages"][-1]
-    assert user_msg["content"] == QUESTION_M_NOW
 
 
 def test_ambiguous_question_clarifies_without_provider_call():
@@ -198,6 +195,7 @@ def test_ambiguous_question_clarifies_without_provider_call():
 
     result = _run(QUESTION_AMBIGUOUS, [MATCHING, FOREIGN, STALE], spy=spy)
     assert result["kind"] == "needs_clarification"
+    assert result["kind"] != "no_matching_information"
     assert result["titan_invoked"] is False
     assert result["provider_calls"] == 0
     assert result["final_messages"] is None
@@ -424,6 +422,7 @@ def test_order_invariance_sent_set_is_stable():
     assert "CORRECTION-CLOSED-MARKER" in blob_fwd and "CORRECTION-CLOSED-MARKER" in blob_bwd
     assert "SUPERSEDED-OPEN-MARKER" not in blob_fwd
     assert "SUPERSEDED-OPEN-MARKER" not in blob_bwd
+    assert forward["selection_fingerprint"]["sha256"] == backward["selection_fingerprint"]["sha256"]
 
 
 def test_receipt_digest_currently_depends_on_created_at():
@@ -470,3 +469,53 @@ def test_bridge_side_flags_dirty_answer_repeating_superseded_status():
     # Record Titan's current score; do not treat it as a contract to fix.
     assert "unsupported" in faith
     assert "score" in faith
+
+
+def test_confidence_zero_is_preserved_and_not_coerced_to_one():
+    fact = dict(MATCHING)
+    fact["confidence"] = 0.0
+    result = _run(QUESTION_M_NOW, [fact])
+    record = result["titan_records"][0]
+    assert record["confidence"] == 0.0
+    assert record["confidence_present"] is True
+    assert record["confidence_repr"] == "0"
+    blob = flatten_messages(result["final_messages"])
+    assert "confidence=0" in blob
+    assert "1.00" not in blob.split("MATCHING-GROUND-TEXT")[0] or "confidence=1" not in blob
+
+
+def test_missing_confidence_is_represented_separately_from_zero():
+    from tests.support.crystal_titan_bridge import encode_confidence, ground_to_titan_record
+    fact = dict(MATCHING)
+    fact.pop("confidence", None)
+    encoded = encode_confidence(fact)
+    assert encoded == {"present": False, "value": None, "repr": "missing"}
+    record = ground_to_titan_record(fact)
+    assert "confidence" not in record
+    assert record["confidence_present"] is False
+    assert record["confidence_repr"] == "missing"
+    assert record["confidence_missing"] is True
+    assert "confidence=missing" in record["source"]
+    zero = encode_confidence({**MATCHING, "confidence": 0.0})
+    assert zero == {"present": True, "value": 0.0, "repr": "0"}
+    # FINDING: CanonicalView.STRICT treats missing confidence as invalid
+    # and drops the fact before conversion, so run_bridge never ships it.
+    result = _run(QUESTION_M_NOW, [fact])
+    assert result["kind"] == "no_matching_information"
+    assert result["titan_records"] == []
+    assert "g-m-current" in {f["fact_id"] for f in result["canonical_view_excluded"]}
+
+
+def test_non_status_question_is_not_rewritten_as_no_matching_information():
+    result = _run("Почему небо голубое?", [MATCHING, FOREIGN])
+    assert result["kind"] != "no_matching_information"
+    assert result["kind"] in {"unsupported", "needs_clarification"}
+    assert result["titan_invoked"] is False
+
+
+def test_status_question_with_grounds_still_invokes_titan():
+    result = _run(QUESTION_M_NOW, [MATCHING])
+    assert result["kind"] == "answer_request"
+    assert result["titan_invoked"] is True
+    assert result["provider_calls"] == 1
+    assert result["handoff"]["provider_called"] is True

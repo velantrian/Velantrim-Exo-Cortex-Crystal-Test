@@ -90,7 +90,10 @@ def _evaluate_response_checks(reply: str, source_facts: list[dict[str, Any]]) ->
     trace = [{"fact_id": f.get("fact_id")} for f in source_facts if f.get("fact_id")]
     avg_conf = 0.0
     if source_facts:
-        avg_conf = sum(float(f.get("confidence") or 0.5) for f in source_facts) / len(source_facts)
+        def _conf(fact):
+            raw = fact.get("confidence")
+            return float(raw) if raw is not None else 0.5
+        avg_conf = sum(_conf(f) for f in source_facts) / len(source_facts)
 
     gated_guardian = apply_response_guardian(reply, source_facts, trace)
     gated_faith = check_response_faithfulness(reply, source_facts)

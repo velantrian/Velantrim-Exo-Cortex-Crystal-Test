@@ -7,6 +7,7 @@ exact messages Titan prepared for the provider.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import subprocess
@@ -20,6 +21,11 @@ from core.canonical_view import project_canonical
 from core.generation import ExtractiveGenerator
 from core.provenance import build_receipt, claim_digest, verify_receipt
 from core.query_parse import parse_question
+
+
+def _shadow_support(**kwargs):
+    from tests.support.shadow_support import evaluate_shadow_support
+    return evaluate_shadow_support(**kwargs)
 
 DEFAULT_TITAN_ROOT = Path(os.environ.get("TITAN_SANDBOX_ROOT", "/workspace/titan-sandbox"))
 SPY_SCRIPT = Path(__file__).with_name("titan_chat_spy.py")
@@ -43,6 +49,87 @@ def provenance_of(fact: Mapping[str, Any]) -> str:
     return _as_text(fact.get("source"))
 
 
+
+NO_MATCHING_INFORMATION = "no_matching_information"
+NO_MATCHING_INFORMATION_TEXT = (
+    "Подходящих сведений нет: ни одно основание не допущено "
+    "для этого вопроса о статусе."
+)
+SELECTION_FINGERPRINT_VERSION = "lab-selection-fp-v1"
+
+
+def encode_confidence(fact: Mapping[str, Any]) -> dict[str, Any]:
+    """Preserve 0.0; treat a missing confidence as missing, never as 1.0."""
+    if "confidence" not in fact or fact.get("confidence") is None:
+        return {"present": False, "value": None, "repr": "missing"}
+    value = float(fact["confidence"])
+    return {"present": True, "value": value, "repr": f"{value:.4g}"}
+
+
+def is_status_question(parsed: Mapping[str, Any] | None) -> bool:
+    """This lab parser's status questions carry an object and a moment."""
+    if not parsed or parsed.get("kind") != "parsed":
+        return False
+    params = parsed.get("params") or {}
+    return bool(params.get("asked_object")) and bool(
+        params.get("as_of") or params.get("temporal_scope")
+    )
+
+
+def selection_fingerprint(
+    params: Mapping[str, Any] | None,
+    kept: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Order-stable lab fingerprint of the admitted grounds set.
+
+    Separate from ``provenance.build_receipt``: it does not include
+    ``created_at``, extractive answer text, or citation order. Do not use
+    it as a replacement digest.
+    """
+    params = dict(params or {})
+    grounds = sorted(
+        (
+            {
+                "fact_id": str(fact.get("fact_id") or ""),
+                "claim_sha256": claim_digest(fact.get("claim", "")),
+            }
+            for fact in kept
+        ),
+        key=lambda row: (row["fact_id"], row["claim_sha256"]),
+    )
+    payload = {
+        "as_of": params.get("as_of"),
+        "asked_object": params.get("asked_object"),
+        "grounds": grounds,
+        "temporal_scope": params.get("temporal_scope"),
+        "version": SELECTION_FINGERPRINT_VERSION,
+    }
+    canonical = json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    return {
+        "version": SELECTION_FINGERPRINT_VERSION,
+        "canonical": canonical,
+        "sha256": hashlib.sha256(canonical.encode("utf-8")).hexdigest(),
+        "separate_from_receipt": True,
+    }
+
+
+def describe_handoff(
+    *,
+    records: list[dict[str, Any]],
+    prepared_messages: Sequence[Mapping[str, Any]] | None,
+    provider_calls: int,
+    reply: str | None,
+) -> dict[str, Any]:
+    """Keep prepared / received / provider response as distinct fields."""
+    called = provider_calls > 0
+    return {
+        "admitted_records_passed_to_titan": records,
+        "prepared_messages": list(prepared_messages) if prepared_messages else None,
+        "provider_received": list(prepared_messages) if called and prepared_messages else None,
+        "provider_response": reply if called else None,
+        "provider_called": called,
+    }
+
 def ground_to_titan_record(fact: Mapping[str, Any]) -> dict[str, Any]:
     """Map a Crystal ground onto a Titan memory record.
 
@@ -57,18 +144,28 @@ def ground_to_titan_record(fact: Mapping[str, Any]) -> dict[str, Any]:
     fact_id = str(fact.get("fact_id") or fact.get("id") or "")
     source = fact.get("source") or ""
     prov = provenance_of(fact)
+    conf = encode_confidence(fact)
     encoded_source = (
         f"source={source}; object={obj}; observed_at={observed}; "
         f"valid_from={decls.get('valid_from') or ''}; "
         f"valid_until={decls.get('valid_until') or ''}; "
-        f"provenance={prov}; fact_id={fact_id}"
+        f"provenance={prov}; fact_id={fact_id}; "
+        f"confidence={conf['repr']}"
     )
-    return {
+    record = {
         "fact_id": fact_id,
         "claim": fact.get("claim") or fact.get("text") or "",
         "source": encoded_source,
-        "confidence": float(fact.get("confidence") or 1.0),
+        "confidence_repr": conf["repr"],
+        "confidence_present": conf["present"],
     }
+    if conf["present"]:
+        record["confidence"] = conf["value"]
+    else:
+        # Titan's formatter uses f.get("confidence", 0) and would print 0.00.
+        # We do not substitute 1.0; missing stays missing in our record.
+        record["confidence_missing"] = True
+    return record
 
 
 def parse_and_select(
@@ -291,6 +388,31 @@ def run_bridge(
         question, prep["params"], prep["kept"], prep["selection"],
         canonical_view_excluded=prep.get("canonical_view_excluded"),
     )
+    fingerprint = selection_fingerprint(prep["params"], prep["kept"])
+    if is_status_question(prep["parsed"]) and not prep["kept"]:
+        return {
+            "kind": NO_MATCHING_INFORMATION,
+            "parsed": prep["parsed"],
+            "clarification": None,
+            "params": prep["params"],
+            "kept": [],
+            "excluded": prep["excluded"],
+            "receipt": receipt,
+            "selection_fingerprint": fingerprint,
+            "titan_records": [],
+            "titan_invoked": False,
+            "provider_calls": 0,
+            "final_messages": None,
+            "context_report": None,
+            "titan": None,
+            "reply": NO_MATCHING_INFORMATION_TEXT,
+            "canonical_view_excluded": prep.get("canonical_view_excluded") or [],
+            "bridge_answer_check": None,
+            "shadow_support": None,
+            "handoff": describe_handoff(
+                records=[], prepared_messages=None, provider_calls=0, reply=None
+            ),
+        }
     records = [ground_to_titan_record(fact) for fact in prep["kept"]]
     caller = (
         invoke_titan
@@ -299,6 +421,8 @@ def run_bridge(
     )
     titan = caller(question, records)
     reply = titan.get("reply")
+    provider_calls = int(titan.get("provider_calls") or 0)
+    prepared = titan.get("messages")
     return {
         "kind": "answer_request",
         "parsed": prep["parsed"],
@@ -307,16 +431,29 @@ def run_bridge(
         "kept": prep["kept"],
         "excluded": prep["excluded"],
         "receipt": receipt,
+        "selection_fingerprint": fingerprint,
         "titan_records": records,
         "titan_invoked": True,
-        "provider_calls": int(titan.get("provider_calls") or 0),
-        "final_messages": titan.get("messages"),
+        "provider_calls": provider_calls,
+        "final_messages": prepared,
         "context_report": titan.get("context_report"),
         "titan": titan,
         "reply": reply,
         "canonical_view_excluded": prep.get("canonical_view_excluded") or [],
         "bridge_answer_check": check_answer_excludes_rejected_grounds(
             reply, _not_sent_facts(candidate_facts, prep["kept"])
+        ),
+        "handoff": describe_handoff(
+            records=records,
+            prepared_messages=prepared,
+            provider_calls=provider_calls,
+            reply=reply,
+        ),
+        "shadow_support": _shadow_support(
+            answer=reply,
+            prepared_messages=prepared,
+            admitted=prep["kept"],
+            excluded=_not_sent_facts(candidate_facts, prep["kept"]),
         ),
     }
 
