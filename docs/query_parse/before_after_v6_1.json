@@ -1,0 +1,764 @@
+[
+ {
+  "split": "counterexamples_v6_1",
+  "id": "S01",
+  "question": "А его статус?",
+  "context_v6": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "А L вчера?",
+    "kind": "needs_clarification",
+    "mentioned_objects": [
+     "L"
+    ]
+   }
+  ],
+  "context_v6_1": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "А L вчера?",
+    "kind": "needs_clarification",
+    "mentioned_objects": [
+     "L"
+    ],
+    "time_state": "unresolved"
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v6": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6_1": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какой момент нужен статус L: сейчас или на конкретную дату и время?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6_1",
+  "id": "S02",
+  "question": "А его статус?",
+  "context_v6": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус L вчера?",
+    "kind": "needs_clarification",
+    "mentioned_objects": [
+     "L"
+    ]
+   }
+  ],
+  "context_v6_1": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус L вчера?",
+    "kind": "needs_clarification",
+    "mentioned_objects": [
+     "L"
+    ],
+    "time_state": "unresolved"
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v6": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6_1": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какой момент нужен статус L: сейчас или на конкретную дату и время?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6_1",
+  "id": "S03",
+  "question": "А его статус?",
+  "context_v6": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус L будет 12 ноября в 10:00?",
+    "kind": "unsupported",
+    "mentioned_objects": [
+     "L"
+    ]
+   }
+  ],
+  "context_v6_1": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус L будет 12 ноября в 10:00?",
+    "kind": "unsupported",
+    "mentioned_objects": [
+     "L"
+    ],
+    "time_state": "unresolved"
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v6": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6_1": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какой момент нужен статус L: сейчас или на конкретную дату и время?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6_1",
+  "id": "S04",
+  "question": "А его статус?",
+  "context_v6": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус L был весь день вчера?",
+    "kind": "unsupported",
+    "mentioned_objects": [
+     "L"
+    ]
+   }
+  ],
+  "context_v6_1": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус L был весь день вчера?",
+    "kind": "unsupported",
+    "mentioned_objects": [
+     "L"
+    ],
+    "time_state": "unresolved"
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v6": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6_1": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какой момент нужен статус L: сейчас или на конкретную дату и время?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6_1",
+  "id": "S05",
+  "question": "А его статус?",
+  "context_v6": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Что менялось у L за неделю?",
+    "kind": "unsupported",
+    "mentioned_objects": [
+     "L"
+    ]
+   }
+  ],
+  "context_v6_1": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Что менялось у L за неделю?",
+    "kind": "unsupported",
+    "mentioned_objects": [
+     "L"
+    ],
+    "time_state": "unresolved"
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v6": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6_1": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какой момент нужен статус L: сейчас или на конкретную дату и время?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6_1",
+  "id": "S06",
+  "question": "А его статус?",
+  "context_v6": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус L был в десять утра 8 ноября?",
+    "kind": "needs_clarification",
+    "mentioned_objects": [
+     "L"
+    ]
+   }
+  ],
+  "context_v6_1": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус L был в десять утра 8 ноября?",
+    "kind": "needs_clarification",
+    "mentioned_objects": [
+     "L"
+    ],
+    "time_state": "unresolved"
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v6": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6_1": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какой момент нужен статус L: сейчас или на конкретную дату и время?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6_1",
+  "id": "S07",
+  "question": "А его статус?",
+  "context_v6": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус L был 8 ноября в 13:00 по Лондону?",
+    "kind": "needs_clarification",
+    "mentioned_objects": [
+     "L"
+    ]
+   }
+  ],
+  "context_v6_1": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус L был 8 ноября в 13:00 по Лондону?",
+    "kind": "needs_clarification",
+    "mentioned_objects": [
+     "L"
+    ],
+    "time_state": "unresolved"
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v6": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6_1": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какой момент нужен статус L: сейчас или на конкретную дату и время?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6_1",
+  "id": "S08",
+  "question": "А его статус?",
+  "context_v6": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус L был 8 ноября в 10:00 или в 12:00?",
+    "kind": "needs_clarification",
+    "mentioned_objects": [
+     "L"
+    ]
+   }
+  ],
+  "context_v6_1": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус L был 8 ноября в 10:00 или в 12:00?",
+    "kind": "needs_clarification",
+    "mentioned_objects": [
+     "L"
+    ],
+    "time_state": "unresolved"
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v6": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6_1": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какой момент нужен статус L: сейчас или на конкретную дату и время?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6_1",
+  "id": "S09",
+  "question": "А его статус?",
+  "context_v6": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус L?",
+    "kind": "needs_clarification",
+    "mentioned_objects": [
+     "L"
+    ]
+   }
+  ],
+  "context_v6_1": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус L?",
+    "kind": "needs_clarification",
+    "mentioned_objects": [
+     "L"
+    ],
+    "time_state": "unresolved"
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v6": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6_1": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какой момент нужен статус L: сейчас или на конкретную дату и время?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6_1",
+  "id": "S10",
+  "question": "А его статус?",
+  "context_v6": [
+   {
+    "question": "Какой статус L был 8 ноября в 10:00?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "absolute",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   },
+   {
+    "question": "Какой статус L сегодня?",
+    "kind": "needs_clarification",
+    "mentioned_objects": [
+     "L"
+    ]
+   }
+  ],
+  "context_v6_1": [
+   {
+    "question": "Какой статус L был 8 ноября в 10:00?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "absolute",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   },
+   {
+    "question": "Какой статус L сегодня?",
+    "kind": "needs_clarification",
+    "mentioned_objects": [
+     "L"
+    ],
+    "time_state": "unresolved"
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v6": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-repair"
+   ],
+   "grounds_answer": "L: статус — на ремонте",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6_1": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какой момент нужен статус L: сейчас или на конкретную дату и время?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6_1",
+  "id": "S20",
+  "question": "А его статус?",
+  "context_v6": [
+   {
+    "question": "Какой статус L был 8 ноября в 10:00?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "absolute",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   },
+   {
+    "question": "Расскажи про L сейчас",
+    "kind": "unsupported",
+    "mentioned_objects": [
+     "L"
+    ]
+   }
+  ],
+  "context_v6_1": [
+   {
+    "question": "Какой статус L был 8 ноября в 10:00?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "absolute",
+    "as_of": "2026-11-08T10:00:00+01:00"
+   },
+   {
+    "question": "Расскажи про L сейчас",
+    "kind": "unsupported",
+    "mentioned_objects": [
+     "L"
+    ],
+    "time_state": {
+     "time_ref": "now",
+     "as_of": "2026-11-09T07:58:00+01:00"
+    }
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v6": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08T10:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-repair"
+   ],
+   "grounds_answer": "L: статус — на ремонте",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6_1": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какой момент нужен статус L: сейчас или на конкретную дату и время?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ }
+]

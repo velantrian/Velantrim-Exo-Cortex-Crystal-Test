@@ -888,3 +888,41 @@ New file `counterexamples_v6_1.json` (S01–S21): blocked sequences, positive
 controls, unsupported without time / with the same time, new explicit time,
 resolution. Existing golds were reviewed for sequences with an intermediate
 non-parsed turn; see results for any change.
+
+## v6.1 results (generated; frozen v6 = `tests/query_parse_v6.py`)
+
+Reports: `docs/query_parse/eval_results_v6_1.json` (with `v6_snapshot_on_v6_1_sets`),
+`before_after_v6_1.json`, `permutation_invariance_v6_1.json`,
+`regression_independent_v6_1.json`, `demo_v6_1.md`. All v1–v6 reports regenerate
+byte-identically (sha256 compared before/after); v6 reports untouched.
+
+Categories: correct parse / confident misparse / correct clarification /
+unnecessary clarification / correct unsupported / wrong unsupported /
+clarification instead of unsupported.
+
+| Split (latest gold) | n | v6 (frozen) | v6.1 |
+|---|---|---|---|
+| dev_gold_v3 | 28 | 12/0/9/0/7/0/0 | 12/0/9/0/7/0/0 |
+| heldout_gold_v2 | 24 | 14/0/6/1/3/0/0 | 14/0/6/1/3/0/0 |
+| probes | 10 | 3/0/4/2/0/1/0 | 3/0/4/2/0/1/0 |
+| counterexamples_v2 | 20 | 8/0/12/0/0/0/0 | 8/0/12/0/0/0/0 |
+| counterexamples_v3_gold_v2 | 23 | 10/0/13/0/0/0/0 | 10/0/13/0/0/0/0 |
+| counterexamples_v4 | 22 | 14/0/8/0/0/0/0 | 14/0/8/0/0/0/0 |
+| counterexamples_v5_gold_v2 | 36 | 6/0/14/0/16/0/0 | 6/0/14/0/16/0/0 |
+| counterexamples_v6 | 22 | 7/0/9/0/6/0/0 | 7/0/9/0/6/0/0 |
+| **counterexamples_v6_1 (new)** | 21 | 9/**11**/1/0/0/0/0 | 9/0/12/0/0/0/0 |
+| regression (independent_v4_gold_v3) | 30 | 11/0/15/0/4/0/0 | 11/0/15/0/4/0/0 |
+
+* before→after: only S01–S10 and S20 change (v6 confident misparse with the
+  old moment → v6.1 clarification «На какой момент нужен статус L…»); no item of
+  any earlier set changed; regression set: 0 rows changed.
+* No gold changed (existing golds hold no sequence affected by the rule).
+* Spy: in every blocked case `query_fn` is not called (also when the same
+  follow-up is repeated); in positive controls it is called once with the
+  parsed parameters.
+* Permutation invariance: 127 440 variants per parser on the v6.1 sets,
+  changed = []; regression set 2 419 200 variants, changed = [].
+* One existing test updated with a comment citing the rule
+  (`test_query_parse_v2_fixes`: intermediate «…что менялось за неделю?» now
+  blocks the time; the negation check still holds: no object candidates).
+* `core/query_parse.py`: 100 % lines and branches.

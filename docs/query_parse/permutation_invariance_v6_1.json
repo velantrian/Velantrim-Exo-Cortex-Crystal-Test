@@ -1,0 +1,115 @@
+{
+ "_note": "decision (kind, params, candidates, clarification/limitation text, mentioned_objects) for every permutation of the split's catalogue x {names as given, names reversed}; 'changed' lists items whose decision differs between catalogue orders",
+ "v6": [
+  {
+   "split": "dev_gold_v3",
+   "items": 28,
+   "variants": 6720,
+   "changed": []
+  },
+  {
+   "split": "heldout_gold_v2",
+   "items": 24,
+   "variants": 5760,
+   "changed": []
+  },
+  {
+   "split": "probes",
+   "items": 10,
+   "variants": 2400,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v2",
+   "items": 20,
+   "variants": 28800,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v3_gold_v2",
+   "items": 23,
+   "variants": 33120,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v4",
+   "items": 22,
+   "variants": 31680,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v5_gold_v2",
+   "items": 36,
+   "variants": 8640,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v6",
+   "items": 22,
+   "variants": 5280,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v6_1",
+   "items": 21,
+   "variants": 5040,
+   "changed": []
+  }
+ ],
+ "v6_1": [
+  {
+   "split": "dev_gold_v3",
+   "items": 28,
+   "variants": 6720,
+   "changed": []
+  },
+  {
+   "split": "heldout_gold_v2",
+   "items": 24,
+   "variants": 5760,
+   "changed": []
+  },
+  {
+   "split": "probes",
+   "items": 10,
+   "variants": 2400,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v2",
+   "items": 20,
+   "variants": 28800,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v3_gold_v2",
+   "items": 23,
+   "variants": 33120,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v4",
+   "items": 22,
+   "variants": 31680,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v5_gold_v2",
+   "items": 36,
+   "variants": 8640,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v6",
+   "items": 22,
+   "variants": 5280,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v6_1",
+   "items": 21,
+   "variants": 5040,
+   "changed": []
+  }
+ ]
+}
