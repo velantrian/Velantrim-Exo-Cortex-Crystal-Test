@@ -102,8 +102,8 @@ Data: `tests/fixtures/query_parse/setup.json` (7 synthetic VERIFIED facts,
 5 objects incl. alias collision «Пульсар»). Conditions on the same questions:
 manual gold parameters vs parser parameters, both through the same ported
 filter. Gold written before running. `heldout.json` was frozen in its own
-commit before the parser landed. Results (`docs/query_parse/eval_results.json`,
-regenerate with `python -m tests.query_parse_eval --write`):
+commit before the parser landed. Results (`docs/query_parse/eval_results_v1.json`,
+regenerate with `python -m tests.query_parse_eval --version v1 --write`):
 
 | Split | n | correct parse | **confident misparse** | correct clarif. | unnecessary clarif. | correct unsupported | wrong unsupported | answers differ from manual |
 |---|---|---|---|---|---|---|---|---|
@@ -132,7 +132,7 @@ before the held-out set was written; no rule was changed after the first
 held-out run. Probes were written after seeing results and are not held-out.
 The set is small and synthetic; numbers are not a general accuracy estimate.
 
-Demonstration: `docs/query_parse/demo.md` / `demo.json`
+Demonstration: `docs/query_parse/demo_v1.md` / `demo_v1.json`
 (Question → parsed parameters → admitted grounds → answer or clarification).
 
 ## Limitations

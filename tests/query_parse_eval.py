@@ -5,8 +5,16 @@ Same questions, same isolated data, two conditions:
   parser -- parameters produced by core.query_parse.
 
 Both go through the same ported #503 filter (core.pipeline.generate_answer).
-Run:  python -m tests.query_parse_eval  [--write]
---write regenerates docs/query_parse/eval_results.json and demo.{json,md}.
+Run:  python -m tests.query_parse_eval  [--version v1|v2] [--write]
+
+v1 = frozen snapshot of the original parser (tests/query_parse_v1.py, byte-identical
+     to core/query_parse.py at d550f3f) on the original splits dev/heldout/probes;
+     --write regenerates docs/query_parse/eval_results_v1.json, demo_v1.{json,md}
+     (must be byte-identical to the committed v1 report).
+v2 = current core.query_parse on dev/heldout/probes + counterexamples_v2, and the
+     v1 snapshot on the same items for the before -> after table;
+     --write produces docs/query_parse/eval_results_v2.json, demo_v2.{json,md},
+     before_after_v2.json.
 """
 import json
 import sys
@@ -15,7 +23,8 @@ from pathlib import Path
 
 from core.applicability import _parse_temporal_instant
 from core.pipeline import generate_answer
-from core.query_parse import ask, parse_question
+import core.query_parse as parser_v2
+from tests import query_parse_v1 as parser_v1
 
 ROOT = Path(__file__).resolve().parent.parent
 FIX = ROOT / "tests" / "fixtures" / "query_parse"
@@ -31,13 +40,41 @@ def _fact(f):
             "metadata": {"applicability": dict(f["applicability"])}}
 
 
-def facts():
-    return [_fact(f) for f in SETUP["facts"]]
+V1_SPLITS = ("dev", "heldout", "probes")
+V2_SPLITS = V1_SPLITS + ("counterexamples_v2",)
+PARSERS = {"v1": parser_v1, "v2": parser_v2}
 
 
-def run_filter(question, **params):
-    pack = {"facts": facts(), "query": question, "total": len(SETUP["facts"]), **params}
-    return generate_answer(pack, trace=[])
+def load_split(split):
+    return json.loads((FIX / f"{split}.json").read_text(encoding="utf-8"))
+
+
+def split_objects(data):
+    return SETUP["known_objects"] + data.get("extra_known_objects", [])
+
+
+def facts(extra=()):
+    return [_fact(f) for f in list(SETUP["facts"]) + list(extra)]
+
+
+def make_filter(extra=()):
+    def run(question, **params):
+        fs = facts(extra)
+        return generate_answer({"facts": fs, "query": question, "total": len(fs), **params}, trace=[])
+    return run
+
+
+run_filter = make_filter()
+
+
+def build_context(parser, it, objects, tz):
+    """Explicit context from the fixture, or built by running ``parser`` on context_questions."""
+    if "context_questions" not in it:
+        return it.get("context")
+    ctx = []
+    for q in it["context_questions"]:
+        ctx.append(parser.context_turn(q, parser.parse_question(q, objects, ctx, now=NOW, timezone=tz)))
+    return ctx
 
 
 def _summary(result):
@@ -77,24 +114,27 @@ CATEGORIES = ("correct_parse", "confident_misparse", "correct_clarification", "u
               "correct_unsupported", "wrong_unsupported", "clarification_instead_of_unsupported")
 
 
-def evaluate(split):
-    items = json.loads((FIX / f"{split}.json").read_text(encoding="utf-8"))["items"]
+def evaluate(split, parser=parser_v2):
+    data = load_split(split)
+    items = data["items"]
+    objects = split_objects(data)
+    run = make_filter(data.get("extra_facts", ()))
     rows, counts = [], dict.fromkeys(CATEGORIES, 0)
     for it in items:
         tz = it["timezone"] if "timezone" in it else SETUP["timezone"]
         gold = it["gold"]
         manual = None
         if gold["kind"] == "parsed":
-            manual = run_filter(it["question"], asked_object=gold["asked_object"], as_of=gold["as_of"],
-                                temporal_scope="current")
-        gated = ask(it["question"], SETUP["known_objects"], it.get("context"), now=NOW, timezone=tz,
-                    query_fn=run_filter)
+            manual = run(it["question"], asked_object=gold["asked_object"], as_of=gold["as_of"],
+                         temporal_scope="current")
+        context = build_context(parser, it, objects, tz)
+        gated = parser.ask(it["question"], objects, context, now=NOW, timezone=tz, query_fn=run)
         parse = gated["parse"]
         category = classify(gold, parse)
         counts[category] += 1
         m, p = _summary(manual), _summary(gated.get("result"))
-        rows.append({
-            "id": it["id"], "question": it["question"], "context": it.get("context", []),
+        row = {
+            "id": it["id"], "question": it["question"], "context": context or [],
             "timezone": tz, "gold": gold, "category": category,
             "parser": {"kind": parse["kind"], "params": parse.get("params"),
                        "explanation": parse.get("explanation"),
@@ -104,7 +144,12 @@ def evaluate(split):
                        if gold["kind"] == "parsed" else None,
                        **{"grounds_" + k: v for k, v in m.items()}},
             "answers_differ": (m["answer"], m["admitted"]) != (p["answer"], p["admitted"]),
-        })
+        }
+        if "context_questions" in it:
+            row["context_questions"] = it["context_questions"]
+        if "group" in it:
+            row["group"] = it["group"]
+        rows.append(row)
     return {"split": split, "n": len(items), "counts": counts,
             "answers_differ": [r["id"] for r in rows if r["answers_differ"]], "rows": rows}
 
@@ -112,11 +157,17 @@ def evaluate(split):
 DEMO_IDS = ("D01", "D02", "D03", "D04", "D05", "D07", "D08", "H05", "H07", "H12", "H20", "H23")
 
 
-def demo(results):
-    rows = [r for res in results for r in res["rows"] if r["id"] in DEMO_IDS]
-    lines = ["# Query-parse demonstration (isolated data, generated)", "",
-             "Generated by `python -m tests.query_parse_eval --write`. Explicit now `%s`, timezone `%s`."
-             % (SETUP["now"], SETUP["timezone"]), "",
+DEMO_IDS_V2 = DEMO_IDS + ("P01", "P09", "C01", "C02", "C03", "C05", "C09", "C12", "C13", "C14", "C17", "C20")
+
+
+def demo(results, ids=DEMO_IDS, version="v1"):
+    rows = [r for res in results for r in res["rows"] if r["id"] in ids]
+    title = "# Query-parse demonstration (isolated data, generated)" if version == "v1" else \
+        "# Query-parse demonstration %s (isolated data, generated)" % version
+    cmd = "`python -m tests.query_parse_eval --write`" if version == "v1" else \
+        "`python -m tests.query_parse_eval --version %s --write`" % version
+    lines = [title, "",
+             "Generated by %s. Explicit now `%s`, timezone `%s`." % (cmd, SETUP["now"], SETUP["timezone"]), "",
              "Path: **Question → parsed parameters → admitted grounds → answer or clarification**.", ""]
     for r in rows:
         p = r["parser"]
@@ -147,9 +198,35 @@ def demo(results):
     return rows, "\n".join(lines)
 
 
+def before_after(v2_results):
+    """Same items, v1 snapshot vs v2: every item whose category, parse or grounds changed."""
+    out = []
+    for res2 in v2_results:
+        res1 = evaluate(res2["split"], parser_v1)
+        for r1, r2 in zip(res1["rows"], res2["rows"]):
+            assert r1["id"] == r2["id"]
+            key = lambda r: (r["category"], r["parser"]["kind"], r["parser"]["params"], r["parser"]["grounds_admitted"],
+                             r["parser"]["grounds_answer"])
+            if key(r1) != key(r2):
+                out.append({"split": res2["split"], "id": r2["id"], "question": r2["question"],
+                            "context_v1": r1["context"], "context_v2": r2["context"], "gold": r2["gold"],
+                            "v1": {k: r1["parser"][k] for k in ("kind", "params", "clarification", "limitation",
+                                                               "grounds_admitted", "grounds_answer")}
+                                  | {"category": r1["category"], "query_called": r1["parser"]["grounds_query_called"],
+                                     "answers_differ_from_manual": r1["answers_differ"]},
+                            "v2": {k: r2["parser"][k] for k in ("kind", "params", "clarification", "limitation",
+                                                               "grounds_admitted", "grounds_answer")}
+                                  | {"category": r2["category"], "query_called": r2["parser"]["grounds_query_called"],
+                                     "answers_differ_from_manual": r2["answers_differ"]}})
+    return out
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
-    results = [evaluate("dev"), evaluate("heldout"), evaluate("probes")]
+    version = argv[argv.index("--version") + 1] if "--version" in argv else "v2"
+    parser = PARSERS[version]
+    splits = V1_SPLITS if version == "v1" else V2_SPLITS
+    results = [evaluate(s, parser) for s in splits]
     for res in results:
         print(res["split"], res["n"], json.dumps(res["counts"], ensure_ascii=False), "answers differ:", res["answers_differ"])
         for r in res["rows"]:
@@ -157,13 +234,26 @@ def main(argv=None):
                 print("  ", r["id"], r["category"], "differs" if r["answers_differ"] else "", r["question"],
                       r["parser"]["params"] or r["parser"]["clarification"] or r["parser"]["limitation"])
     if "--write" in argv:
-        OUT.mkdir(parents=True, exist_ok=True)
-        (OUT / "eval_results.json").write_text(json.dumps(
-            {"setup": SETUP, "results": results}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-        rows, md = demo(results)
-        (OUT / "demo.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-        (OUT / "demo.md").write_text(md + "\n", encoding="utf-8")
+        write(results, version)
     return results
+
+
+def write(results, version):
+    OUT.mkdir(parents=True, exist_ok=True)
+    payload = {"setup": SETUP, "results": results}
+    if version != "v1":
+        payload = {"version": version, "parser": "core/query_parse.py", "setup": SETUP,
+                   "extra_setup": {s: {k: load_split(s).get(k, []) for k in ("extra_known_objects", "extra_facts")}
+                                   for s in V2_SPLITS if "extra_known_objects" in load_split(s)},
+                   "results": results}
+    (OUT / f"eval_results_{version}.json").write_text(json.dumps(payload, ensure_ascii=False, indent=1) + "\n",
+                                                     encoding="utf-8")
+    rows, md = demo(results, DEMO_IDS if version == "v1" else DEMO_IDS_V2, version)
+    (OUT / f"demo_{version}.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    (OUT / f"demo_{version}.md").write_text(md + "\n", encoding="utf-8")
+    if version != "v1":
+        (OUT / f"before_after_{version}.json").write_text(
+            json.dumps(before_after(results), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":
