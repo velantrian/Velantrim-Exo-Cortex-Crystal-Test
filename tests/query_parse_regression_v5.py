@@ -8,7 +8,7 @@ import json
 import sys
 from datetime import datetime
 
-import core.query_parse as parser_v5
+from tests import query_parse_v5 as parser_v5  # frozen v5 (= tag query-parse-v5-frozen)
 from tests import query_parse_eval as ev
 from tests import query_parse_independent_v4 as ind
 from tests import query_parse_v4 as parser_v4

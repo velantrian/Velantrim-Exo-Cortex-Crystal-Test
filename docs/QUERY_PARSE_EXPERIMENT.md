@@ -730,3 +730,57 @@ Manual parameters: 09:00 / 10:00 → «на ремонте»; 18:00 / 21:00 → 
 * Rules, gold and fixes have the same author; the regression set is no longer
   independent. 100 % statement/branch coverage of `core/query_parse.py`;
   coverage ≠ correctness. No claim of general "understanding".
+
+---
+
+# v6 — final contract C1–C6 (user decision 2026-11-09), fixed BEFORE the code change
+
+v5 is frozen as `tests/query_parse_v5.py` (sha256
+`9d87bd5d2ad8bed7682deefbf81cd570730df7b6fec486ceb29a4ad7c397f6f5` = tag
+`query-parse-v5-frozen`; no tag moved). v1–v5 reports regenerate byte-identically.
+No vocabulary expansion, no «готов ли L».
+
+## Rules
+
+* **C1** «сегодня», «вчера», a calendar date **without a time** → clarification
+  asking for the time. This replaces the v1–v5 whole-day reading of «сегодня» /
+  «вчера» (and resolves the v5 inconsistency).
+* **C2** a day with a clock («сегодня в 08:00», «вчера в 10:00», «8 ноября в
+  10:00») → a moment in the established zone: a supported zone named in the text
+  (Москва / Берлин / UTC, any case), otherwise the configured default; no zone
+  or an unknown zone → clarification (unchanged).
+* **C3** an explicitly requested whole day → **unsupported** with the message
+  that a whole-day check is not supported by the parser yet. Markers (detection
+  only): `весь день` (also covers «за весь день»), `в течение … дня` (the
+  existing «в течение» detection, now labelled as whole day when «дня» follows).
+* **C4** a future state → unsupported (as v5, by the resolved time vs `now`).
+* **C5** «будет» with a past moment → clarification (as v5, now pinned).
+* **C6** no time at all → clarification; «сейчас» stays the explicit `now`.
+  **Context decision:** a follow-up («А его статус?», «А L?») inheriting the time
+  of the previous *parsed* turn is an existing documented v1 rule (contract table
+  above: «time is inherited from that turn … no prior time → clarification»). It
+  is kept, with the explanation in the output, but restricted to moments («сейчас»
+  re-anchored to the new `now`, an absolute moment reused). The same holds for a
+  confirmed choice answering a clarified question (v4 rule). A date-only time is
+  never inherited or reused.
+* **Invariant:** no `parsed` output carries a date-only `as_of`; `ask()` always
+  gets a moment. The filter (#503) still supports date-only `as_of`; it is not
+  touched.
+
+## Gold versions (existing files unchanged)
+
+* `dev_gold_v3.json`: **D07** «Какой статус L сегодня?» parsed `2026-11-09` →
+  clarification (C1).
+* `heldout_gold_v2.json`: **H12** «Что с L сегодня по статусу?» parsed
+  `2026-11-09` → clarification (C1).
+* `counterexamples_v5_gold_v2.json`: **V16** «сегодня» and **V17** «вчера»
+  parsed date-only → clarification (C1); **V18** «весь день 7 ноября»
+  clarification → unsupported (C3); **V19** «весь день сегодня» parsed
+  `2026-11-09` → unsupported (C3).
+* `independent_v4_gold_v3.json` (regression set): **I03** «Статус котельной
+  сегодня?» and **I26** «А его статус сегодня?» parsed date → clarification
+  (C1).
+* Each change records `old_gold`, `new_gold`, `rule` and `reason` (the user's final
+  contract decision of 2026-11-09, not a parser result). probes, cv2,
+  cv3_gold_v2 and cv4 were reviewed and are unaffected.
+* `counterexamples_v6.json`: 22 new items G01–G22.

@@ -43,6 +43,7 @@ from tests import query_parse_v1 as parser_v1
 from tests import query_parse_v2 as parser_v2_frozen
 from tests import query_parse_v3 as parser_v3_frozen
 from tests import query_parse_v4 as parser_v4_frozen
+from tests import query_parse_v5 as parser_v5_frozen
 
 ROOT = Path(__file__).resolve().parent.parent
 FIX = ROOT / "tests" / "fixtures" / "query_parse"
@@ -65,7 +66,7 @@ V4_SPLITS = V2_SPLITS + ("counterexamples_v3_gold_v2", "counterexamples_v4")
 V5_SPLITS = ("dev_gold_v2", "heldout", "probes", "counterexamples_v2", "counterexamples_v3_gold_v2", "counterexamples_v4",
              "counterexamples_v5")
 PARSERS = {"v1": parser_v1, "v2": parser_v2_frozen, "v3": parser_v3_frozen, "v4": parser_v4_frozen,
-           "v5": parser_current}
+           "v5": parser_v5_frozen, "v6": parser_current}
 SPLITS = {"v1": V1_SPLITS, "v2": V2_SPLITS, "v3": V3_SPLITS, "v4": V4_SPLITS, "v5": V5_SPLITS}
 PREVIOUS = {"v2": "v1", "v3": "v2", "v4": "v3", "v5": "v4"}
 PREV_LABEL = {"v2": "v1 snapshot, d550f3f", "v3": "v2 snapshot, eee4062", "v4": "v3 snapshot, a6d11f3",
