@@ -189,7 +189,8 @@ def test_no_date_only_parsed_anywhere():
 
 
 def test_eval_pins_v6():
-    res = {r["split"]: r for r in ev.main([])}
+    # v6.1: the harness default is v6_1 now; this pins the frozen v6 parser on the v6 sets
+    res = {r["split"]: r for r in ev.main(["--version", "v6"])}
     pins = {"dev_gold_v3": [12, 0, 9, 0, 7, 0, 0], "heldout_gold_v2": [14, 0, 6, 1, 3, 0, 0],
             "probes": [3, 0, 4, 2, 0, 1, 0], "counterexamples_v2": [8, 0, 12, 0, 0, 0, 0],
             "counterexamples_v3_gold_v2": [10, 0, 13, 0, 0, 0, 0], "counterexamples_v4": [14, 0, 8, 0, 0, 0, 0],

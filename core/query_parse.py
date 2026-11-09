@@ -86,6 +86,16 @@ v6 final contract (user decision 2026-11-09, C1–C6; frozen v5 at
 * C4/C5: future -> unsupported, «будет» + past moment -> ask (as v5);
 * a follow-up / confirmed choice reuses only a moment (documented v1/v4 rules);
   no ``parsed`` result carries a date-only as_of.
+
+v6.1 (user decision 2026-11-09; frozen v6 at ``tests/query_parse_v6.py``):
+inheriting a moment from unambiguous context stays, but a newer non-parsed turn
+in the bounded context blocks it when its time is unresolved (day without time,
+word time, unknown zone, alternatives, an open time clarification), when it is
+an unsupported question with a time reference (future, whole day, period), or
+when it names a different moment. A non-parsed turn without any time
+expression, or with the same time, does not block. The state is stored
+structurally as ``time_state`` in the context turn; a new explicit time in the
+latest question is used.
 """
 import re
 from datetime import date, datetime, time, timedelta, timezone as _utc_mod, tzinfo
@@ -168,6 +178,10 @@ _STATUS = r"\bстатус\w*|\bсостояни\w*"
 
 # v6 C3: explicitly requested whole day (detection only)
 _WHOLE_DAY = r"\bвесь\s+день\b|\bв\s+течени[еи]\s+(?:[а-яё]+\s+)?дня\b"
+# v6.1: period labels that carry a time reference (a turn with one of them
+# blocks time inheritance); changes/comparison/history/«когда» carry none.
+_TIME_PERIOD_PATTERNS = tuple(p for p, label in _PERIOD_PATTERNS
+                              if label.startswith("вопрос о периоде") or label == "вопрос о будущем (прогноз)")
 
 
 def _result_unsupported(limitation: str, **extra) -> Dict[str, Any]:
@@ -654,9 +668,52 @@ def parse_question(question: str, known_objects: Sequence[Dict[str, Any]],
     # v2: record every positively mentioned known object, whatever the outcome.
     mentioned = sorted({i for m in mentions if not m["negated"] for i in m["ids"]})
     result = _parse(text, low, tokens, index, mentions, context, now, tz, timezone)
+    unresolved_time = result.pop("_time", False)
+    if result["kind"] != "parsed":  # v6.1: structured time state of a non-parsed turn
+        state = "unresolved" if unresolved_time else _time_state(text, low, index, now, tz)
+        if state is not None:
+            result["time_state"] = state
     if mentioned:
         result["mentioned_objects"] = mentioned
     return result
+
+
+def _time_state(text, low, index, now, tz):
+    """v6.1: 'unresolved', {'time_ref', 'as_of'} or None (no time expression)."""
+    if re.search(_WHOLE_DAY, low) or any(re.search(p, low) for p in _TIME_PERIOD_PATTERNS):
+        return "unresolved"
+    zone = _zone_in_text(text, low, {w for key in index for w in key})
+    if "clarify" in zone:
+        return "unresolved"
+    ref = _time_reference(low, now, zone["tz"] if zone.get("zone") else tz)
+    if ref is None:
+        return None
+    if ref.get("kind"):
+        return "unresolved"
+    return {"time_ref": ref["ref"], "as_of": ref["as_of"]}
+
+
+def _same_time(state, turn) -> bool:
+    if state.get("time_ref") != turn.get("time_ref"):
+        return False
+    if state["time_ref"] == "now":
+        return True
+    try:
+        return datetime.fromisoformat(state["as_of"]) == datetime.fromisoformat(turn["as_of"])
+    except (TypeError, ValueError):
+        return False
+
+
+def _inheritance_blocker(newer_turns, decided_turn):
+    """v6.1: a newer non-parsed turn with an unresolved or a different time blocks
+    inheriting the decided turn's time. Returns (turn, why) or None."""
+    for turn in newer_turns:
+        state = turn.get("time_state")
+        if state == "unresolved":
+            return turn, "время не разрешено или уточнение не завершено"
+        if isinstance(state, dict) and not _same_time(state, decided_turn):
+            return turn, "названо другое время (%s)" % state["as_of"]
+    return None
 
 
 def _parse(text, low, tokens, index, mentions, context, now, tz, timezone_param):
@@ -807,6 +864,7 @@ def _parse(text, low, tokens, index, mentions, context, now, tz, timezone_param)
         decided = None
         pending = set()  # v2: objects mentioned by later non-parsed turns (possible switch)
         turns = _bounded(context)
+        newer = []  # v6.1: non-parsed turns newer than the decided one
         for offset, turn in enumerate(reversed(turns), start=1):
             if turn.get("kind") == "parsed" and isinstance(turn.get("asked_object"), str):
                 decided = ("object", turn, offset)
@@ -818,6 +876,7 @@ def _parse(text, low, tokens, index, mentions, context, now, tz, timezone_param)
                 decided = ("ambiguous", turn, offset)
                 break
             pending |= {o for o in turn.get("mentioned_objects") or [] if isinstance(o, str)}
+            newer.append(turn)
         if pending and (decided is None or decided[0] == "ambiguous" or not pending <= {decided[1]["asked_object"]}):
             prior = set(decided[1]["asked_object"] if decided[0] == "object" else decided[1]["candidates"]) if decided else set()
             cands = sorted(pending | prior)
@@ -836,6 +895,9 @@ def _parse(text, low, tokens, index, mentions, context, now, tz, timezone_param)
                                    "предыдущая реплика не определила объект однозначно", cands)
         asked = turn["asked_object"]
         from_context = turn
+        blocker = _inheritance_blocker(newer, turn)
+        if blocker is not None:
+            from_context = dict(turn, _blocked_by=(blocker[0].get("question", ""), blocker[1]))
         explanation["asked_object"] = "из контекста: %d-я реплика с конца («%s») → объект %s" % (
             offset, turn.get("question", ""), asked) + (
             "; промежуточные реплики упоминали только этот объект" if pending else "")
@@ -870,9 +932,17 @@ def _parse_time_part(low, now, tz, zone, context, follow_up, from_context):
         _bounded(context)[-1] if follow_up and _bounded(context) else None)
     if ref is None and zone_note:
         if prior and prior.get("time_ref") == "absolute":
-            return ("result", _result_clarify(
+            r = _result_clarify(
                 "Пересчитать прежний момент в поясе «%s» или вы имеете в виду другой момент?" % zone["phrase"],
-                "пояс назван без момента; прежний момент был в другом поясе"))
+                "пояс назван без момента; прежний момент был в другом поясе")
+            r["_time"] = True  # v6.1: unfinished time clarification
+            return ("result", r)
+    if ref is None and prior and "_blocked_by" in prior:  # v6.1
+        r = _result_clarify("На какой момент нужен статус %s: сейчас или на конкретную дату и время?" % prior["asked_object"],
+                            "в более поздней реплике «%s» %s; момент реплики «%s» не наследуется"
+                            % (prior["_blocked_by"][0], prior["_blocked_by"][1], prior.get("question", "")))
+        r["_time"] = True
+        return ("result", r)
     if ref is None:
         prior_ref = prior.get("time_ref") if prior and prior.get("kind") == "parsed" else None
         if prior_ref == "now":
@@ -885,8 +955,10 @@ def _parse_time_part(low, now, tz, zone, context, follow_up, from_context):
             ref = {"ref": prior_ref, "as_of": prior["as_of"],
                    "why": "время не названо; унаследовано из предыдущей реплики: as_of %s" % prior["as_of"]}
         else:
-            return ("result", _result_clarify("На какой момент: сейчас или на конкретную дату и время?",
-                                              "время не указано; без него фильтр времени не включается, а молча его не выключаем"))
+            r = _result_clarify("На какой момент: сейчас или на конкретную дату и время?",
+                                "время не указано; без него фильтр времени не включается, а молча его не выключаем")
+            r["_time"] = True  # v6.1: unfinished time clarification
+            return ("result", r)
     return ("ref", ref, zone_note, zone.get("zone"))
 
 
@@ -904,6 +976,9 @@ def context_turn(question: str, result: Dict[str, Any]) -> Dict[str, Any]:
         turn["confirmed_object"] = result["confirmed_object"]
     if result.get("kind") != "parsed" and result.get("mentioned_objects"):
         turn["mentioned_objects"] = list(result["mentioned_objects"])  # v2: possible object switch
+    state = result.get("time_state")
+    if result.get("kind") != "parsed" and (state == "unresolved" or isinstance(state, dict)):
+        turn["time_state"] = state if state == "unresolved" else dict(state)  # v6.1
     return turn
 
 

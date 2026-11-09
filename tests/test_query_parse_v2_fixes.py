@@ -242,7 +242,11 @@ def test_mentions_without_prior_parsed_object_and_with_prior_ambiguity():
     # negated mention is not a possible switch
     ctx = _ctx("Какой статус L сейчас?", "Не L2, а L — что менялось за неделю?")
     assert ctx[1]["mentioned_objects"] == ["L"]
-    assert_run("А его статус?", {"asked_object": "L", "as_of": "2026-11-09T07:58:00+01:00"}, ctx)
+    # v6.1 rule change (user decision 2026-11-09): the intermediate turn asks about a period («за неделю»),
+    # so it now blocks inheriting «сейчас» -> time clarification. The object part of this check is unchanged:
+    # the negated L2 is not a possible switch (no object candidates are offered).
+    p = assert_not_run("А его статус?", ctx)
+    assert p["candidates"] == [] and p["question"].startswith("На какой момент нужен статус L")
     # explicit object in the follow-up is still honoured
     ctx = _ctx("Какой статус L сейчас?", "Был ли L2 готов вчера в 10:00?")
     assert_run("А какой статус L2 сейчас?", {"asked_object": "L2", "as_of": "2026-11-09T07:58:00+01:00"}, ctx)

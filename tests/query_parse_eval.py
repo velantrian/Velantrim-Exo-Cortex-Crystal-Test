@@ -71,14 +71,16 @@ V3_SPLITS = V2_SPLITS + ("counterexamples_v3",)
 V4_SPLITS = V2_SPLITS + ("counterexamples_v3_gold_v2", "counterexamples_v4")
 V6_SPLITS = ("dev_gold_v3", "heldout_gold_v2", "probes", "counterexamples_v2", "counterexamples_v3_gold_v2",
              "counterexamples_v4", "counterexamples_v5_gold_v2", "counterexamples_v6")
+V6_1_SPLITS = V6_SPLITS + ("counterexamples_v6_1",)
 V5_SPLITS = ("dev_gold_v2", "heldout", "probes", "counterexamples_v2", "counterexamples_v3_gold_v2", "counterexamples_v4",
              "counterexamples_v5")
 PARSERS = {"v1": parser_v1, "v2": parser_v2_frozen, "v3": parser_v3_frozen, "v4": parser_v4_frozen,
            "v5": parser_v5_frozen, "v6": parser_v6_frozen, "v6_1": parser_current}
-SPLITS = {"v1": V1_SPLITS, "v2": V2_SPLITS, "v3": V3_SPLITS, "v4": V4_SPLITS, "v5": V5_SPLITS, "v6": V6_SPLITS}
-PREVIOUS = {"v2": "v1", "v3": "v2", "v4": "v3", "v5": "v4", "v6": "v5"}
+SPLITS = {"v1": V1_SPLITS, "v2": V2_SPLITS, "v3": V3_SPLITS, "v4": V4_SPLITS, "v5": V5_SPLITS, "v6": V6_SPLITS, "v6_1": V6_1_SPLITS}
+PREVIOUS = {"v2": "v1", "v3": "v2", "v4": "v3", "v5": "v4", "v6": "v5", "v6_1": "v6"}
 PREV_LABEL = {"v2": "v1 snapshot, d550f3f", "v3": "v2 snapshot, eee4062", "v4": "v3 snapshot, a6d11f3",
-              "v5": "v4 snapshot, tag query-parse-v4-frozen", "v6": "v5 snapshot, tag query-parse-v5-frozen"}
+              "v5": "v4 snapshot, tag query-parse-v4-frozen", "v6": "v5 snapshot, tag query-parse-v5-frozen",
+              "v6_1": "v6 snapshot, tag query-parse-v6-frozen"}
 
 
 def load_split(split):
@@ -204,7 +206,8 @@ DEMO_V6 = (("G04", "Outcome 1 — correct answer"), ("G01", "Outcome 2 — usefu
            ("G08", "Outcome 3 — understandable limitation (unsupported, no query)"))
 DEMO_SPEC = {"v5": DEMO_V5, "v6": DEMO_V6}
 DEMO_IDS_BY = {"v1": DEMO_IDS, "v2": DEMO_IDS_V2, "v3": DEMO_IDS_V3, "v4": DEMO_IDS_V4,
-               "v5": tuple(i for i, _ in DEMO_V5), "v6": tuple(i for i, _ in DEMO_V6)}
+               "v5": tuple(i for i, _ in DEMO_V5), "v6": tuple(i for i, _ in DEMO_V6),
+               "v6_1": ("S01", "S11", "S14")}  # v6.1: blocked, new explicit time, positive control
 
 
 def demo(results, ids=DEMO_IDS, version="v1"):
@@ -282,7 +285,7 @@ def before_after(v2_results, version="v2"):
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
-    version = argv[argv.index("--version") + 1] if "--version" in argv else "v6"
+    version = argv[argv.index("--version") + 1] if "--version" in argv else "v6_1"
     parser = PARSERS[version]
     splits = SPLITS[version]
     results = [evaluate(s, parser) for s in splits]
@@ -322,6 +325,14 @@ def write(results, version):
             "results": [{"split": r["split"], "n": r["n"], "counts": r["counts"], "answers_differ": r["answers_differ"],
                          "not_correct": [x["id"] for x in r["rows"] if not x["category"].startswith("correct")]}
                         for r in prev]}
+    if version == "v6_1":
+        prev = [evaluate(s, PARSERS["v6"]) for s in SPLITS["v6_1"]]
+        payload["v6_snapshot_on_v6_1_sets"] = {
+            "_note": "frozen v6 parser (tests/query_parse_v6.py, = tag query-parse-v6-frozen) scored on the v6.1 sets "
+                     "(latest gold versions; no existing gold changed; counterexamples_v6_1 is new).",
+            "results": [{"split": r["split"], "n": r["n"], "counts": r["counts"], "answers_differ": r["answers_differ"],
+                         "not_correct": [x["id"] for x in r["rows"] if not x["category"].startswith("correct")]}
+                        for r in prev]}
     if version == "v5":
         prev = [evaluate(s, PARSERS["v4"]) for s in SPLITS["v5"]]
         payload["v4_snapshot_on_v5_sets"] = {
@@ -341,7 +352,7 @@ def write(results, version):
     if version != "v1":
         (OUT / f"before_after_{version}.json").write_text(
             json.dumps(before_after(results, version), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    if version in ("v3", "v4", "v5", "v6"):
+    if version in ("v3", "v4", "v5", "v6", "v6_1"):
         prev = PREVIOUS[version]
         perm = {"_note": "decision (kind, params, candidates, clarification/limitation text, mentioned_objects) for every "
                          "permutation of the split's catalogue x {names as given, names reversed}; 'changed' lists items "
