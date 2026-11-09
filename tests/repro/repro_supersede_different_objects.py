@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Reproduce supersede() with different objects on a main Crystal checkout.
 
-Read-only with respect to that checkout: uses a temporary SQLite DB and
-prints one JSON object to stdout. Set CRYSTAL_MAIN_ROOT to the Crystal
-tree (the directory that contains core/reconcile.py). This file is not a
-pytest test (name does not match test_*.py).
+Observation script, not a pytest regression test. Read-only with respect
+to that checkout: uses a temporary SQLite DB and prints one JSON object
+to stdout. Set CRYSTAL_MAIN_ROOT to the Crystal tree (the directory that
+contains core/reconcile.py).
 """
 from __future__ import annotations
 
+import argparse
 import inspect
 import json
 import os
@@ -16,6 +17,9 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
+
+DEFAULT_EXPECTED_HEAD = "ba8e84a4f8f24bdb816ea8fb89485f1dedccd0a3"
 
 
 def git_head(root: Path) -> str:
@@ -27,21 +31,95 @@ def git_head(root: Path) -> str:
         return f"unavailable:{exc}"
 
 
-def main() -> int:
+def git_dirty_status(root: Path) -> list[str]:
+    """Tracked changes and untracked files; do not skip untracked paths."""
+    try:
+        raw = subprocess.check_output(
+            ["git", "status", "--porcelain", "--untracked-files=all"],
+            cwd=str(root),
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        return [f"unavailable:{exc}"]
+    return [line for line in raw.splitlines() if line]
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Observe supersede() across different objects on a Crystal checkout."
+    )
+    parser.add_argument(
+        "--diagnostic",
+        action="store_true",
+        help="Run even if HEAD or cleanliness does not match the expected reproduction.",
+    )
+    return parser.parse_args(argv)
+
+
+def dump(payload: dict) -> None:
+    print(json.dumps(payload, ensure_ascii=False, indent=2))
+
+
+def checkout_identity(crystal: Path, expected_head: str) -> dict:
+    head = git_head(crystal)
+    dirty = git_dirty_status(crystal)
+    head_ok = head == expected_head
+    clean = dirty == []
+    return {
+        "expected_head": expected_head,
+        "crystal_head": head,
+        "head_matches_expected": head_ok,
+        "checkout_clean": clean,
+        "dirty_status": dirty,
+        "matches_reproduction_checkout": head_ok and clean,
+    }
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+    diagnostic = args.diagnostic or (
+        (os.environ.get("CRYSTAL_REPRO_DIAGNOSTIC") or "").strip() in
+        ("1", "true", "yes", "on")
+    )
+    expected_head = (
+        (os.environ.get("CRYSTAL_REPRO_EXPECTED_HEAD") or "").strip()
+        or DEFAULT_EXPECTED_HEAD
+    )
     raw = (os.environ.get("CRYSTAL_MAIN_ROOT") or "").strip()
     if not raw:
-        print(
-            "CRYSTAL_MAIN_ROOT is required (path to a main Crystal checkout)",
-            file=sys.stderr,
-        )
+        dump({
+            "error": "missing_crystal_main_root",
+            "message": "CRYSTAL_MAIN_ROOT is required (path to a main Crystal checkout)",
+            "mode": "error",
+            "reproduction_of_expected_head": False,
+        })
         return 2
     crystal = Path(raw).resolve()
     if not (crystal / "core" / "reconcile.py").is_file():
-        print(
-            f"CRYSTAL_MAIN_ROOT does not look like Crystal: {crystal}",
-            file=sys.stderr,
-        )
+        dump({
+            "error": "invalid_crystal_main_root",
+            "message": f"CRYSTAL_MAIN_ROOT does not look like Crystal: {crystal}",
+            "mode": "error",
+            "reproduction_of_expected_head": False,
+            "crystal_root": str(crystal),
+        })
         return 2
+
+    identity = checkout_identity(crystal, expected_head)
+    if not identity["matches_reproduction_checkout"] and not diagnostic:
+        dump({
+            "error": "checkout_not_reproducible",
+            "message": (
+                "CRYSTAL_MAIN_ROOT is not a clean checkout of the expected "
+                "commit. Re-run with --diagnostic or CRYSTAL_REPRO_DIAGNOSTIC=1 "
+                "to observe this tree without claiming a reproduction."
+            ),
+            "mode": "error",
+            "reproduction_of_expected_head": False,
+            "crystal_root": str(crystal),
+            **identity,
+        })
+        return 1
 
     work = Path(tempfile.mkdtemp(prefix="crystal-supersede-repro-"))
     os.environ["VELANTRIM_L3_BACKEND"] = "mock"
@@ -144,9 +222,15 @@ def main() -> int:
         return sorted(row.keys()) if isinstance(row, dict) else None
 
     report = {
+        "mode": "diagnostic" if diagnostic else "reproduction",
+        "reproduction_of_expected_head": identity["matches_reproduction_checkout"],
         "crystal_root": str(crystal),
-        "crystal_head": git_head(crystal),
-        "expected_head_prefix": "ba8e84a",
+        "expected_head": identity["expected_head"],
+        "crystal_head": identity["crystal_head"],
+        "head_matches_expected": identity["head_matches_expected"],
+        "checkout_clean": identity["checkout_clean"],
+        "dirty_status": identity["dirty_status"],
+        "expected_head_prefix": identity["expected_head"][:7],
         "temp_db": memory.SQLITE_PATH,
         "functions": {
             "supersede": {
