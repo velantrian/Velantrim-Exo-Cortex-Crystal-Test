@@ -1,0 +1,25 @@
+{
+  "runner_rc": 0,
+  "key_found": true,
+  "key_source": "ENV DEEPSEEK_API_KEY",
+  "model_in_body": "deepseek-flash",
+  "thinking_in_body": {
+    "type": "enabled"
+  },
+  "reasoning_effort_in_body": "high",
+  "max_tokens_in_body": 8192,
+  "stream_in_body": false,
+  "temperature_in_body": "<unset>",
+  "body_keys": [
+    "max_tokens",
+    "messages",
+    "model",
+    "reasoning_effort",
+    "stream",
+    "thinking"
+  ],
+  "provider_calls": 1,
+  "note": "Fake provider only. A POST to the fake client is not a chat/completions network call and is not counted against the three authorized live calls.",
+  "stderr_tail": "2026-11-10 06:44:38,758 [WARNING] velantrim.server: ⚠️  VELANTRIM_API_KEY не задан — сервер открыт без аутентификации (development-режим). В production это БАГ. Установи VELANTRIM_API_KEY.\n",
+  "titan_passes_high_mode": true
+}

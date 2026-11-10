@@ -1,0 +1,17 @@
+{
+  "kept": [
+    {
+      "fact_id": "g-m-closed-new",
+      "claim": "M is closed CORRECTION-CLOSED-MARKER"
+    }
+  ],
+  "excluded": [
+    {
+      "fact_id": "g-m-open-old",
+      "claim": "M is open SUPERSEDED-OPEN-MARKER"
+    }
+  ],
+  "canonical_view_excluded_fact_ids": [
+    "g-m-open-old"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "version": "lab-selection-fp-v1",
+  "canonical": "{\"as_of\":\"2026-11-09T12:00:00+01:00\",\"asked_object\":\"M\",\"grounds\":[{\"claim_sha256\":\"b1a1f01cb952386836e14eeb0a21a64de6d7f6bd477110045d8dc6b4046de543\",\"fact_id\":\"g-m-current\"}],\"temporal_scope\":\"current\",\"version\":\"lab-selection-fp-v1\"}",
+  "sha256": "315c47fde5a8482e0174e5fe71595e8eb49aceafbf6f6b093c13915f9d81605c",
+  "separate_from_receipt": true,
+  "proves_identical_context": false
+}

@@ -1,0 +1,84 @@
+{
+  "label": "квитанция ответа Crystal (не подтверждение ответа Titan)",
+  "certifies_titan_answer": false,
+  "receipt": {
+    "certifies_response": false,
+    "does_not_certify": [
+      "titan_generated_answer"
+    ],
+    "certifies": {
+      "admitted_fact_ids": [
+        "g-m-current"
+      ],
+      "claim_sha256": [
+        "b1a1f01cb952386836e14eeb0a21a64de6d7f6bd477110045d8dc6b4046de543"
+      ],
+      "admitted_claims": [
+        "M is operational MATCHING-GROUND-TEXT"
+      ],
+      "asked_object": "M",
+      "as_of": "2026-11-09T12:00:00+01:00",
+      "temporal_scope": "current",
+      "exclusions": [
+        {
+          "fact_id": "g-l-foreign",
+          "reason": "primary object differs; linked_objects does not transfer status"
+        },
+        {
+          "fact_id": "g-m-stale",
+          "reason": "historical observation does not cover as_of"
+        }
+      ]
+    },
+    "asked_object": "M",
+    "as_of": "2026-11-09T12:00:00+01:00",
+    "temporal_scope": "current",
+    "applicability": {
+      "exclusions": [
+        {
+          "fact_id": "g-l-foreign",
+          "reason": "primary object differs; linked_objects does not transfer status"
+        },
+        {
+          "fact_id": "g-m-stale",
+          "reason": "historical observation does not cover as_of"
+        }
+      ],
+      "historical_facts": [
+        {
+          "fact_id": "g-m-stale",
+          "claim": "M was in maintenance STALE-GROUND-MARKER",
+          "primary_object": "M",
+          "observed_at": "2026-10-01T10:00:00+01:00",
+          "use": "historical only, not current grounding"
+        }
+      ],
+      "context_relations": [],
+      "request_error": null
+    },
+    "admitted": [
+      {
+        "fact_id": "g-m-current",
+        "claim": "M is operational MATCHING-GROUND-TEXT",
+        "claim_sha256": "b1a1f01cb952386836e14eeb0a21a64de6d7f6bd477110045d8dc6b4046de543"
+      }
+    ],
+    "canonical_view_excluded_fact_ids": [],
+    "provenance_receipt": {
+      "version": 2,
+      "created_at": "2026-11-10T05:44:38.967383+00:00",
+      "query": "Какой статус у M сейчас?",
+      "answer": "M is operational MATCHING-GROUND-TEXT",
+      "citations": [
+        {
+          "fact_id": "g-m-current",
+          "claim_sha256": "b1a1f01cb952386836e14eeb0a21a64de6d7f6bd477110045d8dc6b4046de543",
+          "source": "operator-log:m-current",
+          "epistemic_state": "Validated",
+          "truth_status": "VERIFIED"
+        }
+      ],
+      "digest": "92d52beeac669bdbab5ec18be797ed2564cf2b3264ae7025a6bd9a9fdd3d0456"
+    }
+  }
+}

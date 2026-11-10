@@ -1,0 +1,20 @@
+{
+  "kept": [
+    {
+      "fact_id": "g-m-current",
+      "claim": "M is operational MATCHING-GROUND-TEXT"
+    }
+  ],
+  "excluded": [
+    {
+      "fact_id": "g-l-foreign",
+      "claim": "L is offline FOREIGN-OBJECT-MARKER"
+    },
+    {
+      "fact_id": "g-m-stale",
+      "claim": "M was in maintenance STALE-GROUND-MARKER"
+    }
+  ],
+  "canonical_view_excluded_fact_ids": [],
+  "excluded_claim_repair": "Post-hoc repair: the live abort list originally overwrote these claims with applicability exclusion rows that had no claim field. The saved boundary_request.flattened was checked independently for both claims, markers, fact_ids, sources and provenance ids; none were present. No extra model call was made."
+}

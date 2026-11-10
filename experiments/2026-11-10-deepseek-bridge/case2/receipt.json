@@ -1,0 +1,58 @@
+{
+  "label": "квитанция ответа Crystal (не подтверждение ответа Titan)",
+  "certifies_titan_answer": false,
+  "receipt": {
+    "certifies_response": false,
+    "does_not_certify": [
+      "titan_generated_answer"
+    ],
+    "certifies": {
+      "admitted_fact_ids": [
+        "g-m-not-operational"
+      ],
+      "claim_sha256": [
+        "79d7c6d66b24be0e9183dc3cc201ceeb312785f8bba5d74ae85f189ba2d29939"
+      ],
+      "admitted_claims": [
+        "M is NOT operational NEGATION-NOT-MARKER"
+      ],
+      "asked_object": "M",
+      "as_of": "2026-11-09T12:00:00+01:00",
+      "temporal_scope": "current",
+      "exclusions": []
+    },
+    "asked_object": "M",
+    "as_of": "2026-11-09T12:00:00+01:00",
+    "temporal_scope": "current",
+    "applicability": {
+      "exclusions": [],
+      "historical_facts": [],
+      "context_relations": [],
+      "request_error": null
+    },
+    "admitted": [
+      {
+        "fact_id": "g-m-not-operational",
+        "claim": "M is NOT operational NEGATION-NOT-MARKER",
+        "claim_sha256": "79d7c6d66b24be0e9183dc3cc201ceeb312785f8bba5d74ae85f189ba2d29939"
+      }
+    ],
+    "canonical_view_excluded_fact_ids": [],
+    "provenance_receipt": {
+      "version": 2,
+      "created_at": "2026-11-10T05:44:45.941851+00:00",
+      "query": "Какой статус у M сейчас?",
+      "answer": "M is NOT operational NEGATION-NOT-MARKER",
+      "citations": [
+        {
+          "fact_id": "g-m-not-operational",
+          "claim_sha256": "79d7c6d66b24be0e9183dc3cc201ceeb312785f8bba5d74ae85f189ba2d29939",
+          "source": "operator-log:m-not",
+          "epistemic_state": "Validated",
+          "truth_status": "VERIFIED"
+        }
+      ],
+      "digest": "bd6daf560738479fd96beaa15f9ed19729593d0f2f849f229b9e7a793287bc1c"
+    }
+  }
+}
