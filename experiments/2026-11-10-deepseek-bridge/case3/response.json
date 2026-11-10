@@ -1,0 +1,52 @@
+{
+  "http_status": 200,
+  "from_llm": true,
+  "reply_from_titan_chat": "**Кратко: по единственной записи в памяти M числится закрытой — но это неподтверждённые данные, а не верифицированный факт.**\n\nЧто именно есть в памяти:\n\n- Запись `g-m-closed-new` (source: `operator-log:m-closed-new`), содержимое: «M is closed», помечена как `CORRECTION-CLOSED-MARKER`.\n- `observed_at`: 2026-11-09 12:00 +01:00. Поля `valid_from` / `valid_until` пусты — окно действия не задано.\n- `confidence=1.00` — это внутренняя уверенность самой записи, а **не** признак верификации.\n\nОграничения, которые я обязан обозначить:\n\n1. Запись **не помечена** как `Validated` или `ImmutableCore`, поэтому её уровень достоверности — reported-only / непроверенное сообщение оператора. Преподносить её как подтверждённый статус M я не могу.\n2. Вопрос про «сейчас»: запись фиксирует состояние только на момент 2026-11-09 12:00 +01:00. Более поздних записей в предоставленном контексте нет, поэтому **текущий статус M не подтверждён** — он мог измениться после указанного времени.\n3. Пометка «CORRECTION» указывает, что запись, вероятно, исправляет более раннюю; но самих ранних записей в контексте нет, так что проверить, что именно она перекрывает, невозможно.\n\nИтог: «M закрыта» — это наиболее вероятная версия по имеющимся данным (единственная запись, консистентная, с высокой внутренней уверенностью), но для утверждения о статусе *сейчас* нужна валидированная запись или более свежее наблюдение. Если вы дадите более позднюю запись по M — смогу сопоставить и уточнить.",
+  "response_text": "**Кратко: по единственной записи в памяти M числится закрытой — но это неподтверждённые данные, а не верифицированный факт.**\n\nЧто именно есть в памяти:\n\n- Запись `g-m-closed-new` (source: `operator-log:m-closed-new`), содержимое: «M is closed», помечена как `CORRECTION-CLOSED-MARKER`.\n- `observed_at`: 2026-11-09 12:00 +01:00. Поля `valid_from` / `valid_until` пусты — окно действия не задано.\n- `confidence=1.00` — это внутренняя уверенность самой записи, а **не** признак верификации.\n\nОграничения, которые я обязан обозначить:\n\n1. Запись **не помечена** как `Validated` или `ImmutableCore`, поэтому её уровень достоверности — reported-only / непроверенное сообщение оператора. Преподносить её как подтверждённый статус M я не могу.\n2. Вопрос про «сейчас»: запись фиксирует состояние только на момент 2026-11-09 12:00 +01:00. Более поздних записей в предоставленном контексте нет, поэтому **текущий статус M не подтверждён** — он мог измениться после указанного времени.\n3. Пометка «CORRECTION» указывает, что запись, вероятно, исправляет более раннюю; но самих ранних записей в контексте нет, так что проверить, что именно она перекрывает, невозможно.\n\nИтог: «M закрыта» — это наиболее вероятная версия по имеющимся данным (единственная запись, консистентная, с высокой внутренней уверенностью), но для утверждения о статусе *сейчас* нужна валидированная запись или более свежее наблюдение. Если вы дадите более позднюю запись по M — смогу сопоставить и уточнить.",
+  "reasoning_content": "The user asks: \"What is the status of M now?\" The memory entry says: [source=operator-log:m-closed-new; object=M; observed_at=2026-11-09T12:00:00+01:00; ... confidence=1 | conf=1.00] M is closed CORRECTION-CLOSED-MARKER.\n\nKey boundary instruction: memory entries are context, not automatically verified evidence. Do not present an entry as verified unless explicitly marked Validated or ImmutableCore. This entry is source=operator-log, confidence=1.00, but not marked Validated or ImmutableCore. So it must be qualified as unverified/reported-only.\n\nAlso there's a \"now\" question — the observation is from 2026-11-09T12:00:00+01:00, which is a timestamp; whether that's \"now\" is unknown. Also the entry has valid_from/valid_until empty, so no validity window specified.\n\nAlso note the entry label says \"CORRECTION-CLOSED-MARKER\" and fact_id g-m-closed-new, suggesting a correction. But there may be older conflicting entries — only this one given.\n\nI should answer: According to the only memory entry available, M is recorded as closed, but this is a reported/operator-log entry, not verified; confidence field is 1.00 within that record, but that's the record's own confidence, not independent verification. Timestamp 2026-11-09 12:00 +01:00; I cannot confirm the current status if the present time is later. No validated entries.\n\nShould I note that \"now\" cannot be established? Yes, be honest: the record says closed as of that observation; current status unconfirmed without a validated source or a later entry. Also note it's a single entry, labeled a correction, so it may supersede earlier entries not present here.\n\nKeep it concise, in Russian.\n\nFormat: short answer with status qualification. Maybe a small list.",
+  "raw_response": {
+    "id": "ace7284e-b0f7-4701-9925-9f5f875a13d8",
+    "object": "chat.completion",
+    "created": 1794289490,
+    "model": "deepseek-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "**Кратко: по единственной записи в памяти M числится закрытой — но это неподтверждённые данные, а не верифицированный факт.**\n\nЧто именно есть в памяти:\n\n- Запись `g-m-closed-new` (source: `operator-log:m-closed-new`), содержимое: «M is closed», помечена как `CORRECTION-CLOSED-MARKER`.\n- `observed_at`: 2026-11-09 12:00 +01:00. Поля `valid_from` / `valid_until` пусты — окно действия не задано.\n- `confidence=1.00` — это внутренняя уверенность самой записи, а **не** признак верификации.\n\nОграничения, которые я обязан обозначить:\n\n1. Запись **не помечена** как `Validated` или `ImmutableCore`, поэтому её уровень достоверности — reported-only / непроверенное сообщение оператора. Преподносить её как подтверждённый статус M я не могу.\n2. Вопрос про «сейчас»: запись фиксирует состояние только на момент 2026-11-09 12:00 +01:00. Более поздних записей в предоставленном контексте нет, поэтому **текущий статус M не подтверждён** — он мог измениться после указанного времени.\n3. Пометка «CORRECTION» указывает, что запись, вероятно, исправляет более раннюю; но самих ранних записей в контексте нет, так что проверить, что именно она перекрывает, невозможно.\n\nИтог: «M закрыта» — это наиболее вероятная версия по имеющимся данным (единственная запись, консистентная, с высокой внутренней уверенностью), но для утверждения о статусе *сейчас* нужна валидированная запись или более свежее наблюдение. Если вы дадите более позднюю запись по M — смогу сопоставить и уточнить.",
+          "reasoning_content": "The user asks: \"What is the status of M now?\" The memory entry says: [source=operator-log:m-closed-new; object=M; observed_at=2026-11-09T12:00:00+01:00; ... confidence=1 | conf=1.00] M is closed CORRECTION-CLOSED-MARKER.\n\nKey boundary instruction: memory entries are context, not automatically verified evidence. Do not present an entry as verified unless explicitly marked Validated or ImmutableCore. This entry is source=operator-log, confidence=1.00, but not marked Validated or ImmutableCore. So it must be qualified as unverified/reported-only.\n\nAlso there's a \"now\" question — the observation is from 2026-11-09T12:00:00+01:00, which is a timestamp; whether that's \"now\" is unknown. Also the entry has valid_from/valid_until empty, so no validity window specified.\n\nAlso note the entry label says \"CORRECTION-CLOSED-MARKER\" and fact_id g-m-closed-new, suggesting a correction. But there may be older conflicting entries — only this one given.\n\nI should answer: According to the only memory entry available, M is recorded as closed, but this is a reported/operator-log entry, not verified; confidence field is 1.00 within that record, but that's the record's own confidence, not independent verification. Timestamp 2026-11-09 12:00 +01:00; I cannot confirm the current status if the present time is later. No validated entries.\n\nShould I note that \"now\" cannot be established? Yes, be honest: the record says closed as of that observation; current status unconfirmed without a validated source or a later entry. Also note it's a single entry, labeled a correction, so it may supersede earlier entries not present here.\n\nKeep it concise, in Russian.\n\nFormat: short answer with status qualification. Maybe a small list."
+        },
+        "logprobs": null,
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 287,
+      "completion_tokens": 872,
+      "total_tokens": 1159,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 419
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 287
+    },
+    "system_fingerprint": "bc19ba97cbe016479903222bb1578db6"
+  },
+  "error": null,
+  "latency_ms": 6752.91,
+  "llm_usage": {
+    "prompt_tokens": 287,
+    "completion_tokens": 872,
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 287,
+    "cache_note": "DeepSeek KV-cache: hit 0, miss 287"
+  },
+  "provider_calls": 1,
+  "runner_rc": 0,
+  "memory_saved": [],
+  "memory_auto_status": "off"
+}

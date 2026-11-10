@@ -1,0 +1,29 @@
+{
+  "capture_point": "httpx.AsyncClient.post",
+  "url": "https://api.deepseek.com/chat/completions",
+  "headers_redacted": {
+    "Authorization": "<redacted>",
+    "Content-Type": "application/json"
+  },
+  "body": {
+    "model": "deepseek-flash",
+    "messages": [
+      {
+        "role": "system",
+        "content": "[VELANTRIM REMOTE EPISTEMIC BOUNDARY]\nMemory entries are context, not automatically verified evidence. Do not present an entry as verified unless its text explicitly marks it Validated or ImmutableCore. Observed, Hypothesized, reported-only, and fallback memory must be qualified as unverified.\n\nТы — Velantrim ExoCortex, AI-агент с памятью, где записи могут иметь разный уровень подтверждения.\nИспользуй следующие записи памяти только как контекст и не повышай их уровень достоверности. Если записи не содержат ответа — скажи об этом честно.\n\nЗаписи памяти (часть может быть неподтверждённой):\n- [source=operator-log:m-current; object=M; observed_at=2026-11-09T12:00:00+01:00; valid_from=; valid_until=; provenance={\"origin\": \"fixture\", \"record\": \"PROV-M-CURRENT\"}; fact_id=g-m-current; confidence=1 | conf=1.00] M is operational MATCHING-GROUND-TEXT"
+      },
+      {
+        "role": "user",
+        "content": "Какой статус у M сейчас?"
+      }
+    ],
+    "max_tokens": 8192,
+    "stream": false,
+    "thinking": {
+      "type": "enabled"
+    },
+    "reasoning_effort": "high"
+  },
+  "prepared_matches_wire_body": true,
+  "prepared_matches_provider_received": true
+}

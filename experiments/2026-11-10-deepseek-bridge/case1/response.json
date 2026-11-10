@@ -1,0 +1,52 @@
+{
+  "http_status": 200,
+  "from_llm": true,
+  "reply_from_titan_chat": "## Что есть в памяти\n\nЕдинственная запись об M:\n\n- **Источник:** `operator-log:m-current` (origin: fixture, record: PROV-M-CURRENT)\n- **Содержание:** «M is operational» + пометка `MATCHING-GROUND-TEXT`\n- **Момент наблюдения:** `2026-11-09T12:00:00+01:00`\n- **Окно валидности:** `valid_from` и `valid_until` — **пустые**\n- **Confidence:** 1.00\n\n## Как это правильно интерпретировать\n\nЭта запись **не является подтверждённой**. Она не помечена ни как `Validated`, ни как `ImmutableCore`, поэтому её статус — наблюдение из операторского лога, то есть **непроверенные данные**. Я не могу повышать её достоверность: высокий `confidence=1.00` внутри записи — это атрибут самой записи, а не признак верификации.\n\nДаже если принять её как рабочую гипотезу, она отвечает не на ваш вопрос:\n\n1. **Это точечное наблюдение, а не текущее состояние.** Запись фиксирует состояние на момент `2026-11-09T12:00:00+01:00`. Что произошло после этой отметки — в памяти не отражено. Слово «сейчас» из неё не выводится.\n2. **Нет окна действия.** Пустые `valid_from`/`valid_until` означают, что запись не заявляет, на какой период она распространяется — ни начало, ни конец действия не определены.\n3. **Содержимое неинформативно по существу.** «Operational» — это общая характеристика, а `MATCHING-GROUND-TEXT` выглядит как служебная/заполняющая метка, а не как описание статуса.\n\n## Ответ\n\n**Проверенного статуса M на текущий момент у меня нет.** В памяти есть одна неподтверждённая запись операторского лога, согласно которой M был operational по состоянию на 2026-11-09T12:00+01:00, но:\n\n- достоверность записи не верифицирована;\n- период её действия не задан;\n- актуальность на «сейчас» из неё не следует.\n\nЕсли нужен подтверждённый статус — требуется свежий источник с явной пометкой `Validated`/`ImmutableCore` либо запись с заполненным `valid_until`, покрывающим текущий момент.",
+  "response_text": "## Что есть в памяти\n\nЕдинственная запись об M:\n\n- **Источник:** `operator-log:m-current` (origin: fixture, record: PROV-M-CURRENT)\n- **Содержание:** «M is operational» + пометка `MATCHING-GROUND-TEXT`\n- **Момент наблюдения:** `2026-11-09T12:00:00+01:00`\n- **Окно валидности:** `valid_from` и `valid_until` — **пустые**\n- **Confidence:** 1.00\n\n## Как это правильно интерпретировать\n\nЭта запись **не является подтверждённой**. Она не помечена ни как `Validated`, ни как `ImmutableCore`, поэтому её статус — наблюдение из операторского лога, то есть **непроверенные данные**. Я не могу повышать её достоверность: высокий `confidence=1.00` внутри записи — это атрибут самой записи, а не признак верификации.\n\nДаже если принять её как рабочую гипотезу, она отвечает не на ваш вопрос:\n\n1. **Это точечное наблюдение, а не текущее состояние.** Запись фиксирует состояние на момент `2026-11-09T12:00:00+01:00`. Что произошло после этой отметки — в памяти не отражено. Слово «сейчас» из неё не выводится.\n2. **Нет окна действия.** Пустые `valid_from`/`valid_until` означают, что запись не заявляет, на какой период она распространяется — ни начало, ни конец действия не определены.\n3. **Содержимое неинформативно по существу.** «Operational» — это общая характеристика, а `MATCHING-GROUND-TEXT` выглядит как служебная/заполняющая метка, а не как описание статуса.\n\n## Ответ\n\n**Проверенного статуса M на текущий момент у меня нет.** В памяти есть одна неподтверждённая запись операторского лога, согласно которой M был operational по состоянию на 2026-11-09T12:00+01:00, но:\n\n- достоверность записи не верифицирована;\n- период её действия не задан;\n- актуальность на «сейчас» из неё не следует.\n\nЕсли нужен подтверждённый статус — требуется свежий источник с явной пометкой `Validated`/`ImmutableCore` либо запись с заполненным `valid_until`, покрывающим текущий момент.",
+  "reasoning_content": "The user asks: \"What is M's status right now?\" Memory entry: [source=operator-log:m-current; object=M; observed_at=2026-11-09T12:00:00+01:00; ... confidence=1 | conf=1.00] M is operational MATCHING-GROUND-TEXT\n\nThis entry is not marked Validated or ImmutableCore. So per the boundary instruction, I must not present it as verified. It's an operator-log observation with confidence 1.00, but the rule says: only entries explicitly marked \"Validated\" or \"ImmutableCore\" count as verified. Observed/reported-only must be qualified as unverified.\n\nAlso note the timestamp: observed_at=2026-11-09T12:00:00+01:00 — a future date (relative to typical present). And \"now\" — the observation is from a specific time, so status \"now\" cannot be confirmed from a point-in-time log. Also the text \"MATCHING-GROUND-TEXT\" is odd placeholder.\n\nAlso valid_from and valid_until are empty — no validity window specified.\n\nI should answer: the only memory record says M is operational, observed at that timestamp, but it's unverified (not marked Validated/ImmutableCore), valid_from/valid_until are empty, and it's a point-in-time observation, so I can't confirm current status. I should be honest about lack of verified evidence.\n\nKeep it concise, in Russian.",
+  "raw_response": {
+    "id": "7f6d8934-a794-49eb-9074-2585a4b4f42e",
+    "object": "chat.completion",
+    "created": 1794289479,
+    "model": "deepseek-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "## Что есть в памяти\n\nЕдинственная запись об M:\n\n- **Источник:** `operator-log:m-current` (origin: fixture, record: PROV-M-CURRENT)\n- **Содержание:** «M is operational» + пометка `MATCHING-GROUND-TEXT`\n- **Момент наблюдения:** `2026-11-09T12:00:00+01:00`\n- **Окно валидности:** `valid_from` и `valid_until` — **пустые**\n- **Confidence:** 1.00\n\n## Как это правильно интерпретировать\n\nЭта запись **не является подтверждённой**. Она не помечена ни как `Validated`, ни как `ImmutableCore`, поэтому её статус — наблюдение из операторского лога, то есть **непроверенные данные**. Я не могу повышать её достоверность: высокий `confidence=1.00` внутри записи — это атрибут самой записи, а не признак верификации.\n\nДаже если принять её как рабочую гипотезу, она отвечает не на ваш вопрос:\n\n1. **Это точечное наблюдение, а не текущее состояние.** Запись фиксирует состояние на момент `2026-11-09T12:00:00+01:00`. Что произошло после этой отметки — в памяти не отражено. Слово «сейчас» из неё не выводится.\n2. **Нет окна действия.** Пустые `valid_from`/`valid_until` означают, что запись не заявляет, на какой период она распространяется — ни начало, ни конец действия не определены.\n3. **Содержимое неинформативно по существу.** «Operational» — это общая характеристика, а `MATCHING-GROUND-TEXT` выглядит как служебная/заполняющая метка, а не как описание статуса.\n\n## Ответ\n\n**Проверенного статуса M на текущий момент у меня нет.** В памяти есть одна неподтверждённая запись операторского лога, согласно которой M был operational по состоянию на 2026-11-09T12:00+01:00, но:\n\n- достоверность записи не верифицирована;\n- период её действия не задан;\n- актуальность на «сейчас» из неё не следует.\n\nЕсли нужен подтверждённый статус — требуется свежий источник с явной пометкой `Validated`/`ImmutableCore` либо запись с заполненным `valid_until`, покрывающим текущий момент.",
+          "reasoning_content": "The user asks: \"What is M's status right now?\" Memory entry: [source=operator-log:m-current; object=M; observed_at=2026-11-09T12:00:00+01:00; ... confidence=1 | conf=1.00] M is operational MATCHING-GROUND-TEXT\n\nThis entry is not marked Validated or ImmutableCore. So per the boundary instruction, I must not present it as verified. It's an operator-log observation with confidence 1.00, but the rule says: only entries explicitly marked \"Validated\" or \"ImmutableCore\" count as verified. Observed/reported-only must be qualified as unverified.\n\nAlso note the timestamp: observed_at=2026-11-09T12:00:00+01:00 — a future date (relative to typical present). And \"now\" — the observation is from a specific time, so status \"now\" cannot be confirmed from a point-in-time log. Also the text \"MATCHING-GROUND-TEXT\" is odd placeholder.\n\nAlso valid_from and valid_until are empty — no validity window specified.\n\nI should answer: the only memory record says M is operational, observed at that timestamp, but it's unverified (not marked Validated/ImmutableCore), valid_from/valid_until are empty, and it's a point-in-time observation, so I can't confirm current status. I should be honest about lack of verified evidence.\n\nKeep it concise, in Russian."
+        },
+        "logprobs": null,
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 279,
+      "completion_tokens": 902,
+      "total_tokens": 1181,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 314
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 279
+    },
+    "system_fingerprint": "bc19ba97cbe016479903222bb1578db6"
+  },
+  "error": null,
+  "latency_ms": 6548.68,
+  "llm_usage": {
+    "prompt_tokens": 279,
+    "completion_tokens": 902,
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 279,
+    "cache_note": "DeepSeek KV-cache: hit 0, miss 279"
+  },
+  "provider_calls": 1,
+  "runner_rc": 0,
+  "memory_saved": [],
+  "memory_auto_status": "off"
+}

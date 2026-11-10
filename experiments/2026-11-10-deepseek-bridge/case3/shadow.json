@@ -1,0 +1,23 @@
+{
+  "authority": "shadow",
+  "blocks": false,
+  "check_available": true,
+  "verdict": "supports",
+  "citation_in_prepared_context": [
+    {
+      "fact_id": "g-m-closed-new",
+      "in_prepared_context": true
+    }
+  ],
+  "missing_from_prepared_context": [],
+  "supports": [
+    "g-m-closed-new"
+  ],
+  "matched_outside_prepared_context": [],
+  "contradicts": [],
+  "insufficient": [],
+  "cited_excluded": [],
+  "ambiguous_source_labels": {},
+  "source_ambiguity_in_answer": [],
+  "limits": "Lexical heuristics only. Not a model, not Crystal CanonicalView, and not Titan OutputFaithfulnessChecker. Never blocks."
+}

@@ -1,0 +1,32 @@
+{
+  "id": "case1",
+  "title": "matching M + foreign L + stale M",
+  "admitted": [
+    {
+      "fact_id": "g-m-current",
+      "claim": "M is operational MATCHING-GROUND-TEXT"
+    }
+  ],
+  "excluded": [
+    {
+      "fact_id": "g-l-foreign",
+      "claim": "L is offline FOREIGN-OBJECT-MARKER"
+    },
+    {
+      "fact_id": "g-m-stale",
+      "claim": "M was in maintenance STALE-GROUND-MARKER"
+    }
+  ],
+  "boundary_ok": true,
+  "boundary_problems": [],
+  "provider_calls": 1,
+  "cumulative_provider_calls": 1,
+  "http_status": 200,
+  "from_llm": true,
+  "response_text": "## Что есть в памяти\n\nЕдинственная запись об M:\n\n- **Источник:** `operator-log:m-current` (origin: fixture, record: PROV-M-CURRENT)\n- **Содержание:** «M is operational» + пометка `MATCHING-GROUND-TEXT`\n- **Момент наблюдения:** `2026-11-09T12:00:00+01:00`\n- **Окно валидности:** `valid_from` и `valid_until` — **пустые**\n- **Confidence:** 1.00\n\n## Как это правильно интерпретировать\n\nЭта запись **не является подтверждённой**. Она не помечена ни как `Validated`, ни как `ImmutableCore`, поэтому её статус — наблюдение из операторского лога, то есть **непроверенные данные**. Я не могу повышать её достоверность: высокий `confidence=1.00` внутри записи — это атрибут самой записи, а не признак верификации.\n\nДаже если принять её как рабочую гипотезу, она отвечает не на ваш вопрос:\n\n1. **Это точечное наблюдение, а не текущее состояние.** Запись фиксирует состояние на момент `2026-11-09T12:00:00+01:00`. Что произошло после этой отметки — в памяти не отражено. Слово «сейчас» из неё не выводится.\n2. **Нет окна действия.** Пустые `valid_from`/`valid_until` означают, что запись не заявляет, на какой период она распространяется — ни начало, ни конец действия не определены.\n3. **Содержимое неинформативно по существу.** «Operational» — это общая характеристика, а `MATCHING-GROUND-TEXT` выглядит как служебная/заполняющая метка, а не как описание статуса.\n\n## Ответ\n\n**Проверенного статуса M на текущий момент у меня нет.** В памяти есть одна неподтверждённая запись операторского лога, согласно которой M был operational по состоянию на 2026-11-09T12:00+01:00, но:\n\n- достоверность записи не верифицирована;\n- период её действия не задан;\n- актуальность на «сейчас» из неё не следует.\n\nЕсли нужен подтверждённый статус — требуется свежий источник с явной пометкой `Validated`/`ImmutableCore` либо запись с заполненным `valid_until`, покрывающим текущий момент.",
+  "reasoning_present": true,
+  "error": null,
+  "shadow_verdict": "contradicts",
+  "criteria": "Ответ передаёт допущенный статус M (operational / MATCHING-GROUND-TEXT) и не приписывает M статус L и не опирается на устаревшую запись о maintenance.",
+  "excluded_claim_repair": "Post-hoc repair: the live abort list originally overwrote these claims with applicability exclusion rows that had no claim field. The saved boundary_request.flattened was checked independently for both claims, markers, fact_ids, sources and provenance ids; none were present. No extra model call was made."
+}

@@ -1,0 +1,643 @@
+[
+ {
+  "split": "dev_gold_v3",
+  "id": "D07",
+  "question": "Какой статус L сегодня?",
+  "context_v5": [],
+  "context_v6": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v5": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-09",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какое время сегодня нужен статус? Укажите время, например «сегодня в 10:00».",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "heldout_gold_v2",
+  "id": "H11",
+  "question": "Какой статус был у L в течение вчерашнего дня?",
+  "context_v5": [],
+  "context_v6": [],
+  "gold": {
+   "kind": "unsupported"
+  },
+  "v5": {
+   "kind": "unsupported",
+   "params": null,
+   "clarification": null,
+   "limitation": "Первая версия разбирает только статус одного объекта на один момент; вопрос о периоде («в течение …») не поддерживается.",
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_unsupported",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  },
+  "v6": {
+   "kind": "unsupported",
+   "params": null,
+   "clarification": null,
+   "limitation": "Проверка состояния за весь день разборщиком пока не поддерживается; укажите момент (например «8 ноября в 10:00») или «сейчас».",
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_unsupported",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "heldout_gold_v2",
+  "id": "H12",
+  "question": "Что с L сегодня по статусу?",
+  "context_v5": [],
+  "context_v6": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v5": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-09",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какое время сегодня нужен статус? Укажите время, например «сегодня в 10:00».",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v5_gold_v2",
+  "id": "V16",
+  "question": "Какой статус L сегодня?",
+  "context_v5": [],
+  "context_v6": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v5": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-09",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какое время сегодня нужен статус? Укажите время, например «сегодня в 10:00».",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v5_gold_v2",
+  "id": "V17",
+  "question": "Какой статус L был вчера?",
+  "context_v5": [],
+  "context_v6": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v5": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  },
+  "v6": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какое время вчера нужен статус? Укажите время, например «вчера в 10:00».",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v5_gold_v2",
+  "id": "V18",
+  "question": "Какой статус L был весь день 7 ноября?",
+  "context_v5": [],
+  "context_v6": [],
+  "gold": {
+   "kind": "unsupported"
+  },
+  "v5": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какое время 7 ноября нужен статус? Укажите время, например «7 ноября в 10:00».",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "clarification_instead_of_unsupported",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  },
+  "v6": {
+   "kind": "unsupported",
+   "params": null,
+   "clarification": null,
+   "limitation": "Проверка состояния за весь день разборщиком пока не поддерживается; укажите момент (например «8 ноября в 10:00») или «сейчас».",
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_unsupported",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v5_gold_v2",
+  "id": "V19",
+  "question": "Какой статус L весь день сегодня?",
+  "context_v5": [],
+  "context_v6": [],
+  "gold": {
+   "kind": "unsupported"
+  },
+  "v5": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-09",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6": {
+   "kind": "unsupported",
+   "params": null,
+   "clarification": null,
+   "limitation": "Проверка состояния за весь день разборщиком пока не поддерживается; укажите момент (например «8 ноября в 10:00») или «сейчас».",
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_unsupported",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6",
+  "id": "G01",
+  "question": "Какой статус L сегодня?",
+  "context_v5": [],
+  "context_v6": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v5": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-09",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какое время сегодня нужен статус? Укажите время, например «сегодня в 10:00».",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6",
+  "id": "G02",
+  "question": "Какой статус L был вчера?",
+  "context_v5": [],
+  "context_v6": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v5": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  },
+  "v6": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какое время вчера нужен статус? Укажите время, например «вчера в 10:00».",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6",
+  "id": "G08",
+  "question": "Какой статус L был весь день 7 ноября?",
+  "context_v5": [],
+  "context_v6": [],
+  "gold": {
+   "kind": "unsupported"
+  },
+  "v5": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какое время 7 ноября нужен статус? Укажите время, например «7 ноября в 10:00».",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "clarification_instead_of_unsupported",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  },
+  "v6": {
+   "kind": "unsupported",
+   "params": null,
+   "clarification": null,
+   "limitation": "Проверка состояния за весь день разборщиком пока не поддерживается; укажите момент (например «8 ноября в 10:00») или «сейчас».",
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_unsupported",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6",
+  "id": "G09",
+  "question": "Какой статус L весь день сегодня?",
+  "context_v5": [],
+  "context_v6": [],
+  "gold": {
+   "kind": "unsupported"
+  },
+  "v5": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-09",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6": {
+   "kind": "unsupported",
+   "params": null,
+   "clarification": null,
+   "limitation": "Проверка состояния за весь день разборщиком пока не поддерживается; укажите момент (например «8 ноября в 10:00») или «сейчас».",
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_unsupported",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6",
+  "id": "G10",
+  "question": "Какой статус L был за весь день вчера?",
+  "context_v5": [],
+  "context_v6": [],
+  "gold": {
+   "kind": "unsupported"
+  },
+  "v5": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-08",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  },
+  "v6": {
+   "kind": "unsupported",
+   "params": null,
+   "clarification": null,
+   "limitation": "Проверка состояния за весь день разборщиком пока не поддерживается; укажите момент (например «8 ноября в 10:00») или «сейчас».",
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_unsupported",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6",
+  "id": "G11",
+  "question": "Какой статус L был в течение дня 8 ноября?",
+  "context_v5": [],
+  "context_v6": [],
+  "gold": {
+   "kind": "unsupported"
+  },
+  "v5": {
+   "kind": "unsupported",
+   "params": null,
+   "clarification": null,
+   "limitation": "Первая версия разбирает только статус одного объекта на один момент; вопрос о периоде («в течение …») не поддерживается.",
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_unsupported",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  },
+  "v6": {
+   "kind": "unsupported",
+   "params": null,
+   "clarification": null,
+   "limitation": "Проверка состояния за весь день разборщиком пока не поддерживается; укажите момент (например «8 ноября в 10:00») или «сейчас».",
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_unsupported",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6",
+  "id": "G18",
+  "question": "А его статус?",
+  "context_v5": [
+   {
+    "question": "Какой статус L сегодня?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "date",
+    "as_of": "2026-11-09"
+   }
+  ],
+  "context_v6": [
+   {
+    "question": "Какой статус L сегодня?",
+    "kind": "needs_clarification",
+    "mentioned_objects": [
+     "L"
+    ]
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v5": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-09",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Уточните, о каком объекте: L? После последнего разобранного вопроса упоминался другой объект.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6",
+  "id": "G19",
+  "question": "А сегодня?",
+  "context_v5": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  ],
+  "context_v6": [
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v5": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "L",
+    "as_of": "2026-11-09",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "L-ready"
+   ],
+   "grounds_answer": "L: статус — готов",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какое время сегодня нужен статус? Укажите время, например «сегодня в 10:00».",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v6",
+  "id": "G21",
+  "question": "P1",
+  "context_v5": [
+   {
+    "question": "Какой статус Пульсара сегодня?",
+    "kind": "needs_clarification",
+    "candidates": [
+     "P1",
+     "P2"
+    ],
+    "pending_time": {
+     "time_ref": "date",
+     "as_of": "2026-11-09",
+     "tz": null
+    },
+    "mentioned_objects": [
+     "P1",
+     "P2"
+    ]
+   }
+  ],
+  "context_v6": [
+   {
+    "question": "Какой статус Пульсара сегодня?",
+    "kind": "needs_clarification",
+    "candidates": [
+     "P1",
+     "P2"
+    ],
+    "mentioned_objects": [
+     "P1",
+     "P2"
+    ]
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v5": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "P1",
+    "as_of": "2026-11-09",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "P1-test"
+   ],
+   "grounds_answer": "P1: статус — на испытаниях",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v6": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Выбран объект P1. На какой момент: сейчас или на конкретную дату и время?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ }
+]

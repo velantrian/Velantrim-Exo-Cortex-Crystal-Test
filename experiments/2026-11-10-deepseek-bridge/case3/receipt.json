@@ -1,0 +1,60 @@
+{
+  "label": "квитанция ответа Crystal (не подтверждение ответа Titan)",
+  "certifies_titan_answer": false,
+  "receipt": {
+    "certifies_response": false,
+    "does_not_certify": [
+      "titan_generated_answer"
+    ],
+    "certifies": {
+      "admitted_fact_ids": [
+        "g-m-closed-new"
+      ],
+      "claim_sha256": [
+        "db0ca1592280a78f16566cce8515965fee6cade7a2da2b42064d3603e2ac167a"
+      ],
+      "admitted_claims": [
+        "M is closed CORRECTION-CLOSED-MARKER"
+      ],
+      "asked_object": "M",
+      "as_of": "2026-11-09T12:00:00+01:00",
+      "temporal_scope": "current",
+      "exclusions": []
+    },
+    "asked_object": "M",
+    "as_of": "2026-11-09T12:00:00+01:00",
+    "temporal_scope": "current",
+    "applicability": {
+      "exclusions": [],
+      "historical_facts": [],
+      "context_relations": [],
+      "request_error": null
+    },
+    "admitted": [
+      {
+        "fact_id": "g-m-closed-new",
+        "claim": "M is closed CORRECTION-CLOSED-MARKER",
+        "claim_sha256": "db0ca1592280a78f16566cce8515965fee6cade7a2da2b42064d3603e2ac167a"
+      }
+    ],
+    "canonical_view_excluded_fact_ids": [
+      "g-m-open-old"
+    ],
+    "provenance_receipt": {
+      "version": 2,
+      "created_at": "2026-11-10T05:44:50.312985+00:00",
+      "query": "Какой статус у M сейчас?",
+      "answer": "M is closed CORRECTION-CLOSED-MARKER",
+      "citations": [
+        {
+          "fact_id": "g-m-closed-new",
+          "claim_sha256": "db0ca1592280a78f16566cce8515965fee6cade7a2da2b42064d3603e2ac167a",
+          "source": "operator-log:m-closed-new",
+          "epistemic_state": "Validated",
+          "truth_status": "VERIFIED"
+        }
+      ],
+      "digest": "e50819c3bd2992fab4edf511e5086f425dcef8561e02dbc886b4b65653092053"
+    }
+  }
+}

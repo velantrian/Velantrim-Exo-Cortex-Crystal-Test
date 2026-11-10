@@ -1,0 +1,38 @@
+{
+  "experiment_id": "2026-11-10-deepseek-bridge",
+  "frozen_at": "2026-11-10T06:44:38+01:00",
+  "timezone": "Europe/Berlin",
+  "question": "Какой статус у M сейчас?",
+  "model_id": "deepseek-flash",
+  "model_served_as": "DeepSeek-V4.1-Flash-1017",
+  "model_id_sources": [
+    "https://api-docs.deepseek.com/ — use deepseek-flash; served by DeepSeek-V4.1-Flash-1017",
+    "GET https://api.deepseek.com/models returned [deepseek-flash, deepseek-v4-pro]"
+  ],
+  "dated_id_not_on_official_api": "deepseek-v4.1-flash-1017",
+  "thinking_mode_requested": "high",
+  "provider_parameters": {
+    "thinking": {
+      "type": "enabled"
+    },
+    "reasoning_effort": "high"
+  },
+  "titan_request_fields": {
+    "ChatRequest.llm_model": "deepseek-flash",
+    "ChatRequest.deepseek_thinking": "high",
+    "ChatRequest.llm_max_tokens": 8192,
+    "ChatRequest.auto_save_memory": false
+  },
+  "temperature": null,
+  "temperature_note": "Titan core.llm_router._deepseek_request_body does not set temperature or other sampling parameters; the provider default applies.",
+  "max_tokens": 8192,
+  "stream": false,
+  "titan_http_timeout_seconds": 218.0,
+  "auto_save_memory": false,
+  "persist_to_system": false,
+  "include_system_guide": false,
+  "titan_commit": "6b45854f57ca90516b86b2c48b284c88857bc2c2",
+  "crystal_test_commit_at_freeze": "d46ff2da44ae1e376774d5a096bb598e72b62ecb",
+  "max_provider_chat_completions_calls": 3,
+  "preflight_ok": true
+}

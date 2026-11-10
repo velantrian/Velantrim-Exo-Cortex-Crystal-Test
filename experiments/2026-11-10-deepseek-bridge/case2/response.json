@@ -1,0 +1,52 @@
+{
+  "http_status": 200,
+  "from_llm": true,
+  "reply_from_titan_chat": "По имеющимся записям памяти:\n\n- **Запись (operator-log, `g-m-not-operational`)**: «M is **NOT** operational» — то есть M **не работает / не в эксплуатации**.\n- **Время наблюдения**: 2026-11-09T12:00:00+01:00.\n- **Достоверность**: confidence=1.00, происхождение — fixture (PROV-M-NOT).\n\n⚠️ Важные оговорки:\n1. Эта запись **не помечена как Validated или ImmutableCore**, поэтому она остаётся **непроверенным контекстом**, а не подтверждённым фактом. Я не могу повышать её уровень достоверности.\n2. Запись содержит отрицание («NOT operational») — статус именно **не операционен**, а не наоборот.\n3. Она датирована 2026-11-09; насколько она актуальна «сейчас» — из памяти не следует. Других записей, подтверждающих или опровергающих этот статус, в предоставленном контексте нет.\n\nИтог: по неподтверждённой записи операторского лога M числится как **не операционный**, но это требует независимой проверки для утверждения о текущем статусе.",
+  "response_text": "По имеющимся записям памяти:\n\n- **Запись (operator-log, `g-m-not-operational`)**: «M is **NOT** operational» — то есть M **не работает / не в эксплуатации**.\n- **Время наблюдения**: 2026-11-09T12:00:00+01:00.\n- **Достоверность**: confidence=1.00, происхождение — fixture (PROV-M-NOT).\n\n⚠️ Важные оговорки:\n1. Эта запись **не помечена как Validated или ImmutableCore**, поэтому она остаётся **непроверенным контекстом**, а не подтверждённым фактом. Я не могу повышать её уровень достоверности.\n2. Запись содержит отрицание («NOT operational») — статус именно **не операционен**, а не наоборот.\n3. Она датирована 2026-11-09; насколько она актуальна «сейчас» — из памяти не следует. Других записей, подтверждающих или опровергающих этот статус, в предоставленном контексте нет.\n\nИтог: по неподтверждённой записи операторского лога M числится как **не операционный**, но это требует независимой проверки для утверждения о текущем статусе.",
+  "reasoning_content": "The user asks: \"What is the status of M now?\" The memory entry says: \"M is NOT operational NEGATION-NOT-MARKER\" with source operator-log, observed_at 2026-11-09T12:00:00+01:00, confidence=1.00, but no Validated or ImmutableCore marker. So it's context, unverified. Also it's a negation: M is NOT operational.\n\nI should answer honestly: according to the operator log entry (unverified, observed at 2026-11-09T12:00+01:00), M is stated as not operational. But I must qualify it as unverified, not confirmed. Also note timing: \"now\" — the record is from 2026-11-09, possibly stale.\n\nAnswer in Russian.",
+  "raw_response": {
+    "id": "40c093c4-7ab5-4365-b877-31f70a70d748",
+    "object": "chat.completion",
+    "created": 1794289486,
+    "model": "deepseek-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "По имеющимся записям памяти:\n\n- **Запись (operator-log, `g-m-not-operational`)**: «M is **NOT** operational» — то есть M **не работает / не в эксплуатации**.\n- **Время наблюдения**: 2026-11-09T12:00:00+01:00.\n- **Достоверность**: confidence=1.00, происхождение — fixture (PROV-M-NOT).\n\n⚠️ Важные оговорки:\n1. Эта запись **не помечена как Validated или ImmutableCore**, поэтому она остаётся **непроверенным контекстом**, а не подтверждённым фактом. Я не могу повышать её уровень достоверности.\n2. Запись содержит отрицание («NOT operational») — статус именно **не операционен**, а не наоборот.\n3. Она датирована 2026-11-09; насколько она актуальна «сейчас» — из памяти не следует. Других записей, подтверждающих или опровергающих этот статус, в предоставленном контексте нет.\n\nИтог: по неподтверждённой записи операторского лога M числится как **не операционный**, но это требует независимой проверки для утверждения о текущем статусе.",
+          "reasoning_content": "The user asks: \"What is the status of M now?\" The memory entry says: \"M is NOT operational NEGATION-NOT-MARKER\" with source operator-log, observed_at 2026-11-09T12:00:00+01:00, confidence=1.00, but no Validated or ImmutableCore marker. So it's context, unverified. Also it's a negation: M is NOT operational.\n\nI should answer honestly: according to the operator log entry (unverified, observed at 2026-11-09T12:00+01:00), M is stated as not operational. But I must qualify it as unverified, not confirmed. Also note timing: \"now\" — the record is from 2026-11-09, possibly stale.\n\nAnswer in Russian."
+        },
+        "logprobs": null,
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 282,
+      "completion_tokens": 465,
+      "total_tokens": 747,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 171
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 282
+    },
+    "system_fingerprint": "bc19ba97cbe016479903222bb1578db6"
+  },
+  "error": null,
+  "latency_ms": 3868.44,
+  "llm_usage": {
+    "prompt_tokens": 282,
+    "completion_tokens": 465,
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 282,
+    "cache_note": "DeepSeek KV-cache: hit 0, miss 282"
+  },
+  "provider_calls": 1,
+  "runner_rc": 0,
+  "memory_saved": [],
+  "memory_auto_status": "off"
+}

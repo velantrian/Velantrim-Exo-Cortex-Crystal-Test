@@ -1,0 +1,1181 @@
+[
+ {
+  "split": "dev",
+  "id": "D13",
+  "question": "Какой статус Пульсара сейчас?",
+  "context_v3": [],
+  "context_v4": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Название «Пульсара» подходит к нескольким объектам: P1, P2. Какой из них?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  },
+  "v4": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Форма «Пульсара» подходит к нескольким объектам: P1 (через склонение «пульсар»), P2 (через склонение «пульсар»). Какой из них?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "heldout",
+  "id": "H20",
+  "question": "Что сейчас со статусом Пульсара?",
+  "context_v3": [],
+  "context_v4": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Название «Пульсара» подходит к нескольким объектам: P1, P2. Какой из них?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  },
+  "v4": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Форма «Пульсара» подходит к нескольким объектам: P1 (через склонение «пульсар»), P2 (через склонение «пульсар»). Какой из них?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3_gold_v2",
+  "id": "K20",
+  "question": "Какой статус Моста сейчас?",
+  "context_v3": [],
+  "context_v4": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v3": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "Y",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "Y-open"
+   ],
+   "grounds_answer": "Y: статус — открыт",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v4": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Форма «Моста» подходит к нескольким объектам: M (через склонение «мост»), Y (точное название «моста»). Какой из них?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3_gold_v2",
+  "id": "K21",
+  "question": "Какой статус Мостами сейчас?",
+  "context_v3": [],
+  "context_v4": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Название «Мостами» подходит к нескольким объектам: M, Y. Какой из них?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  },
+  "v4": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Форма «Мостами» подходит к нескольким объектам: M (через склонение «мост»), Y (через склонение «моста»). Какой из них?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v3_gold_v2",
+  "id": "K23",
+  "question": "Какой статус Пульсаром сейчас?",
+  "context_v3": [],
+  "context_v4": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Название «Пульсаром» подходит к нескольким объектам: P1, P2. Какой из них?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  },
+  "v4": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Форма «Пульсаром» подходит к нескольким объектам: P1 (через склонение «пульсар»), P2 (через склонение «пульсар»). Какой из них?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v4",
+  "id": "E03",
+  "question": "Какой статус Моста (объект M) сейчас?",
+  "context_v3": [],
+  "context_v4": [],
+  "gold": {
+   "kind": "parsed",
+   "asked_object": "M",
+   "as_of": "2026-11-09T07:58:00+01:00"
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "О каком объекте вопрос: M, Y? Первая версия отвечает про один объект.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "unnecessary_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": true
+  },
+  "v4": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "M",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "M-works"
+   ],
+   "grounds_answer": "M: статус — работает",
+   "category": "correct_parse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v4",
+  "id": "E05",
+  "question": "Какой статус Моста (объект L) сейчас?",
+  "context_v3": [],
+  "context_v4": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "О каком объекте вопрос: L, Y? Первая версия отвечает про один объект.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  },
+  "v4": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "О каком объекте вопрос: L, M, Y? Явный идентификатор не согласуется с остальными упоминаниями.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v4",
+  "id": "E06",
+  "question": "Какой статус Моста и объекта Y сейчас?",
+  "context_v3": [],
+  "context_v4": [],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v3": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "Y",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "Y-open"
+   ],
+   "grounds_answer": "Y: статус — открыт",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v4": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "О каком объекте вопрос: M, Y? Явный идентификатор не согласуется с остальными упоминаниями.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v4",
+  "id": "E08",
+  "question": "Какой статус Пульсара (объект P2) сейчас?",
+  "context_v3": [],
+  "context_v4": [],
+  "gold": {
+   "kind": "parsed",
+   "asked_object": "P2",
+   "as_of": "2026-11-09T07:58:00+01:00"
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "О каком объекте вопрос: P1, P2? Первая версия отвечает про один объект.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "unnecessary_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": true
+  },
+  "v4": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "P2",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "P2-idle"
+   ],
+   "grounds_answer": "P2: статус — простаивает",
+   "category": "correct_parse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v4",
+  "id": "F01",
+  "question": "M",
+  "context_v3": [
+   {
+    "question": "Какой статус Моста сейчас?",
+    "kind": "parsed",
+    "asked_object": "Y",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  ],
+  "context_v4": [
+   {
+    "question": "Какой статус Моста сейчас?",
+    "kind": "needs_clarification",
+    "candidates": [
+     "M",
+     "Y"
+    ],
+    "pending_time": {
+     "time_ref": "now",
+     "as_of": "2026-11-09T07:58:00+01:00",
+     "tz": null
+    },
+    "mentioned_objects": [
+     "M",
+     "Y"
+    ]
+   }
+  ],
+  "gold": {
+   "kind": "parsed",
+   "asked_object": "M",
+   "as_of": "2026-11-09T07:58:00+01:00"
+  },
+  "v3": {
+   "kind": "unsupported",
+   "params": null,
+   "clarification": null,
+   "limitation": "Первая версия разбирает только вопросы о статусе/состоянии объекта.",
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "wrong_unsupported",
+   "query_called": false,
+   "answers_differ_from_manual": true
+  },
+  "v4": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "M",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "M-works"
+   ],
+   "grounds_answer": "M: статус — работает",
+   "category": "correct_parse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v4",
+  "id": "F02",
+  "question": "А его статус сейчас?",
+  "context_v3": [
+   {
+    "question": "Какой статус Моста сейчас?",
+    "kind": "parsed",
+    "asked_object": "Y",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "M",
+    "kind": "unsupported",
+    "mentioned_objects": [
+     "M"
+    ]
+   }
+  ],
+  "context_v4": [
+   {
+    "question": "Какой статус Моста сейчас?",
+    "kind": "needs_clarification",
+    "candidates": [
+     "M",
+     "Y"
+    ],
+    "pending_time": {
+     "time_ref": "now",
+     "as_of": "2026-11-09T07:58:00+01:00",
+     "tz": null
+    },
+    "mentioned_objects": [
+     "M",
+     "Y"
+    ]
+   },
+   {
+    "question": "M",
+    "kind": "parsed",
+    "asked_object": "M",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "confirmed_object": "M"
+   }
+  ],
+  "gold": {
+   "kind": "parsed",
+   "asked_object": "M",
+   "as_of": "2026-11-09T07:58:00+01:00"
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Уточните, о каком объекте: M, Y? После последнего разобранного вопроса упоминался другой объект.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "unnecessary_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": true
+  },
+  "v4": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "M",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "M-works"
+   ],
+   "grounds_answer": "M: статус — работает",
+   "category": "correct_parse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v4",
+  "id": "F04",
+  "question": "Какой статус Моста сейчас?",
+  "context_v3": [
+   {
+    "question": "Какой статус Моста сейчас?",
+    "kind": "parsed",
+    "asked_object": "Y",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "M",
+    "kind": "unsupported",
+    "mentioned_objects": [
+     "M"
+    ]
+   }
+  ],
+  "context_v4": [
+   {
+    "question": "Какой статус Моста сейчас?",
+    "kind": "needs_clarification",
+    "candidates": [
+     "M",
+     "Y"
+    ],
+    "pending_time": {
+     "time_ref": "now",
+     "as_of": "2026-11-09T07:58:00+01:00",
+     "tz": null
+    },
+    "mentioned_objects": [
+     "M",
+     "Y"
+    ]
+   },
+   {
+    "question": "M",
+    "kind": "parsed",
+    "asked_object": "M",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "confirmed_object": "M"
+   }
+  ],
+  "gold": {
+   "kind": "parsed",
+   "asked_object": "M",
+   "as_of": "2026-11-09T07:58:00+01:00"
+  },
+  "v3": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "Y",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "Y-open"
+   ],
+   "grounds_answer": "Y: статус — открыт",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v4": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "M",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "M-works"
+   ],
+   "grounds_answer": "M: статус — работает",
+   "category": "correct_parse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v4",
+  "id": "F05",
+  "question": "Какой статус Моста сейчас?",
+  "context_v3": [
+   {
+    "question": "Какой статус Моста сейчас?",
+    "kind": "parsed",
+    "asked_object": "Y",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "M",
+    "kind": "unsupported",
+    "mentioned_objects": [
+     "M"
+    ]
+   },
+   {
+    "question": "Что менялось у Y за неделю?",
+    "kind": "unsupported",
+    "mentioned_objects": [
+     "Y"
+    ]
+   }
+  ],
+  "context_v4": [
+   {
+    "question": "Какой статус Моста сейчас?",
+    "kind": "needs_clarification",
+    "candidates": [
+     "M",
+     "Y"
+    ],
+    "pending_time": {
+     "time_ref": "now",
+     "as_of": "2026-11-09T07:58:00+01:00",
+     "tz": null
+    },
+    "mentioned_objects": [
+     "M",
+     "Y"
+    ]
+   },
+   {
+    "question": "M",
+    "kind": "parsed",
+    "asked_object": "M",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "confirmed_object": "M"
+   },
+   {
+    "question": "Что менялось у Y за неделю?",
+    "kind": "unsupported",
+    "mentioned_objects": [
+     "Y"
+    ]
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v3": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "Y",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "Y-open"
+   ],
+   "grounds_answer": "Y: статус — открыт",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v4": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Форма «Моста» подходит к нескольким объектам: M (через склонение «мост»), Y (точное название «моста»). Ранее был подтверждён выбор, но затем упоминался другой из них (M, Y). Какой из них?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v4",
+  "id": "F07",
+  "question": "L",
+  "context_v3": [
+   {
+    "question": "Какой статус Моста сейчас?",
+    "kind": "parsed",
+    "asked_object": "Y",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  ],
+  "context_v4": [
+   {
+    "question": "Какой статус Моста сейчас?",
+    "kind": "needs_clarification",
+    "candidates": [
+     "M",
+     "Y"
+    ],
+    "pending_time": {
+     "time_ref": "now",
+     "as_of": "2026-11-09T07:58:00+01:00",
+     "tz": null
+    },
+    "mentioned_objects": [
+     "M",
+     "Y"
+    ]
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v3": {
+   "kind": "unsupported",
+   "params": null,
+   "clarification": null,
+   "limitation": "Первая версия разбирает только вопросы о статусе/состоянии объекта.",
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "wrong_unsupported",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  },
+  "v4": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "«L» не среди предложенных вариантов. Выберите один из вариантов: M, Y.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v4",
+  "id": "F08",
+  "question": "P2",
+  "context_v3": [
+   {
+    "question": "Какой статус Пульсара сейчас?",
+    "kind": "needs_clarification",
+    "candidates": [
+     "P1",
+     "P2"
+    ],
+    "mentioned_objects": [
+     "P1",
+     "P2"
+    ]
+   }
+  ],
+  "context_v4": [
+   {
+    "question": "Какой статус Пульсара сейчас?",
+    "kind": "needs_clarification",
+    "candidates": [
+     "P1",
+     "P2"
+    ],
+    "pending_time": {
+     "time_ref": "now",
+     "as_of": "2026-11-09T07:58:00+01:00",
+     "tz": null
+    },
+    "mentioned_objects": [
+     "P1",
+     "P2"
+    ]
+   }
+  ],
+  "gold": {
+   "kind": "parsed",
+   "asked_object": "P2",
+   "as_of": "2026-11-09T07:58:00+01:00"
+  },
+  "v3": {
+   "kind": "unsupported",
+   "params": null,
+   "clarification": null,
+   "limitation": "Первая версия разбирает только вопросы о статусе/состоянии объекта.",
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "wrong_unsupported",
+   "query_called": false,
+   "answers_differ_from_manual": true
+  },
+  "v4": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "P2",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "P2-idle"
+   ],
+   "grounds_answer": "P2: статус — простаивает",
+   "category": "correct_parse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v4",
+  "id": "F09",
+  "question": "Y",
+  "context_v3": [
+   {
+    "question": "Какой статус Мостами был 8 ноября в 10:00?",
+    "kind": "needs_clarification",
+    "candidates": [
+     "M",
+     "Y"
+    ],
+    "mentioned_objects": [
+     "M",
+     "Y"
+    ]
+   }
+  ],
+  "context_v4": [
+   {
+    "question": "Какой статус Мостами был 8 ноября в 10:00?",
+    "kind": "needs_clarification",
+    "candidates": [
+     "M",
+     "Y"
+    ],
+    "pending_time": {
+     "time_ref": "absolute",
+     "as_of": "2026-11-08T10:00:00+01:00",
+     "tz": null
+    },
+    "mentioned_objects": [
+     "M",
+     "Y"
+    ]
+   }
+  ],
+  "gold": {
+   "kind": "parsed",
+   "asked_object": "Y",
+   "as_of": "2026-11-08T10:00:00+01:00"
+  },
+  "v3": {
+   "kind": "unsupported",
+   "params": null,
+   "clarification": null,
+   "limitation": "Первая версия разбирает только вопросы о статусе/состоянии объекта.",
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "wrong_unsupported",
+   "query_called": false,
+   "answers_differ_from_manual": true
+  },
+  "v4": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "Y",
+    "as_of": "2026-11-08T10:00:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "Y-open"
+   ],
+   "grounds_answer": "Y: статус — открыт",
+   "category": "correct_parse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v4",
+  "id": "F10",
+  "question": "M",
+  "context_v3": [
+   {
+    "question": "Какой статус Моста?",
+    "kind": "needs_clarification",
+    "mentioned_objects": [
+     "Y"
+    ]
+   }
+  ],
+  "context_v4": [
+   {
+    "question": "Какой статус Моста?",
+    "kind": "needs_clarification",
+    "candidates": [
+     "M",
+     "Y"
+    ],
+    "mentioned_objects": [
+     "M",
+     "Y"
+    ]
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v3": {
+   "kind": "unsupported",
+   "params": null,
+   "clarification": null,
+   "limitation": "Первая версия разбирает только вопросы о статусе/состоянии объекта.",
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "wrong_unsupported",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  },
+  "v4": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Выбран объект M. На какой момент: сейчас или на конкретную дату и время?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v4",
+  "id": "F11",
+  "question": "А Y?",
+  "context_v3": [
+   {
+    "question": "Какой статус Моста сейчас?",
+    "kind": "parsed",
+    "asked_object": "Y",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "M",
+    "kind": "unsupported",
+    "mentioned_objects": [
+     "M"
+    ]
+   }
+  ],
+  "context_v4": [
+   {
+    "question": "Какой статус Моста сейчас?",
+    "kind": "needs_clarification",
+    "candidates": [
+     "M",
+     "Y"
+    ],
+    "pending_time": {
+     "time_ref": "now",
+     "as_of": "2026-11-09T07:58:00+01:00",
+     "tz": null
+    },
+    "mentioned_objects": [
+     "M",
+     "Y"
+    ]
+   },
+   {
+    "question": "M",
+    "kind": "parsed",
+    "asked_object": "M",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "confirmed_object": "M"
+   }
+  ],
+  "gold": {
+   "kind": "parsed",
+   "asked_object": "Y",
+   "as_of": "2026-11-09T07:58:00+01:00"
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "На какой момент: сейчас или на конкретную дату и время?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "unnecessary_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": true
+  },
+  "v4": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "Y",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "Y-open"
+   ],
+   "grounds_answer": "Y: статус — открыт",
+   "category": "correct_parse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v4",
+  "id": "F12",
+  "question": "А его статус?",
+  "context_v3": [
+   {
+    "question": "Какой статус Моста сейчас?",
+    "kind": "parsed",
+    "asked_object": "Y",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "объект M",
+    "kind": "unsupported",
+    "mentioned_objects": [
+     "M"
+    ]
+   }
+  ],
+  "context_v4": [
+   {
+    "question": "Какой статус Моста сейчас?",
+    "kind": "needs_clarification",
+    "candidates": [
+     "M",
+     "Y"
+    ],
+    "pending_time": {
+     "time_ref": "now",
+     "as_of": "2026-11-09T07:58:00+01:00",
+     "tz": null
+    },
+    "mentioned_objects": [
+     "M",
+     "Y"
+    ]
+   },
+   {
+    "question": "объект M",
+    "kind": "parsed",
+    "asked_object": "M",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "confirmed_object": "M"
+   }
+  ],
+  "gold": {
+   "kind": "parsed",
+   "asked_object": "M",
+   "as_of": "2026-11-09T07:58:00+01:00"
+  },
+  "v3": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Уточните, о каком объекте: M, Y? После последнего разобранного вопроса упоминался другой объект.",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "unnecessary_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": true
+  },
+  "v4": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "M",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "M-works"
+   ],
+   "grounds_answer": "M: статус — работает",
+   "category": "correct_parse",
+   "query_called": true,
+   "answers_differ_from_manual": false
+  }
+ },
+ {
+  "split": "counterexamples_v4",
+  "id": "F13",
+  "question": "Какой статус Моста сейчас?",
+  "context_v3": [
+   {
+    "question": "Какой статус Моста сейчас?",
+    "kind": "parsed",
+    "asked_object": "Y",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "M",
+    "kind": "unsupported",
+    "mentioned_objects": [
+     "M"
+    ]
+   },
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус L2 сейчас?",
+    "kind": "parsed",
+    "asked_object": "L2",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус P1 сейчас?",
+    "kind": "parsed",
+    "asked_object": "P1",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  ],
+  "context_v4": [
+   {
+    "question": "Какой статус Моста сейчас?",
+    "kind": "needs_clarification",
+    "candidates": [
+     "M",
+     "Y"
+    ],
+    "pending_time": {
+     "time_ref": "now",
+     "as_of": "2026-11-09T07:58:00+01:00",
+     "tz": null
+    },
+    "mentioned_objects": [
+     "M",
+     "Y"
+    ]
+   },
+   {
+    "question": "M",
+    "kind": "parsed",
+    "asked_object": "M",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "confirmed_object": "M"
+   },
+   {
+    "question": "Какой статус L сейчас?",
+    "kind": "parsed",
+    "asked_object": "L",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус L2 сейчас?",
+    "kind": "parsed",
+    "asked_object": "L2",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   },
+   {
+    "question": "Какой статус P1 сейчас?",
+    "kind": "parsed",
+    "asked_object": "P1",
+    "time_ref": "now",
+    "as_of": "2026-11-09T07:58:00+01:00"
+   }
+  ],
+  "gold": {
+   "kind": "needs_clarification"
+  },
+  "v3": {
+   "kind": "parsed",
+   "params": {
+    "asked_object": "Y",
+    "as_of": "2026-11-09T07:58:00+01:00",
+    "temporal_scope": "current"
+   },
+   "clarification": null,
+   "limitation": null,
+   "grounds_admitted": [
+    "Y-open"
+   ],
+   "grounds_answer": "Y: статус — открыт",
+   "category": "confident_misparse",
+   "query_called": true,
+   "answers_differ_from_manual": true
+  },
+  "v4": {
+   "kind": "needs_clarification",
+   "params": null,
+   "clarification": "Форма «Моста» подходит к нескольким объектам: M (через склонение «мост»), Y (точное название «моста»). Какой из них?",
+   "limitation": null,
+   "grounds_admitted": [],
+   "grounds_answer": null,
+   "category": "correct_clarification",
+   "query_called": false,
+   "answers_differ_from_manual": false
+  }
+ }
+]

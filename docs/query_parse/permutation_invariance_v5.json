@@ -1,0 +1,91 @@
+{
+ "_note": "decision (kind, params, candidates, clarification/limitation text, mentioned_objects) for every permutation of the split's catalogue x {names as given, names reversed}; 'changed' lists items whose decision differs between catalogue orders",
+ "v4": [
+  {
+   "split": "dev_gold_v2",
+   "items": 28,
+   "variants": 6720,
+   "changed": []
+  },
+  {
+   "split": "heldout",
+   "items": 24,
+   "variants": 5760,
+   "changed": []
+  },
+  {
+   "split": "probes",
+   "items": 10,
+   "variants": 2400,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v2",
+   "items": 20,
+   "variants": 28800,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v3_gold_v2",
+   "items": 23,
+   "variants": 33120,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v4",
+   "items": 22,
+   "variants": 31680,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v5",
+   "items": 36,
+   "variants": 8640,
+   "changed": []
+  }
+ ],
+ "v5": [
+  {
+   "split": "dev_gold_v2",
+   "items": 28,
+   "variants": 6720,
+   "changed": []
+  },
+  {
+   "split": "heldout",
+   "items": 24,
+   "variants": 5760,
+   "changed": []
+  },
+  {
+   "split": "probes",
+   "items": 10,
+   "variants": 2400,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v2",
+   "items": 20,
+   "variants": 28800,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v3_gold_v2",
+   "items": 23,
+   "variants": 33120,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v4",
+   "items": 22,
+   "variants": 31680,
+   "changed": []
+  },
+  {
+   "split": "counterexamples_v5",
+   "items": 36,
+   "variants": 8640,
+   "changed": []
+  }
+ ]
+}
