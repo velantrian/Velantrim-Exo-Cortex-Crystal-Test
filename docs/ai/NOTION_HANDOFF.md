@@ -105,6 +105,58 @@ A human or AI agent with Notion access must:
 
 No pending hand-offs at the time this protocol was created.
 
+## HOFF-20261111-01 — Crystal-Test → Titan bridge: selection attestation
+
+- Status: `HANDOFF_REQUIRED`
+- Created: 2026-11-11
+- GitHub PR/issue: draft PR #15 (base); this work is on a separate branch on top of its head and is not merged.
+- Exact base/head SHA: base `77f10c81dc68fb60d7facb459c0c92264debd905`; head: see this branch's Git history.
+- Intended Notion record title: the existing Crystal / Titan bridge or Experiment Registry entry, as a dated follow-up. Not chosen by this actor.
+- Notion access for originating actor: `UNAVAILABLE`
+
+### Problem / opportunity
+
+The bridge selected grounds correctly, but the record line Titan renders for the model did not carry Crystal's own status labels, so the model could not tell an admitted ground from unverified memory.
+
+### Material findings
+
+- The three live runs of 2026-11-10 sent grounds with `Validated` / `VERIFIED` in Crystal's receipt and without either label in the request. All three replies called the record unverified. Titan's remote boundary text tells the model to do so unless the entry text marks it `Validated` or `ImmutableCore`.
+- Titan's boundary text is an instruction to the model, not a program check of two fields. A separate record key is dropped by Titan's formatter; only `source`, `confidence` and `claim` are rendered.
+- `Validated` (epistemic state) and `VERIFIED` (`truth_status`) are different Crystal fields and are not interchangeable.
+
+### Decision and rationale
+
+Carry the selection as an attestation, not as a bare status word: both Crystal labels under their own names, the claim hash, the procedure actually run, the request scope, which filters were applied and the boundary of the result. Interpretation guidance goes through Titan's `console_instructions`, not into a memory record, so no control text is disguised as memory content and no Titan-side trust is created.
+
+### Alternatives rejected or deferred
+
+- Inserting the word `Validated` into the record text: rejected; it would act as an automatic transfer of trust and conflate two Crystal fields.
+- A validation function inside Titan: deferred; no Titan change is made in this lab.
+- Model calls with the new format: deferred pending explicit authorization.
+
+### Truth / Canon / evidence / privacy / authority boundaries
+
+Crystal remains the only owner of admission. The attestation describes a selection; it does not certify the generated answer and does not change any state in either project. A missing label is shown as `unknown` and never defaulted.
+
+### Files and public documentation updated
+
+`tests/support/crystal_titan_bridge.py`, `tests/support/titan_chat_spy.py`, `tests/test_crystal_titan_bridge_attestation.py`, `docs/ai/WORK_LOG.md`, this file.
+
+### Tests / CI / runtime evidence
+
+60 passed locally (15 new, 45 existing bridge tests), fake provider, Titan sandbox `6b45854`. No CI run recorded for this branch. No model was called.
+
+### Known limitations and next actions
+
+The effect on a model's reading is not measured. The live runner scripts are not updated. Next bounded step: six calls (earlier and new format, same three cases, same settings), then a human reading; requires explicit authorization.
+
+### Synchronization completion
+- Connected actor:
+- Safe Notion title/reference:
+- Synchronization date:
+- Final merge SHA / CI evidence:
+
+
 ## Completed hand-offs
 
 Move completed items here or mark them `SYNCED`; preserve their GitHub evidence and safe

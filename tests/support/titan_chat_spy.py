@@ -188,6 +188,12 @@ def main() -> int:
     facts = list(payload.get("facts") or [])
     server.pipeline_run = lambda q, mode, domain: {"facts": facts, "error": None}
 
+    request_kwargs: dict[str, Any] = {}
+    console_instructions = payload.get("console_instructions")
+    if isinstance(console_instructions, str) and console_instructions:
+        # Titan's own operator-instructions field; appended to the system
+        # message after the memory records. Titan is not patched.
+        request_kwargs["console_instructions"] = console_instructions
     req = server.ChatRequest(
         message=payload["message"],
         llm_provider="deepseek",
@@ -198,6 +204,7 @@ def main() -> int:
         persist_to_system=False,
         include_system_guide=False,
         llm_enabled=True,
+        **request_kwargs,
     )
     resp = asyncio.run(server.chat_endpoint(req))
     bodies = [r["body"] for r in fake.requests]
